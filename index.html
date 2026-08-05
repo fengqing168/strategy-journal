@@ -8,82 +8,24 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
   <script src="js/main.js" defer></script>
   <script src="js/ticker.js" defer></script>
 </head>
 <body>
-
-  <div class="ticker-bar">
-    <div class="site-container">
-      <div class="live-ticker" id="live-ticker">
-        <div class="tkr-item" id="tkr-xau">
-          <span class="tkr-label">XAUUSD</span>
-          <span class="tkr-error">加载中...</span>
-        </div>
-        <div class="tkr-item" id="tkr-dxy">
-          <span class="tkr-label">DXY</span>
-          <span class="tkr-error">加载中...</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="site-container">
-
-    <header class="site-header">
-      <div class="site-header-inner">
-        <a href="/" class="site-brand">
-          <span class="site-logo"><span class="site-logo-gold">&diams;</span> 策略研究日志</span>
-        </a>
-        <nav class="site-nav">
-          <a href="/">日志</a>
-          <a href="library.html">资料库</a>
-          <a href="subscribe.html">订阅</a>
-          <a href="about.html">关于</a>
-        </nav>
-      </div>
-    </header>
-
-    <main>
-
-      <div class="home-hero">
-        <h1>一个观察者的 <span class="gold-highlight">AI 辅助策略研究</span> 日志</h1>
-        <p>AI 做分析，人做判断。专注价格波动与宏观数据的交叉研究。</p>
-      </div>
-
-      <ul class="log-list">
-
-        <li class="log-item">
-          <span class="log-item-num">#001</span>
-          <span class="log-item-date">2026.08.06</span>
-          <a href="logs/001.html" class="log-item-title">我为什么开始记录这个 AI 策略研究系列</a>
-          <p class="log-item-excerpt">用 AI 分析美联储官员讲话措辞变化，AI 做文字对比很有效但缺乏历史语境全局把握。</p>
-        </li>
-
-        <li class="log-item">
-          <span class="log-item-num">#002</span>
-          <span class="log-item-date">即将发布</span>
-          <span class="log-item-title" style="color: var(--text-muted); cursor: default;">AI 辅助分析 XAUUSD 4H 趋势跟踪策略</span>
-        </li>
-
-      </ul>
-
-    </main>
-
-    <section class="subscribe-section" style="margin-top: var(--space-2xl);">
-      <h3>&#9993; 每周策略研究周报</h3>
-      <p>比公开日志更深一层。免费订阅，每周日发送到邮箱。</p>
-      <form class="subscribe-form" action="#" method="post">
-        <input type="email" name="email" placeholder="你的邮箱地址" required>
-        <button type="submit">免费订阅</button>
-      </form>
-    </section>
-
-    <footer class="site-footer">
-      <p>&copy; 2026 舍予又见 &mdash; <a href="about.html">关于</a> &middot; <a href="subscribe.html">订阅</a></p>
-    </footer>
-
-  </div>
+<div class="ticker-bar"><div class="live-ticker" id="live-ticker"><div class="tkr-item" id="tkr-xau"><span class="tkr-label">XAUUSD</span><span class="tkr-error">—</span></div><div class="tkr-item" id="tkr-dxy"><span class="tkr-label">DXY</span><span class="tkr-error">—</span></div></div></div>
+<div class="site-container">
+<header class="site-header"><div class="site-header-inner"><a href="/" class="site-brand"><span class="site-logo"><span class="site-logo-gold">◆</span> 策略研究日志</span></a><nav class="site-nav"><a href="/">日志</a><a href="library.html">资料库</a><a href="subscribe.html">订阅</a><a href="about.html">关于</a></nav></div></header>
+<main>
+<section class="hero"><div class="hero-tag">AI · 策略 · 研究</div><h1>一个观察者的<br><em>AI 辅助策略研究</em> 记录</h1><p>AI 做分析，人做判断。每日记录，持续更新。</p></section>
+<div class="section-rule"></div>
+<ul class="log-list">
+<li class="log-item"><a href="logs/001.html" class="log-item-inner"><div class="log-item-meta"><span class="log-item-num">No. 001</span><span class="log-item-date">2026.08.06</span></div><h3 class="log-item-title">我为什么开始记录这个 AI 策略研究系列</h3><p class="log-item-excerpt">用 AI 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全...</p></a></li>
+<li class="log-item" style="opacity:0.4"><div class="log-item-inner" style="cursor:default"><div class="log-item-meta"><span class="log-item-num">No. 002</span><span class="log-item-date">即将发布</span></div><h3 class="log-item-title">AI 辅助分析趋势跟踪策略</h3></div></li>
+</ul>
+</main>
+<section class="subscribe-section" style="margin-top:var(--space-2xl)"><h3>每周策略研究周报</h3><p>比公开日志更深一层的内容，每周日发送到你的邮箱。</p><form class="subscribe-form" action="#" method="post"><input type="email" name="email" placeholder="你的邮箱地址" required><button type="submit">免费订阅</button></form></section>
+<footer class="site-footer"><p>舍予又见 &copy; 2026 &nbsp;&middot;&nbsp; <a href="about.html">关于</a> &nbsp;&middot;&nbsp; <a href="subscribe.html">订阅</a></p></footer>
+</div>
 </body>
 </html>
