@@ -68,6 +68,89 @@ body {
   box-shadow: var(--shadow);
 }
 
+.live-ticker {
+  display: flex;
+  gap: var(--space-xl);
+  justify-content: center;
+  align-items: center;
+  height: 36px;
+}
+
+.tkr-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.tkr-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.tkr-price {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  transition: color 0.4s ease;
+}
+
+.tkr-price.up { color: var(--up); }
+.tkr-price.down { color: var(--down); }
+
+.tkr-price.flash-up {
+  animation: flashGreen 0.6s ease;
+}
+.tkr-price.flash-down {
+  animation: flashRed 0.6s ease;
+}
+
+@keyframes flashGreen {
+  0%   { color: var(--text); }
+  30%  { color: var(--up); text-shadow: 0 0 8px rgba(5,150,105,0.3); }
+  100% { color: var(--up); text-shadow: none; }
+}
+
+@keyframes flashRed {
+  0%   { color: var(--text); }
+  30%  { color: var(--down); text-shadow: 0 0 8px rgba(220,38,38,0.3); }
+  100% { color: var(--down); text-shadow: none; }
+}
+
+.tkr-change {
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.tkr-change.up { color: var(--up); }
+.tkr-change.down { color: var(--down); }
+
+.tkr-pct {
+  font-size: 0.6875rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.tkr-pct.up {
+  background: var(--up-bg);
+  color: var(--up);
+}
+
+.tkr-pct.down {
+  background: var(--down-bg);
+  color: var(--down);
+}
+
+.tkr-error {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
 /* ── 布局 ── */
 .site-container {
   max-width: var(--max-width);

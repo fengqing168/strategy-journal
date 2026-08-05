@@ -3,37 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="策略研究日志 — 舍予又见的 AI 辅助交易策略研究记录">
+  <meta name="description" content="策略研究日志 — 舍予又见的 AI 辅助交易策略研究记录。实盘策略，不做喊单。">
   <title>策略研究日志 — 舍予又见</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="js/main.js" defer></script>
+  <script src="js/ticker.js" defer></script>
 </head>
 <body>
 
-  <!-- TradingView 报价条 -->
   <div class="ticker-bar">
     <div class="site-container">
-      <div class="tradingview-widget-container" style="height:44px;">
-        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-          "symbols": [
-            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
-            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
-            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
-            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
-            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
-          ],
-          "showSymbolLogo": false,
-          "colorTheme": "light",
-          "isTransparent": true,
-          "displayMode": "regular",
-          "locale": "zh_CN"
-        }
-        </script>
+      <div class="live-ticker" id="live-ticker">
+        <div class="tkr-item" id="tkr-xau">
+          <span class="tkr-label">XAUUSD</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
+        <div class="tkr-item" id="tkr-dxy">
+          <span class="tkr-label">DXY</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -56,41 +47,11 @@
 
     <main>
 
-      <!-- Hero -->
       <div class="home-hero">
         <h1>一个交易员的 <span class="gold-highlight">AI 辅助策略研究</span> 记录</h1>
-        <p>AI 做分析，我做决策。每天记录，持续更新。主攻 XAUUSD 现货黄金。</p>
+        <p>AI 做分析，我做决策。主攻 XAUUSD 现货黄金。不做喊单。</p>
       </div>
 
-      <!-- 迷你 K 线卡片 -->
-      <div class="mini-chart-card">
-        <div class="mini-chart-info">
-          <div class="mini-chart-label">现货黄金</div>
-          <div class="mini-chart-pair">XAUUSD</div>
-          <div class="mini-chart-price" id="xau-price">---</div>
-          <div class="mini-chart-change" id="xau-change">---</div>
-        </div>
-        <div class="mini-chart-widget">
-          <div class="tradingview-widget-container" style="height:180px;">
-            <div class="tradingview-widget-container__widget" style="height:180px;"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-            {
-              "symbol": "OANDA:XAUUSD",
-              "width": "100%",
-              "height": 180,
-              "locale": "zh_CN",
-              "dateRange": "3M",
-              "colorTheme": "light",
-              "isTransparent": true,
-              "autosize": true,
-              "largeChartUrl": ""
-            }
-            </script>
-          </div>
-        </div>
-      </div>
-
-      <!-- 日志列表 -->
       <ul class="log-list">
 
         <li class="log-item">
@@ -110,11 +71,10 @@
 
     </main>
 
-    <!-- 订阅区 -->
     <section class="subscribe-section" style="margin-top: var(--space-2xl);">
       <h3>&#9993; 每周策略研究周报</h3>
       <p>比公开日志更深一层。免费订阅，每周日发送到邮箱。</p>
-      <form class="subscribe-form" action="https://app.convertkit.com/forms/PLACEHOLDER" method="post">
+      <form class="subscribe-form" action="#" method="post">
         <input type="email" name="email" placeholder="你的邮箱地址" required>
         <button type="submit">免费订阅</button>
       </form>
@@ -125,7 +85,5 @@
     </footer>
 
   </div>
-
-  <!-- 回到顶部由 JS 动态插入 -->
 </body>
 </html>

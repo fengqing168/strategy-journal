@@ -10,29 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="js/main.js" defer></script>
+  <script src="js/ticker.js" defer></script>
 </head>
 <body>
 
   <div class="ticker-bar">
     <div class="site-container">
-      <div class="tradingview-widget-container" style="height:44px;">
-        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-          "symbols": [
-            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
-            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
-            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
-            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
-            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
-          ],
-          "showSymbolLogo": false,
-          "colorTheme": "light",
-          "isTransparent": true,
-          "displayMode": "regular",
-          "locale": "zh_CN"
-        }
-        </script>
+      <div class="live-ticker" id="live-ticker">
+        <div class="tkr-item" id="tkr-xau">
+          <span class="tkr-label">XAUUSD</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
+        <div class="tkr-item" id="tkr-dxy">
+          <span class="tkr-label">DXY</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
       </div>
     </div>
   </div>

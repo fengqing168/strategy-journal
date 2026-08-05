@@ -3,36 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="关于舍予又见和他的策略研究日志">
+  <meta name="description" content="舍予又见：一个交易员的实盘策略研究记录。AI × 人的博弈，不做喊单，策略裸奔。">
   <title>关于 — 策略研究日志</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="js/main.js" defer></script>
+  <script src="js/ticker.js" defer></script>
 </head>
 <body>
 
   <div class="ticker-bar">
     <div class="site-container">
-      <div class="tradingview-widget-container" style="height:44px;">
-        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-          "symbols": [
-            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
-            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
-            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
-            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
-            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
-          ],
-          "showSymbolLogo": false,
-          "colorTheme": "light",
-          "isTransparent": true,
-          "displayMode": "regular",
-          "locale": "zh_CN"
-        }
-        </script>
+      <div class="live-ticker" id="live-ticker">
+        <div class="tkr-item" id="tkr-xau">
+          <span class="tkr-label">XAUUSD</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
+        <div class="tkr-item" id="tkr-dxy">
+          <span class="tkr-label">DXY</span>
+          <span class="tkr-error">加载中...</span>
+        </div>
       </div>
     </div>
   </div>
@@ -60,30 +52,44 @@
 
       <div class="about-content">
 
-        <h2>我是谁</h2>
+        <h2>这是谁的第二屏幕</h2>
         <p>
-          舍予又见，一名交易员。主要做 <strong>XAUUSD 现货黄金</strong>，使用 MT4 平台。交易是我的主业。
-        </p>
-
-        <h2>这个网站在做什么</h2>
-        <p>
-          记录我如何用 AI 辅助日常策略研究。不是「AI 自动交易」，不是「AI 喊单」，是 <strong>AI 帮我分析信息，我来做决策</strong>。
+          舍予又见。一个把 MT4 当桌面壁纸的人。主做 <strong>XAUUSD 现货黄金</strong>。这不是副业，不是爱好，这是我的日常。
         </p>
         <p>
-          每天一篇日志：当天 AI 辅助研究了什么问题、输出了什么结果、采纳了还是拒绝了、以及工具优化心得。
+          所有交易员都有一个私密的第二屏幕——不是 MT4 的那个，是在脑子里运行的那一个。你看盘，同时你在计算、在犹豫、在推翻自己。这个网站就是那个第二屏幕的公开版本。
         </p>
 
-        <h2>为什么公开记录</h2>
-        <p>写作是最好的思考方式。把分析过程写下来，你才能看到自己的盲区和逻辑漏洞。</p>
-        <p>中文互联网上几乎没有人做「交易员 + AI 实操记录」这件事。我想填补它。</p>
-        <p>如果这些记录对另一个交易员有帮助，它就值得存在。</p>
+        <h2>AI × 人的博弈，不是 AI 替你交易</h2>
+        <p>
+          2026 年，AI 已经能跑回测、写策略、扫新闻。但有一个问题 AI 解决不了：<strong>你下不下单。</strong>
+        </p>
+        <p>
+          这个网站记录的就是这件事——我每天把数据和分析扔给 AI，AI 还给我结论，然后我做一件事所有交易员每天都在做的事：赌我的判断比 AI 更好，或者比 AI 更谨慎。
+        </p>
+        <p>
+          有时我赢了 AI。有时 AI 对了我错了。我把两种情况都记下来。这叫 <strong>策略裸奔</strong>——不只晒漂亮单子，输的时候一样写。
+        </p>
 
-        <h2>你不该期待什么</h2>
-        <p>没有喊单、带单、跟单。没有「稳赚策略」，没有收益承诺。你看到的是一个人在真实记录他的研究过程，有对有错，有赚有亏。</p>
+        <h2>不做喊单</h2>
+        <p>
+          网上教你「用 AI 炒股、炒金」的人，十个里有九个没做过交易。他们卖的是焦虑，赚的是学费。
+        </p>
+        <p>
+          这里没有喊单。没有带单。没有任何「跟着我做」的暗示。你看到的是一个真实交易员每天在研究什么、AI 在中间起了什么作用、结果是什么。剩下的，你自己判断。
+        </p>
+
+        <h2>为什么写下来</h2>
+        <p>
+          交易是世界上最孤独的职业之一。你看对了市场，没人给你鼓掌。你看错了，亏的是真金白银。写日志是我找到的对抗这种孤独的方式——把脑子里跑的东西倒出来，看看自己到底在想什么。
+        </p>
+        <p>
+          如果另一个交易员碰巧看到这些记录，觉得有一篇对他有用，那这个网站就比 MT4 上的一个止盈订单还有价值。
+        </p>
 
         <div class="about-disclaimer">
           <strong>&#9888; 声明</strong><br><br>
-          本站所有内容仅为个人策略研究记录，不构成任何形式的投资建议。作者不提供喊单、跟单、代客理财等任何金融服务。文中提及的任何策略、工具、平台仅为个人研究用途。投资有风险，决策需谨慎。过往研究结果不预示未来表现。
+          本站所有内容仅为个人策略研究记录，不构成投资建议。作者不提供喊单、跟单、代客理财等金融服务。文中策略与工具仅供研究用途。市场有风险，参与需谨慎。过往结果不代表未来表现。
         </div>
 
       </div>
