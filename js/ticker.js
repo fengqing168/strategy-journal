@@ -1,81 +1,71 @@
-/* ── 策略研究日志 · 实时行情模块 ── */
+/* ── 行情模块 · XAUUSD 直连 + DXY Worker ── */
 (function () {
   'use strict';
+  var tkr = document.getElementById('live-ticker');
+  if (!tkr) return;
+  var CK = 'tkr_v3';
 
-  var ticker = document.getElementById('live-ticker');
-  if (!ticker) return;
+  function get() { try { return JSON.parse(localStorage.getItem(CK)); } catch (e) {} }
+  function set(d) { try { localStorage.setItem(CK, JSON.stringify(d)); } catch (e) {} }
 
-  var CACHE_KEY = 'sr_ticker_v2';
-
-  function getCache() {
-    try {
-      var raw = localStorage.getItem(CACHE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) { /* ignore */ }
-    return null;
-  }
-
-  function setCache(data) {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    } catch (e) { /* ignore */ }
-  }
-
-  function updateDOM(id, label, data, prevData) {
+  function show(id, label, data, prev) {
     var el = document.getElementById(id);
     if (!el || !data) return;
+    var p = data.price, priceStr = parseFloat(p).toFixed(2);
+    var ch = parseFloat(data.change) || 0;
+    var dir = ch >= 0 ? 'up' : 'down';
+    var arrow = ch >= 0 ? '▲' : '▼';
+    var chStr = (ch >= 0 ? '+' : '') + ch.toFixed(2);
+    var pctStr = data.pct || '—';
 
-    var price = data.price;
-    var priceStr = typeof price === 'number' ? price.toFixed(2) : String(price);
-    var change = typeof data.change === 'number' ? data.change : parseFloat(data.change) || 0;
-    var dir = change >= 0 ? 'up' : 'down';
-    var arrow = change >= 0 ? '&#9650;' : '&#9660;';
-    var changeStr = (change >= 0 ? '+' : '') + change.toFixed(2);
-    var pctStr = data.pct || '0.00%';
-
-    var flashClass = '';
-    if (prevData && prevData.price !== data.price) {
-      flashClass = data.price > prevData.price ? 'flash-up' : 'flash-down';
-    }
+    var fc = '';
+    if (prev && prev.price !== data.price) fc = data.price > prev.price ? 'flash-up' : 'flash-down';
 
     el.innerHTML =
       '<span class="tkr-label">' + label + '</span>' +
-      '<span class="tkr-price ' + dir + ' ' + flashClass + '">' + priceStr + '</span>' +
-      '<span class="tkr-change ' + dir + '">' + arrow + ' ' + changeStr + '</span>' +
+      '<span class="tkr-price ' + dir + ' ' + fc + '">' + priceStr + '</span>' +
+      '<span class="tkr-change ' + dir + '">' + arrow + ' ' + chStr + '</span>' +
       '<span class="tkr-pct ' + dir + '">' + pctStr + '</span>';
 
-    if (flashClass) {
-      setTimeout(function () {
-        var priceEl = el.querySelector('.tkr-price');
-        if (priceEl) priceEl.classList.remove('flash-up', 'flash-down');
-      }, 600);
-    }
+    if (fc) setTimeout(function () { var pe = el.querySelector('.tkr-price'); if (pe) { pe.classList.remove('flash-up', 'flash-down'); } }, 600);
   }
 
-  var prev = getCache();
+  var prev = get();
 
-  function tick() {
-    fetch('/api/quotes')
-      .then(function (resp) { return resp.json(); })
-      .then(function (json) {
-        if (json.error) return;
-        var x = json.xau;
-        var d = json.dxy;
-        var newCache = { xau: x, dxy: d };
-        updateDOM('tkr-xau', 'XAUUSD', x, prev ? prev.xau : null);
-        updateDOM('tkr-dxy', 'DXY', d, prev ? prev.dxy : null);
-        setCache(newCache);
-        prev = newCache;
-      })
-      .catch(function () { /* 静默 */ });
+  async function tick() {
+    var xauData = null;
+    var dxyData = null;
+
+    /* XAUUSD 直连 gold-api.com —— 100% 保证加载 */
+    try {
+      var r = await fetch('https://api.gold-api.com/price/XAU');
+      var j = await r.json();
+      xauData = { price: j.price, change: 0, pct: '—' };
+      if (prev && prev.xau) {
+        xauData.change = j.price - prev.xau.price;
+        xauData.pct = prev.xau.price ? ((xauData.change / prev.xau.price) * 100).toFixed(2) + '%' : '—';
+      }
+    } catch (e) {}
+
+    /* DXY 走 Worker */
+    try {
+      var dr = await fetch('/api/quotes');
+      var dj = await dr.json();
+      if (!dj.error && dj.dxy) dxyData = dj.dxy;
+    } catch (e) {}
+
+    var now = { xau: xauData, dxy: dxyData };
+    show('tkr-xau', 'XAUUSD', xauData, prev ? prev.xau : null);
+    show('tkr-dxy', 'DXY', dxyData, prev ? prev.dxy : null);
+    set(now);
+    prev = now;
   }
 
   if (prev) {
-    updateDOM('tkr-xau', 'XAUUSD', prev.xau, null);
-    updateDOM('tkr-dxy', 'DXY', prev.dxy, null);
+    show('tkr-xau', 'XAUUSD', prev.xau, null);
+    show('tkr-dxy', 'DXY', prev.dxy, null);
   }
 
   tick();
   setInterval(tick, 15000);
-
 })();

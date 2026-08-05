@@ -1,63 +1,28 @@
 export async function onRequest(context) {
-  const { request } = context;
-
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Max-Age': '86400'
-      }
-    });
-  }
-
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'public, max-age=15'
+    'Cache-Control': 'public, max-age=20'
   };
 
-  async function fetchYahoo(symbol) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=1d&interval=1d`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Yahoo ${symbol} failed`);
-    const json = await resp.json();
-    const result = json.chart.result[0];
-    const meta = result.meta;
-    return {
-      price: meta.regularMarketPrice,
-      prevClose: meta.previousClose || meta.chartPreviousClose,
-      change: (meta.regularMarketPrice - (meta.previousClose || meta.chartPreviousClose)).toFixed(4),
-    };
-  }
-
   try {
-    const [xau, dxy] = await Promise.all([
-      fetchYahoo('GC=F'),
-      fetchYahoo('DX-Y.NYB')
-    ]);
+    const dxyResp = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?range=1d&interval=1d');
+    const dxyJson = await dxyResp.json();
+    const dxyResult = dxyJson.chart.result[0];
+    const dxyMeta = dxyResult.meta;
+    const dxyPrice = dxyMeta.regularMarketPrice;
+    const dxyPrev = dxyMeta.previousClose || dxyMeta.chartPreviousClose;
+    const dxyChange = (dxyPrice - dxyPrev).toFixed(4);
 
-    const data = {
-      xau: {
-        price: xau.price,
-        change: parseFloat(xau.change),
-        pct: xau.prevClose ? ((xau.change / xau.prevClose) * 100).toFixed(2) + '%' : '0.00%',
-        prevClose: xau.prevClose
-      },
-      dxy: {
-        price: dxy.price,
-        change: parseFloat(dxy.change),
-        pct: dxy.prevClose ? ((dxy.change / dxy.prevClose) * 100).toFixed(2) + '%' : '0.00%',
-        prevClose: dxy.prevClose
-      },
-      ts: Date.now()
-    };
-
-    return new Response(JSON.stringify(data), { headers });
-  } catch (e) {
     return new Response(JSON.stringify({
-      error: 'unavailable',
+      dxy: {
+        price: dxyPrice,
+        change: parseFloat(dxyChange),
+        pct: dxyPrev ? ((dxyChange / dxyPrev) * 100).toFixed(2) + '%' : '0.00%'
+      },
       ts: Date.now()
-    }), { status: 200, headers });
+    }), { headers });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'unavailable', ts: Date.now() }), { headers });
   }
 }
