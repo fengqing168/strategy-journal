@@ -1,18 +1,18 @@
-/* ── 策略研究日志 · 实时行情模块（国内可访问） ── */
+/* ── 策略研究日志 · 实时行情模块 ── */
 (function () {
   'use strict';
 
   var ticker = document.getElementById('live-ticker');
   if (!ticker) return;
 
-  var CACHE_KEY = 'sr_ticker_cache';
+  var CACHE_KEY = 'sr_ticker_v2';
 
   function getCache() {
     try {
       var raw = localStorage.getItem(CACHE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (e) { /* ignore */ }
-    return { xau: null, dxy: null };
+    return null;
   }
 
   function setCache(data) {
@@ -21,62 +21,17 @@
     } catch (e) { /* ignore */ }
   }
 
-  function fetchPrice(uri) {
-    return new Promise(function (resolve, reject) {
-      var script = document.createElement('script');
-      var callbackName = '_sr_cb_' + Math.random().toString(36).slice(2, 10);
-      var timeout = setTimeout(function () {
-        cleanup();
-        reject(new Error('timeout'));
-      }, 5000);
-
-      function cleanup() {
-        clearTimeout(timeout);
-        if (script.parentNode) script.parentNode.removeChild(script);
-        delete window[callbackName];
-      }
-
-      window[callbackName] = function (data) {
-        cleanup();
-        resolve(data);
-      };
-
-      script.src = uri + '&callback=' + callbackName;
-      script.onerror = function () {
-        cleanup();
-        reject(new Error('network'));
-      };
-      document.head.appendChild(script);
-    });
-  }
-
-  /* ── 数据源：新浪财经 JSONP（用户浏览器直连，不翻墙） ── */
-  var SOURCES = {
-    xau: 'https://hq.sinajs.cn/list=fx_sxauusd,fx_sxauusd',
-    dxy: 'https://hq.sinajs.cn/list=fx_susdcnh'
-  };
-
-  function parseSina(str) {
-    if (!str) return null;
-    var parts = str.split(',');
-    if (parts.length < 3) return null;
-    return {
-      price: parseFloat(parts[1]) || 0,
-      change: parts[2] || '0',
-      pct: parts[3] || '0%'
-    };
-  }
-
   function updateDOM(id, label, data, prevData) {
     var el = document.getElementById(id);
     if (!el || !data) return;
 
-    var priceStr = data.price.toFixed(2);
-    var changeNum = parseFloat(data.change);
-    var dir = changeNum >= 0 ? 'up' : 'down';
-    var arrow = changeNum >= 0 ? '&#9650;' : '&#9660;';
-    var changeStr = (changeNum >= 0 ? '+' : '') + changeNum.toFixed(2);
-    var pctStr = data.pct.indexOf('%') > -1 ? data.pct : data.pct + '%';
+    var price = data.price;
+    var priceStr = typeof price === 'number' ? price.toFixed(2) : String(price);
+    var change = typeof data.change === 'number' ? data.change : parseFloat(data.change) || 0;
+    var dir = change >= 0 ? 'up' : 'down';
+    var arrow = change >= 0 ? '&#9650;' : '&#9660;';
+    var changeStr = (change >= 0 ? '+' : '') + change.toFixed(2);
+    var pctStr = data.pct || '0.00%';
 
     var flashClass = '';
     if (prevData && prevData.price !== data.price) {
@@ -92,9 +47,7 @@
     if (flashClass) {
       setTimeout(function () {
         var priceEl = el.querySelector('.tkr-price');
-        if (priceEl) {
-          priceEl.classList.remove('flash-up', 'flash-down');
-        }
+        if (priceEl) priceEl.classList.remove('flash-up', 'flash-down');
       }, 600);
     }
   }
@@ -102,37 +55,27 @@
   var prev = getCache();
 
   function tick() {
-    Promise.allSettled([
-      fetchPrice(SOURCES.xau).then(parseSina),
-      fetchPrice(SOURCES.dxy).then(parseSina)
-    ]).then(function (results) {
-      var xau = results[0].status === 'fulfilled' ? results[0].value : null;
-      var dxy = results[1].status === 'fulfilled' ? results[1].value : null;
-
-      var newCache = { xau: xau, dxy: dxy };
-
-      updateDOM('tkr-xau', 'XAUUSD', xau, prev.xau);
-      updateDOM('tkr-dxy', 'DXY', dxy, prev.dxy);
-
-      setCache(newCache);
-      prev = newCache;
-    }).catch(function () {
-      /* 静默失败，保留上一次的价格 */
-    });
+    fetch('/api/quotes')
+      .then(function (resp) { return resp.json(); })
+      .then(function (json) {
+        if (json.error) return;
+        var x = json.xau;
+        var d = json.dxy;
+        var newCache = { xau: x, dxy: d };
+        updateDOM('tkr-xau', 'XAUUSD', x, prev ? prev.xau : null);
+        updateDOM('tkr-dxy', 'DXY', d, prev ? prev.dxy : null);
+        setCache(newCache);
+        prev = newCache;
+      })
+      .catch(function () { /* 静默 */ });
   }
 
-  /* 如果有缓存，先显示 */
-  if (prev.xau) {
+  if (prev) {
     updateDOM('tkr-xau', 'XAUUSD', prev.xau, null);
-  }
-  if (prev.dxy) {
     updateDOM('tkr-dxy', 'DXY', prev.dxy, null);
   }
 
-  /* 首次拉取 */
   tick();
-
-  /* 每 10 秒刷新 */
-  setInterval(tick, 10000);
+  setInterval(tick, 15000);
 
 })();
