@@ -3,20 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="策略研究日志 #001：我为什么开始记录这个系列">
-  <title>日志 #001 — 策略研究日志</title>
+  <meta name="description" content="日志 #001：我为什么开始记录这个 AI 策略研究系列">
+  <title>#001 策略研究日志</title>
   <link rel="stylesheet" href="../styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/main.js" defer></script>
 </head>
 <body>
+
+  <!-- TradingView 报价条 -->
+  <div class="ticker-bar">
+    <div class="site-container">
+      <div class="tradingview-widget-container" style="height:44px;">
+        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
+            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
+            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
+            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
+            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
+          ],
+          "showSymbolLogo": false,
+          "colorTheme": "light",
+          "isTransparent": true,
+          "displayMode": "regular",
+          "locale": "zh_CN"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+
   <div class="site-container">
 
     <header class="site-header">
       <div class="site-header-inner">
         <a href="../index.html" class="site-brand">
-          <span class="site-logo"><span class="site-logo-gold">&#9650;</span> 策略研究日志</span>
+          <span class="site-logo"><span class="site-logo-gold">&diams;</span> 策略研究日志</span>
         </a>
         <nav class="site-nav">
           <a href="../index.html">日志</a>
@@ -33,35 +60,38 @@
       <article class="log-article">
 
         <div class="log-article-header">
-          <span class="log-article-date">2026.08.06</span>
-          <h1>策略研究日志 #001：我为什么开始记录这个系列</h1>
+          <div class="log-article-meta">
+            <span class="log-article-num">#001</span>
+            <span class="log-article-date">2026.08.06</span>
+          </div>
+          <h1>我为什么开始记录这个 AI 策略研究系列</h1>
         </div>
 
-        <h2>&#9650; 今日研究主题</h2>
+        <h2>今日研究主题</h2>
         <p>
-          从今天开始，我会每天记录如何用 <strong>AI 辅助策略研究</strong>。不是「AI 替你交易」，是你做决策，AI 做分析。记录本身就是研究的证据。没有记录，研究就是一串印象。
+          从今天开始，每天记录如何用 AI 辅助策略研究。不做「AI 替你交易」——那是 EA 干的事。这里是 AI 帮我看信息，我做交易决策。
         </p>
 
-        <h2>&#9650; 今天做了什么</h2>
+        <h2>今天做了什么</h2>
         <p>
-          用 Claude 分析了本周美联储几位官员的最新讲话，尝试识别措辞中关于通胀和就业市场的微妙变化。输入了三份讲话原文，要求 AI 对比本周措辞与上月同官员讲话的差异，并标注出异常措辞。
+          用 Claude 分析了本周美联储几位官员的最新讲话，识别措辞中关于通胀和就业市场的微妙变化。输入三份讲话原文，要求 AI 对比本周措辞与上月同官员讲话的差异，标注异常措辞。
         </p>
 
         <h3>AI 输出摘要</h3>
         <div class="data-block">
           <div class="data-block-label">Claude 措辞分析结果</div>
           官员 A（鹰派）：措辞较上月软化，首次提到「数据依赖」而非「继续加息」
-          官员 B（中立）：维持中性立场，但新增了对服务业通胀黏性的担忧
-          官员 C（鹰派转鸽）：明显转向，使用了「接近限制性水平」的措辞
+          官员 B（中立）：维持中性立场，新增对服务业通胀黏性的担忧
+          官员 C（鹰派转鸽）：明显转向，使用「接近限制性水平」措辞
         </div>
 
         <p>
-          <strong>我采纳了吗？</strong> 部分采纳。AI 的文字对比分析有参考价值，但缺乏对官员个人历史立场的全局把握——Claude 只能对比我喂进去的两份讲话，无法判断这位官员历史上是否有过类似的措辞反转。
+          <strong>采纳了吗？</strong> 部分采纳。AI 的文字对比有效，但缺乏对官员个人历史立场的全局把握——Claude 只能对比我喂进去的两份讲话，无法判断该官员历史上是否有过类似反转。
         </p>
 
-        <h2>&#9650; 工具优化</h2>
+        <h2>工具优化</h2>
         <p>
-          今天发现：Claude 在识别措辞细微变化上非常有效，但在跨时间多窗口对比时，如果一次输入的数据量太大，容易丢失上下文。解决方案：<strong>分批输入，每批不超过 3 篇讲话。</strong>
+          今天发现：Claude 识别措辞细微变化很有效，但跨时间多窗口对比时如果一次输入过多数据，容易丢失上下文。解决方案：<strong>分批输入，每批不超过 3 篇讲话。</strong>
         </p>
 
         <div class="data-block">
@@ -77,17 +107,17 @@
              - 语气总体方向
         </div>
 
-        <h2>&#9650; 市场观察</h2>
+        <h2>市场观察</h2>
         <p>
-          <span class="result-positive">XAUUSD 4H 级别维持区间震荡</span>，等待周五 NFP 数据。基本面方面，多位美联储官员的措辞软化对金价构成温和支撑。技术上，2650 区域仍是关键阻力。
+          <span class="result-positive">XAUUSD 4H 维持区间震荡</span>，等待周五 NFP。多位官员措辞软化对金价温和支撑。2650 区域仍为关键阻力。
         </p>
 
         <div class="takeaway">
-          AI 不是答案，是问法。你能问出的问题深度，决定了 AI 回你的信息质量。不要问「这个行情怎么看」，要问「这份讲话中关于通胀的措辞，和上个月相比有哪些具体差异」。
+          AI 不是答案，是问法。你能问出的问题深度，决定了 AI 回你的信息质量。不要问「这个行情怎么看」，要问「这份讲话中关于通胀的措辞，和上个月比有哪些具体差异」。
         </div>
 
         <div class="log-nav">
-          <span style="color: var(--text-muted);">← 第一篇</span>
+          <span style="color: var(--text-muted);">&larr; 第一篇</span>
           <a href="../index.html">回到列表</a>
         </div>
 
@@ -95,7 +125,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>&copy; 2026 舍予又见 · <a href="../about.html">关于</a> · <a href="../subscribe.html">订阅</a></p>
+      <p>&copy; 2026 舍予又见 &mdash; <a href="../about.html">关于</a> &middot; <a href="../subscribe.html">订阅</a></p>
     </footer>
 
   </div>

@@ -3,20 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="策略研究日志：一个交易员的 AI 辅助策略研究记录">
+  <meta name="description" content="策略研究日志 — 舍予又见的 AI 辅助交易策略研究记录">
   <title>策略研究日志 — 舍予又见</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="js/main.js" defer></script>
 </head>
 <body>
+
+  <!-- TradingView 报价条 -->
+  <div class="ticker-bar">
+    <div class="site-container">
+      <div class="tradingview-widget-container" style="height:44px;">
+        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
+            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
+            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
+            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
+            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
+          ],
+          "showSymbolLogo": false,
+          "colorTheme": "light",
+          "isTransparent": true,
+          "displayMode": "regular",
+          "locale": "zh_CN"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+
   <div class="site-container">
 
     <header class="site-header">
       <div class="site-header-inner">
         <a href="/" class="site-brand">
-          <span class="site-logo"><span class="site-logo-gold">&#9650;</span> 策略研究日志</span>
+          <span class="site-logo"><span class="site-logo-gold">&diams;</span> 策略研究日志</span>
         </a>
         <nav class="site-nav">
           <a href="/">日志</a>
@@ -28,41 +55,77 @@
     </header>
 
     <main>
-      <div class="page-title-section">
-        <h1 class="page-title">AI 辅助策略研究日志</h1>
-        <p class="page-subtitle">一个交易员的每日策略研究记录。AI 做分析，我做决策。持续更新中。</p>
+
+      <!-- Hero -->
+      <div class="home-hero">
+        <h1>一个交易员的 <span class="gold-highlight">AI 辅助策略研究</span> 记录</h1>
+        <p>AI 做分析，我做决策。每天记录，持续更新。主攻 XAUUSD 现货黄金。</p>
       </div>
 
+      <!-- 迷你 K 线卡片 -->
+      <div class="mini-chart-card">
+        <div class="mini-chart-info">
+          <div class="mini-chart-label">现货黄金</div>
+          <div class="mini-chart-pair">XAUUSD</div>
+          <div class="mini-chart-price" id="xau-price">---</div>
+          <div class="mini-chart-change" id="xau-change">---</div>
+        </div>
+        <div class="mini-chart-widget">
+          <div class="tradingview-widget-container" style="height:180px;">
+            <div class="tradingview-widget-container__widget" style="height:180px;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+            {
+              "symbol": "OANDA:XAUUSD",
+              "width": "100%",
+              "height": 180,
+              "locale": "zh_CN",
+              "dateRange": "3M",
+              "colorTheme": "light",
+              "isTransparent": true,
+              "autosize": true,
+              "largeChartUrl": ""
+            }
+            </script>
+          </div>
+        </div>
+      </div>
+
+      <!-- 日志列表 -->
       <ul class="log-list">
 
         <li class="log-item">
+          <span class="log-item-num">#001</span>
           <span class="log-item-date">2026.08.06</span>
-          <a href="logs/001.html" class="log-item-title">策略研究日志 #001：我为什么开始记录这个系列</a>
-          <p class="log-item-excerpt">用 Claude 分析了本周美联储官员讲话合集，识别措辞变化。AI 是工具，决策是人。</p>
+          <a href="logs/001.html" class="log-item-title">我为什么开始记录这个 AI 策略研究系列</a>
+          <p class="log-item-excerpt">用 AI 分析美联储官员讲话措辞变化，AI 做文字对比很有效但缺乏历史语境全局把握。</p>
         </li>
 
         <li class="log-item">
+          <span class="log-item-num">#002</span>
           <span class="log-item-date">即将发布</span>
-          <span class="log-item-title" style="color: var(--text-muted); cursor: default;">#002：AI 辅助分析 XAUUSD 4H 趋势跟踪策略</span>
+          <span class="log-item-title" style="color: var(--text-muted); cursor: default;">AI 辅助分析 XAUUSD 4H 趋势跟踪策略</span>
         </li>
 
       </ul>
 
     </main>
 
+    <!-- 订阅区 -->
     <section class="subscribe-section" style="margin-top: var(--space-2xl);">
-      <h3>每周策略研究周报</h3>
-      <p>比公开日志更深一层的分析。免费订阅，每周日发送。</p>
+      <h3>&#9993; 每周策略研究周报</h3>
+      <p>比公开日志更深一层。免费订阅，每周日发送到邮箱。</p>
       <form class="subscribe-form" action="https://app.convertkit.com/forms/PLACEHOLDER" method="post">
-        <input type="email" name="email" placeholder="输入你的邮箱" required>
-        <button type="submit">订阅</button>
+        <input type="email" name="email" placeholder="你的邮箱地址" required>
+        <button type="submit">免费订阅</button>
       </form>
     </section>
 
     <footer class="site-footer">
-      <p>&copy; 2026 舍予又见 · <a href="about.html">关于</a> · <a href="subscribe.html">订阅</a></p>
+      <p>&copy; 2026 舍予又见 &mdash; <a href="about.html">关于</a> &middot; <a href="subscribe.html">订阅</a></p>
     </footer>
 
   </div>
+
+  <!-- 回到顶部由 JS 动态插入 -->
 </body>
 </html>

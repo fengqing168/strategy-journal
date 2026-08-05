@@ -3,20 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="策略研究资料库：交易员日常研究中参考的概念索引">
+  <meta name="description" content="策略研究资料库——日常研究中参考的市场概念与技术索引">
   <title>资料库 — 策略研究日志</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="js/main.js" defer></script>
 </head>
 <body>
+
+  <div class="ticker-bar">
+    <div class="site-container">
+      <div class="tradingview-widget-container" style="height:44px;">
+        <div class="tradingview-widget-container__widget" style="height:44px;"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            {"proName": "OANDA:XAUUSD", "title": "XAUUSD"},
+            {"proName": "OANDA:EURUSD", "title": "EURUSD"},
+            {"proName": "OANDA:GBPUSD", "title": "GBPUSD"},
+            {"proName": "OANDA:USDJPY", "title": "USDJPY"},
+            {"proName": "OANDA:USDCAD", "title": "USDCAD"}
+          ],
+          "showSymbolLogo": false,
+          "colorTheme": "light",
+          "isTransparent": true,
+          "displayMode": "regular",
+          "locale": "zh_CN"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+
   <div class="site-container">
 
     <header class="site-header">
       <div class="site-header-inner">
         <a href="/" class="site-brand">
-          <span class="site-logo"><span class="site-logo-gold">&#9650;</span> 策略研究日志</span>
+          <span class="site-logo"><span class="site-logo-gold">&diams;</span> 策略研究日志</span>
         </a>
         <nav class="site-nav">
           <a href="/">日志</a>
@@ -30,7 +56,7 @@
     <main>
       <div class="page-title-section">
         <h1 class="page-title">策略研究资料库</h1>
-        <p class="page-subtitle">不是教程。是我日常策略研究中参考的概念索引。每一个词条都对应到具体的日志记录。</p>
+        <p class="page-subtitle">不是教程。是我日常研究中参考的概念索引。每个词条对应具体的日志记录。</p>
       </div>
 
       <div class="library-section">
@@ -38,19 +64,19 @@
 
         <div class="library-item">
           <div class="library-item-title">现货黄金（XAUUSD）做市机制</div>
-          <div class="library-item-desc">银行间市场做市商如何为现货黄金提供流动性、报价机制与点差形成原理。</div>
+          <div class="library-item-desc">银行间做市商如何为现货黄金提供流动性、报价机制与点差形成原理。</div>
           <div class="library-item-ref">相关日志：即将发布</div>
         </div>
 
         <div class="library-item">
           <div class="library-item-title">央行讲话的事件驱动分析框架</div>
-          <div class="library-item-desc">如何系统化地分析美联储/欧央行官员讲话对金价的传导路径。</div>
+          <div class="library-item-desc">系统化分析美联储/欧央行官员讲话对金价的传导路径。</div>
           <div class="library-item-ref">相关日志：<a href="logs/001.html">#001</a></div>
         </div>
 
         <div class="library-item">
           <div class="library-item-title">MT4 数据精度与回测陷阱</div>
-          <div class="library-item-desc">MT4 平台历史数据的常见问题：掉线缺口、点差模拟偏差、数据源差异。</div>
+          <div class="library-item-desc">MT4 历史数据的常见问题：掉线缺口、点差模拟偏差、数据源差异。</div>
           <div class="library-item-ref">相关日志：即将发布</div>
         </div>
       </div>
@@ -60,13 +86,13 @@
 
         <div class="library-item">
           <div class="library-item-title">Prompt 工程：分级分析框架</div>
-          <div class="library-item-desc">如何设计分步骤的 Prompt 来让 AI 做多层级的市场分析，而非一次性开放式提问。</div>
+          <div class="library-item-desc">设计分步骤 Prompt 让 AI 做多层市场分析，而非一次性开放式提问。</div>
           <div class="library-item-ref">相关日志：<a href="logs/001.html">#001</a></div>
         </div>
 
         <div class="library-item">
           <div class="library-item-title">AI 辅助策略回测代码生成</div>
-          <div class="library-item-desc">用 AI 将策略思路转换为 Python 回测脚本的最佳实践和常见错误。</div>
+          <div class="library-item-desc">将策略思路用 AI 转为 Python 回测脚本的最佳实践。</div>
           <div class="library-item-ref">相关日志：即将发布</div>
         </div>
       </div>
@@ -76,19 +102,19 @@
 
         <div class="library-item">
           <div class="library-item-title">XAUUSD 关键价位与阻力支撑</div>
-          <div class="library-item-desc">黄金的历史关键价位区域、心理整数关口、以及如何用 AI 辅助识别突破信号。</div>
+          <div class="library-item-desc">黄金历史关键价位、心理整数关口、AI 辅助识别突破信号。</div>
           <div class="library-item-ref">相关日志：即将发布</div>
         </div>
       </div>
 
       <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: var(--space-2xl);">
-        这个页面会随着日志更新而逐步扩充。每一项资料都源于真实的策略研究记录。
+        这个页面随日志更新而扩充。每项资料源于真实的策略研究记录。
       </p>
 
     </main>
 
     <footer class="site-footer">
-      <p>&copy; 2026 舍予又见 · <a href="about.html">关于</a> · <a href="subscribe.html">订阅</a></p>
+      <p>&copy; 2026 舍予又见 &mdash; <a href="about.html">关于</a> &middot; <a href="subscribe.html">订阅</a></p>
     </footer>
 
   </div>

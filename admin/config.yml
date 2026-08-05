@@ -1,0 +1,26 @@
+backend:
+  name: github
+  repo: fengqing168/strategy-journal
+  branch: master
+  base_url: https://api.decapcms.org
+  auth_endpoint: auth
+
+media_folder: images
+public_folder: /images
+
+collections:
+  - name: logs
+    label: 策略研究日志
+    label_singular: 日志
+    folder: logs
+    create: true
+    slug: "{{slug}}"
+    extension: html
+    format: yaml-frontmatter
+    summary: "#{{fields.num}} — {{fields.title}}"
+
+    fields:
+      - { label: "编号", name: "num", widget: "string", default: "001" }
+      - { label: "日期", name: "date", widget: "date", format: "YYYY.MM.DD" }
+      - { label: "标题", name: "title", widget: "string" }
+      - { label: "正文 (HTML)", name: "body", widget: "markdown" }
