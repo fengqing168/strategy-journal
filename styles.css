@@ -35,20 +35,23 @@
 html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.75;min-height:100vh}
 
-/* ── 行情条 ── */
-.ticker-bar{background:#0F172A;padding:5px 0;position:sticky;top:0;z-index:100}
-.ticker-wrap{max-width:var(--max);margin:0 auto;padding:0 24px;display:flex;gap:32px;justify-content:center;align-items:center;height:34px}
-.tkr{display:flex;align-items:baseline;gap:8px;font-family:var(--mono);font-size:.75rem;white-space:nowrap}
+/* ── 行情条（滚动式） ── */
+.ticker-bar{background:#0F172A;height:36px;overflow:hidden;position:sticky;top:0;z-index:100}
+.ticker-track{display:flex;align-items:center;height:36px;width:max-content;animation:scrollTicker 60s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes scrollTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tkr{display:flex;align-items:baseline;gap:8px;font-family:var(--mono);font-size:.75rem;white-space:nowrap;padding:0 20px;flex-shrink:0}
+.tkr-sep{color:#334155;font-size:.5rem;padding:0 6px;flex-shrink:0;user-select:none}
 .tkr-label{font-weight:600;color:#64748B;font-size:.6875rem;letter-spacing:.05em}
-.tkr-price{font-weight:700;font-size:.9375rem;color:#E2E8F0;transition:color .4s var(--ease)}
+.tkr-price{font-weight:700;font-size:.875rem;color:#E2E8F0;transition:color .3s var(--ease)}
 .tkr-price.up{color:#34D399}.tkr-price.down{color:#F87171}
-@keyframes pulse-up{0%,100%{text-shadow:none}50%{text-shadow:0 0 12px rgba(52,211,153,.4)}}
-@keyframes pulse-down{0%,100%{text-shadow:none}50%{text-shadow:0 0 12px rgba(248,113,113,.4)}}
-.tkr-price.flash-up{animation:pulse-up .6s var(--ease)}
-.tkr-price.flash-down{animation:pulse-down .6s var(--ease)}
+@keyframes pulse-up{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px rgba(52,211,153,.35)}}
+@keyframes pulse-down{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px rgba(248,113,113,.35)}}
+.tkr-price.flash-up{animation:pulse-up .5s var(--ease)}
+.tkr-price.flash-down{animation:pulse-down .5s var(--ease)}
 .tkr-change{font-size:.6875rem;font-weight:500}
 .tkr-change.up{color:#34D399}.tkr-change.down{color:#F87171}
-.tkr-pct{font-size:.625rem;padding:1px 6px;border-radius:3px;font-weight:500}
+.tkr-pct{font-size:.625rem;padding:1px 5px;border-radius:2px;font-weight:500}
 .tkr-pct.up{background:rgba(5,150,105,.2);color:#34D399}
 .tkr-pct.down{background:rgba(220,38,38,.2);color:#F87171}
 .tkr-error{color:#64748B;font-size:.75rem}

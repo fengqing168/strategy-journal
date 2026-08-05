@@ -1,38 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="搜索策略研究日志的全部内容">
-<title>搜索 — 策略研究日志</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="搜索策略研究日志的全部内容"><title>搜索 — 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="ticker-bar"><div class="ticker-wrap" id="live-ticker">
-<div class="tkr" id="tkr-xau"><span class="tkr-label">XAUUSD</span><span class="tkr-error">加载中…</span></div>
-<div class="tkr" id="tkr-dxy"><span class="tkr-label">DXY</span><span class="tkr-error">加载中…</span></div>
-</div></div>
+<div class="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
 <div class="container">
 <header class="site-header"><div class="header-inner">
 <a href="/" class="brand"><span class="brand-gold">◆</span> 策略研究日志</a>
 <nav class="nav"><a href="/">日志</a><a href="library.html">资料库</a><a href="search.html">搜索</a><a href="subscribe.html">订阅</a><a href="about.html">关于</a></nav>
 </div></header>
-
 <div class="page-header"><h1 class="page-title">搜索日志</h1></div>
-
-<div class="search-bar">
-<input type="text" class="search-input" id="search-input" placeholder="输入关键词搜索日志…" autofocus>
-</div>
-
-<div class="search-results" id="search-results">
-<div class="search-hint">输入关键词开始搜索</div>
-</div>
-
+<div class="search-bar"><input type="text" class="search-input" id="search-input" placeholder="输入关键词搜索日志…" autofocus></div>
+<div class="search-results" id="search-results"><div class="search-hint">输入关键词开始搜索</div></div>
 <footer class="footer"><p>舍予又见 &copy; 2026 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p></footer>
 </div>
 <script src="js/ticker.js"></script>
 <script>
 (function(){
-var idx=[{t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",w:"AI 分析 美联储 官员 讲话 措辞 通胀 就业 央行 Claude Prompt 优化 回测 XAUUSD 区间 震荡 NFP 数据 阻力位 2650 黄金 现货黄金 国际金 价格 形成 机制 做市 商 流动性 点差 报价 系统 框架 讲话 事件 驱动 分析 传导 路径 工具 使用 分级 多 层 市场 趋势 跟踪 策略 研究报告 周报"}];
+var idx=[{t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",w:"AI 分析 美联储 官员 讲话 措辞 通胀 就业 央行 Claude Prompt 优化 回测 XAUUSD 区间 震荡 NFP 数据 阻力位 2650 黄金"}];
 var inp=document.getElementById('search-input');
 var res=document.getElementById('search-results');
 var q=new URLSearchParams(window.location.search).get('q');
@@ -42,10 +29,8 @@ function doSearch(s){
 if(!s||s.length<1){res.innerHTML='<div class="search-hint">输入关键词开始搜索</div>';return}
 var t=s.toLowerCase().split(/\s+/);
 var o=idx.filter(function(i){return t.every(function(k){return i.w.toLowerCase().indexOf(k)>-1})});
-if(!o.length){res.innerHTML='<div class="search-hint">没有找到匹配的日志</div>';return}
-res.innerHTML=o.map(function(i){return'<div class="log-item"><a href="'+i.u+'" class="log-link"><div class="log-meta"><span class="log-num">#'+i.u.match(/\d+/)[0]+'</span><span class="log-date">'+i.d+'</span></div><div class="log-title">'+i.t+'</div></a></div>'}).join('')
-}
-})();
+res.innerHTML=o.length?o.map(function(i){return'<div class="log-item"><a href="'+i.u+'" class="log-link"><div class="log-meta"><span class="log-num">#'+i.u.match(/\d+/)[0]+'</span><span class="log-date">'+i.d+'</span></div><div class="log-title">'+i.t+'</div></a></div>'}).join(''):'<div class="search-hint">没有找到匹配的日志</div>'
+}})();
 </script>
 </body>
 </html>

@@ -1,71 +1,115 @@
-/* ── 行情模块 · XAUUSD 直连 + DXY Worker ── */
+/* ── 滚动行情条 · 多品种实时报价 ── */
 (function () {
-  'use strict';
-  var tkr = document.getElementById('live-ticker');
-  if (!tkr) return;
-  var CK = 'tkr_v3';
+  var track = document.getElementById('ticker-track');
+  if (!track) return;
 
-  function get() { try { return JSON.parse(localStorage.getItem(CK)); } catch (e) {} }
-  function set(d) { try { localStorage.setItem(CK, JSON.stringify(d)); } catch (e) {} }
+  var symbols = [
+    { id: 'xau', label: 'XAUUSD', src: 'gold' },
+    { id: 'eur', label: 'EURUSD', src: 'forex', calc: function (r) { return (1 / r.EUR).toFixed(4); } },
+    { id: 'gbp', label: 'GBPUSD', src: 'forex', calc: function (r) { return (1 / r.GBP).toFixed(4); } },
+    { id: 'jpy', label: 'USDJPY', src: 'forex', calc: function (r) { return r.JPY.toFixed(3); } },
+    { id: 'cad', label: 'USDCAD', src: 'forex', calc: function (r) { return r.CAD.toFixed(4); } },
+    { id: 'dxy', label: 'DXY', src: 'worker' }
+  ];
 
-  function show(id, label, data, prev) {
-    var el = document.getElementById(id);
-    if (!el || !data) return;
-    var p = data.price, priceStr = parseFloat(p).toFixed(2);
-    var ch = parseFloat(data.change) || 0;
-    var dir = ch >= 0 ? 'up' : 'down';
-    var arrow = ch >= 0 ? '▲' : '▼';
-    var chStr = (ch >= 0 ? '+' : '') + ch.toFixed(2);
-    var pctStr = data.pct || '—';
+  var data = {};
+  var prevData = {};
 
-    var fc = '';
-    if (prev && prev.price !== data.price) fc = data.price > prev.price ? 'flash-up' : 'flash-down';
+  function fmtNum(v, dec) { return parseFloat(v).toFixed(dec); }
 
-    el.innerHTML =
-      '<span class="tkr-label">' + label + '</span>' +
-      '<span class="tkr-price ' + dir + ' ' + fc + '">' + priceStr + '</span>' +
-      '<span class="tkr-change ' + dir + '">' + arrow + ' ' + chStr + '</span>' +
-      '<span class="tkr-pct ' + dir + '">' + pctStr + '</span>';
+  function buildTrack() {
+    var items = [];
+    symbols.forEach(function (s) {
+      var d = data[s.id];
+      if (!d) return;
+      var price = d.price, change = d.change || 0, pct = d.pct || '--';
+      var dir = change >= 0 ? 'up' : 'down';
+      var arrow = change >= 0 ? '▲' : '▼';
+      var chStr = (change >= 0 ? '+' : '') + change.toFixed(s.label.indexOf('JPY') > -1 ? 3 : 4);
 
-    if (fc) setTimeout(function () { var pe = el.querySelector('.tkr-price'); if (pe) { pe.classList.remove('flash-up', 'flash-down'); } }, 600);
+      var prev = prevData[s.id];
+      var flashClass = '';
+      if (prev && prev.price !== price) {
+        flashClass = price > prev.price ? 'flash-up' : 'flash-down';
+      }
+
+      items.push(
+        '<span class="tkr">' +
+        '<span class="tkr-label">' + s.label + '</span>' +
+        '<span class="tkr-price ' + dir + ' ' + flashClass + '">' + fmtNum(price, s.label.indexOf('JPY') > -1 ? 3 : 2) + '</span>' +
+        '<span class="tkr-change ' + dir + '">' + arrow + ' ' + chStr + '</span>' +
+        '<span class="tkr-pct ' + dir + '">' + pct + '</span>' +
+        '</span><span class="tkr-sep">◆</span>'
+      );
+    });
+    return items.join('');
   }
 
-  var prev = get();
+  function render() {
+    var inner = buildTrack();
+    if (!inner) return;
+    track.innerHTML = inner + inner; /* 双份 — 无缝循环 */
+    prevData = JSON.parse(JSON.stringify(data));
+  }
 
-  async function tick() {
-    var xauData = null;
-    var dxyData = null;
+  async function fetchAll() {
+    var results = {};
 
-    /* XAUUSD 直连 gold-api.com —— 100% 保证加载 */
+    /* XAUUSD 直连 */
     try {
       var r = await fetch('https://api.gold-api.com/price/XAU');
       var j = await r.json();
-      xauData = { price: j.price, change: 0, pct: '—' };
-      if (prev && prev.xau) {
-        xauData.change = j.price - prev.xau.price;
-        xauData.pct = prev.xau.price ? ((xauData.change / prev.xau.price) * 100).toFixed(2) + '%' : '—';
-      }
-    } catch (e) {}
+      results.xau = { price: j.price, change: 0 };
+      if (prevData.xau) results.xau.change = j.price - prevData.xau.price;
+    } catch (e) { results.xau = prevData.xau; }
+
+    /* 外汇 直连 */
+    try {
+      var fr = await fetch('https://open.er-api.com/v6/latest/USD');
+      var fj = await fr.json();
+      var rates = fj.rates;
+
+      var eurPrice = 1 / rates.EUR;
+      var gbpPrice = 1 / rates.GBP;
+      var jpyPrice = rates.JPY;
+      var cadPrice = rates.CAD;
+
+      results.eur = { price: eurPrice, change: prevData.eur ? eurPrice - prevData.eur.price : 0 };
+      results.gbp = { price: gbpPrice, change: prevData.gbp ? gbpPrice - prevData.gbp.price : 0 };
+      results.jpy = { price: jpyPrice, change: prevData.jpy ? jpyPrice - prevData.jpy.price : 0 };
+      results.cad = { price: cadPrice, change: prevData.cad ? cadPrice - prevData.cad.price : 0 };
+    } catch (e) {
+      results.eur = prevData.eur;
+      results.gbp = prevData.gbp;
+      results.jpy = prevData.jpy;
+      results.cad = prevData.cad;
+    }
 
     /* DXY 走 Worker */
     try {
       var dr = await fetch('/api/quotes');
       var dj = await dr.json();
-      if (!dj.error && dj.dxy) dxyData = dj.dxy;
-    } catch (e) {}
+      if (!dj.error && dj.dxy) results.dxy = dj.dxy;
+    } catch (e) { results.dxy = prevData.dxy; }
 
-    var now = { xau: xauData, dxy: dxyData };
-    show('tkr-xau', 'XAUUSD', xauData, prev ? prev.xau : null);
-    show('tkr-dxy', 'DXY', dxyData, prev ? prev.dxy : null);
-    set(now);
-    prev = now;
+    /* 计算涨跌幅 */
+    ['xau', 'eur', 'gbp', 'jpy', 'cad', 'dxy'].forEach(function (id) {
+      var d = results[id];
+      if (!d) return;
+      var prev = prevData[id];
+      if (prev && prev.price) {
+        d.change = d.price - prev.price;
+        d.pct = ((d.change / prev.price) * 100).toFixed(2) + '%';
+      } else {
+        d.pct = '--';
+      }
+    });
+
+    data = results;
+    render();
   }
 
-  if (prev) {
-    show('tkr-xau', 'XAUUSD', prev.xau, null);
-    show('tkr-dxy', 'DXY', prev.dxy, null);
-  }
+  fetchAll();
+  setInterval(fetchAll, 10000);
 
-  tick();
-  setInterval(tick, 15000);
 })();

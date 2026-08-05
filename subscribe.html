@@ -1,48 +1,30 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="订阅每周策略研究周报">
-<title>订阅 — 策略研究日志</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="订阅每周策略研究周报"><title>订阅 — 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="ticker-bar"><div class="ticker-wrap" id="live-ticker">
-<div class="tkr" id="tkr-xau"><span class="tkr-label">XAUUSD</span><span class="tkr-error">加载中…</span></div>
-<div class="tkr" id="tkr-dxy"><span class="tkr-label">DXY</span><span class="tkr-error">加载中…</span></div>
-</div></div>
+<div class="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
 <div class="container">
 <header class="site-header"><div class="header-inner">
 <a href="/" class="brand"><span class="brand-gold">◆</span> 策略研究日志</a>
 <nav class="nav"><a href="/">日志</a><a href="library.html">资料库</a><a href="search.html">搜索</a><a href="subscribe.html">订阅</a><a href="about.html">关于</a></nav>
 </div></header>
-
-<div class="page-header fade-in"><h1 class="page-title">订阅每周策略研究周报</h1><p class="page-sub">比公开日志更深一层的内容，每周日发送到你的邮箱。</p></div>
-
-<div class="subscribe-box fade-in">
-<h3>免费订阅</h3>
-<p>我日常使用的 AI 策略 Prompt 合集 + 每周深度研究报告</p>
-<form class="sub-form" action="https://app.convertkit.com/forms/PLACEHOLDER" method="post">
-<input type="email" name="email" placeholder="你的邮箱地址" required>
-<button type="submit">订阅</button>
-</form>
-</div>
-
+<div class="page-header fade-in"><h1 class="page-title">订阅每周策略研究周报</h1><p class="page-sub">比公开日志更深一层，每周日发送到邮箱。</p></div>
+<div class="subscribe-box fade-in"><h3>免费订阅</h3><p>AI 策略 Prompt 合集 + 每周深度研究报告</p>
+<form class="sub-form" action="#" method="post"><input type="email" name="email" placeholder="你的邮箱地址" required><button type="submit">订阅</button></form></div>
 <ul class="sub-benefits fade-in">
 <li>每周一篇深度复盘——本周最有价值的策略研究展开详解</li>
 <li>公开日志不写的完整 Prompt 和工具链优化细节</li>
 <li>回答读者每周最有价值的问题</li>
 <li>提前预告下周研究方向</li>
-<li>我实际使用的 AI 策略工具合集（订阅即赠）</li>
-</ul>
-
+<li>我实际使用的 AI 策略工具合集（订阅即赠）</li></ul>
 <p style="font-size:.75rem;color:var(--text-muted);margin-top:16px">每周一封。不会发垃圾。随时取消。</p>
-
 <footer class="footer"><p>舍予又见 &copy; 2026 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p></footer>
 </div>
-<script src="js/main.js"></script>
-<script src="js/ticker.js"></script>
+<script src="js/main.js"></script><script src="js/ticker.js"></script>
 </body>
 </html>
