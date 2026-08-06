@@ -2,10 +2,58 @@
 <html lang="zh-CN">
 <head><meta charset="UTF-8">
 <meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="研究日志列表"><title>日志列表 — 策略研究日志</title>
+<meta name="description" content="研究日志列表"><title>日志 — 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.log-page{display:grid;grid-template-columns:1fr 260px;gap:24px;padding:24px 0}
+@media(max-width:800px){.log-page{grid-template-columns:1fr}}
+.log-main{min-width:0}
+.log-featured{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.04));border:1px solid rgba(99,102,241,.25);border-radius:14px;padding:22px;margin-bottom:18px;position:relative;overflow:hidden}
+.log-featured::before{content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(139,92,246,.12),transparent 70%)}
+.log-featured .lf-badge{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:600;text-transform:uppercase;margin-bottom:8px;display:inline-block}
+.log-featured .lf-title{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:6px}
+.log-featured .lf-title a{color:inherit;text-decoration:none}
+.log-featured .lf-title a:hover{color:var(--ai-1)}
+.log-featured .lf-excerpt{font-size:.78rem;color:var(--text-sec);line-height:1.65;margin-bottom:10px}
+.log-featured .lf-tags{display:flex;gap:5px;flex-wrap:wrap}
+.log-featured .lf-tags span{font-size:.6rem;background:rgba(99,102,241,.08);color:var(--ai-1);padding:2px 8px;border-radius:4px;font-family:var(--mono)}
+.log-featured .lf-link{font-size:.72rem;color:var(--ai-1);text-decoration:none;font-weight:600;margin-top:8px;display:inline-block}
+.log-featured .lf-link:hover{text-decoration:underline}
+
+.log-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:550px){.log-grid{grid-template-columns:1fr}}
+.log-card{background:var(--card);border:1px solid var(--border-soft);border-radius:12px;padding:16px;transition:all .2s;box-shadow:0 1px 3px rgba(99,102,241,.04)}
+.log-card:hover{border-color:rgba(99,102,241,.4);box-shadow:var(--shadow)}
+.log-card .lc-num{font-family:var(--mono);font-size:.6rem;font-weight:600;background:rgba(99,102,241,.1);color:var(--ai-1);padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:6px}
+.log-card .lc-date{font-family:var(--mono);font-size:.6rem;color:var(--text-muted);margin-left:6px}
+.log-card .lc-title{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:4px}
+.log-card .lc-title a{color:inherit;text-decoration:none}
+.log-card .lc-title a:hover{color:var(--ai-1)}
+.log-card .lc-excerpt{font-size:.7rem;color:var(--text-sec);line-height:1.55}
+.log-card.coming{opacity:.45;pointer-events:none}
+.log-card.coming .lc-num{background:rgba(99,102,241,.05);color:var(--text-muted)}
+
+.log-search{margin-bottom:18px}
+.log-search input{width:100%;padding:12px 16px;background:var(--card);border:1px solid var(--border-strong);border-radius:10px;font-size:.8125rem;color:var(--text);outline:none;font-family:var(--font)}
+.log-search input:focus{border-color:rgba(99,102,241,.5);box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.log-search input::placeholder{color:var(--text-muted)}
+
+/* Sidebar */
+.log-side{position:sticky;top:100px}
+.log-side .ls-card{background:var(--card);border:1px solid var(--border-soft);border-radius:12px;padding:16px;margin-bottom:12px}
+.log-side .ls-card h4{font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:8px;letter-spacing:.03em}
+.log-side .ls-tags{display:flex;flex-wrap:wrap;gap:5px}
+.log-side .ls-tags span{font-size:.62rem;padding:3px 9px;border-radius:16px;border:1px solid var(--border-soft);color:var(--text-sec);cursor:pointer;transition:all .15s}
+.log-side .ls-tags span:hover,.log-side .ls-tags span.active{border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.08);color:var(--ai-1)}
+.log-side .ls-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.log-side .ls-stat{text-align:center}
+.log-side .ls-stat b{display:block;font-family:var(--mono);font-size:.9rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.log-side .ls-stat span{font-size:.58rem;color:var(--text-muted)}
+.log-side .ls-mini-sub{display:block;text-align:center;padding:10px;background:var(--grad);color:#FFF;border-radius:8px;text-decoration:none;font-size:.7rem;font-weight:600;margin-top:8px}
+.log-side .ls-mini-sub:hover{opacity:.92}
+</style>
 </head>
 <body>
 <div class="ticker-bar"><div class="ticker-track" id="ticker-track"><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span></div></div>
@@ -19,28 +67,58 @@
 <nav class="nav"><a href="/">首页</a><a href="search.html">日志</a><a href="library.html">资料库</a><a href="about.html">关于</a><a href="product.html">工作流</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
 </div></header>
 
-<div class="inner">
-<div class="page-header"><div class="page-lvl">03 · 日志</div><h1 class="page-title">研究日志</h1></div>
+<div class="log-page">
 
-<div style="margin-bottom:16px">
-<input type="text" id="logFilter" class="search-input" placeholder="搜索日志关键词…" autofocus style="background:var(--card);font-size:.8125rem">
+<div class="log-main">
+<!-- Search -->
+<div class="log-search"><input type="text" id="logFilter" placeholder="搜索日志…" autofocus></div>
+
+<!-- Featured -->
+<div class="log-featured" id="featuredLog">
+<div class="lf-badge">LATEST · 最新发布</div>
+<div class="lf-title"><a href="logs/001.html">我为什么开始记录这个 AI 策略研究系列</a></div>
+<div class="lf-excerpt">用 Claude 分析美联储官员讲话措辞变化——AI 的文字对比能力很强，但缺乏历史语境的全局把握。从今天起，每天记录如何用 AI 辅助策略研究。</div>
+<div class="lf-tags"><span>央行分析</span><span>Prompt</span><span>Claude</span></div>
+<a href="logs/001.html" class="lf-link">阅读全文 →</a>
 </div>
 
-<div id="logList">
-<div class="log-item"><a href="logs/001.html" class="log-link">
-<div class="log-meta"><span class="log-num">#001</span><span class="log-date">2026.08.06</span></div>
-<div class="log-title">我为什么开始记录这个 AI 策略研究系列</div>
-<div class="log-excerpt">用 Claude 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。</div>
-<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">Prompt</span><span class="log-tag">Claude</span></div></a></div>
-<div class="log-item" style="opacity:.35"><div class="log-link" style="cursor:default">
-<div class="log-meta"><span class="log-num">#002</span><span class="log-date">即将发布</span></div>
-<div class="log-title">AI 辅助分析趋势跟踪策略</div></div></div>
-<div class="log-item" style="opacity:.3"><div class="log-link" style="cursor:default">
-<div class="log-meta"><span class="log-num">#003</span><span class="log-date">选题中</span></div>
-<div class="log-title">一次失败判断的完整复盘</div></div></div>
+<!-- Grid -->
+<div class="log-grid" id="logGrid">
+<div class="log-card coming"><div class="lc-num">#002</div><span class="lc-date">即将发布</span><div class="lc-title">AI 辅助分析趋势跟踪策略</div><div class="lc-excerpt">用 AI 回测趋势策略的历史表现，量化不同参数组合的胜率与回撤。</div></div>
+<div class="log-card coming"><div class="lc-num">#003</div><span class="lc-date">选题中</span><div class="lc-title">一次失败判断的完整复盘</div><div class="lc-excerpt">坦白局：当时为什么判断错了，工作流在哪个环节出了问题。</div></div>
+<div class="log-card coming"><div class="lc-num">#004</div><span class="lc-date">选题中</span><div class="lc-title">中东冲突如何重塑金价逻辑</div><div class="lc-excerpt">从 FOMC 声明首次点名地缘冲突看避险定价的结构性变化。</div></div>
+<div class="log-card coming"><div class="lc-num">#005</div><span class="lc-date">选题中</span><div class="lc-title">我的 AI 工作流：从 0 到 1</div><div class="lc-excerpt">16 步 Prompt 链的设计思路与踩坑实录。</div></div>
 </div>
-
 <div id="noResults" style="display:none;text-align:center;padding:32px;color:var(--text-muted);font-size:.8125rem">没有匹配的日志</div>
+</div>
+
+<!-- Sidebar -->
+<div class="log-side">
+<div class="ls-card">
+<h4>日志统计</h4>
+<div class="ls-stats">
+<div class="ls-stat"><b>1</b><span>已发布</span></div>
+<div class="ls-stat"><b>4</b><span>选题中</span></div>
+</div>
+</div>
+<div class="ls-card">
+<h4>标签筛选</h4>
+<div class="ls-tags" id="logTags">
+<span class="active" onclick="filterLogs('all')">全部</span>
+<span onclick="filterLogs('央行分析')">央行分析</span>
+<span onclick="filterLogs('Prompt')">Prompt</span>
+<span onclick="filterLogs('回测')">回测</span>
+<span onclick="filterLogs('复盘')">复盘</span>
+<span onclick="filterLogs('趋势')">趋势</span>
+</div>
+</div>
+<div class="ls-card">
+<h4>不想错过更新？</h4>
+<a href="subscribe.html" class="ls-mini-sub">📬 免费订阅周报</a>
+</div>
+</div>
+
+</div>
 
 <footer class="footer">
 <div class="sig">舍予又见</div>
@@ -48,29 +126,42 @@
 <p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
 </footer>
 </div>
-
-</div>
 <script src="js/ticker.js"></script>
 <script>
-var data=[{t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",e:"用 Claude 分析美联储官员讲话措辞变化",k:"央行分析 Prompt Claude",n:"001"},{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"",k:"复盘 教训"}];
+var data=[{n:"001",t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",e:"用 Claude 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。",k:"央行分析 Prompt Claude"},{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"用 AI 回测趋势策略的历史表现，量化不同参数组合的胜率与回撤。",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"坦白局：当时为什么判断错了，工作流在哪个环节出了问题。",k:"复盘 教训"},{n:"004",t:"中东冲突如何重塑金价逻辑",d:"选题中",e:"从 FOMC 声明首次点名地缘冲突看避险定价的结构性变化。",k:"地缘 避险 央行分析"},{n:"005",t:"我的 AI 工作流：从 0 到 1",d:"选题中",e:"16 步 Prompt 链的设计思路与踩坑实录。",k:"Prompt AI 工作流"}];
 
-function renderLogs(items){
-  var list=document.getElementById('logList');
+var activeTag='all';
+
+function renderCards(items){
+  var grid=document.getElementById('logGrid');
   var nr=document.getElementById('noResults');
-  if(!items.length){list.style.display='none';nr.style.display='block';return}
-  list.style.display='block';nr.style.display='none';
-  list.innerHTML=items.map(function(i){var cls=i.d==='即将发布'?'opacity:.35':i.d==='选题中'?'opacity:.3':'';var link=i.u?'<a href="'+i.u+'" class="log-link">':(cls?'<div class="log-link" style="cursor:default">':'');var end=i.u?'</a>':(cls?'</div>':'');var tags=i.k?i.k.split(' ').map(function(t){return'<span class="log-tag">'+t+'</span>'}).join(''):'';return'<div class="log-item" style="'+cls+'">'+link+'<div class="log-meta"><span class="log-num">#'+i.n+'</span><span class="log-date">'+i.d+'</span></div><div class="log-title">'+i.t+'</div>'+(i.e?'<div class="log-excerpt">'+i.e+'</div>':'')+(tags?'<div class="log-tags">'+tags+'</div>':'')+end+'</div>'}).join('')
+  if(!items.length){grid.style.display='none';nr.style.display='block';return}
+  grid.style.display='grid';nr.style.display='none';
+  grid.innerHTML=items.map(function(i){
+    var live=i.d==='2026.08.06';
+    var cls=live?'':' coming';
+    return'<div class="log-card'+cls+'"><div class="lc-num">#'+i.n+'</div><span class="lc-date">'+i.d+'</span><div class="lc-title">'+(live?'<a href="'+i.u+'">'+i.t+'</a>':i.t)+'</div><div class="lc-excerpt">'+i.e+'</div></div>'
+  }).join('')
 }
 
-renderLogs(data);
+function filterLogs(tag){
+  activeTag=tag;
+  document.querySelectorAll('#logTags span').forEach(function(s){s.classList.toggle('active',s.textContent===tag||(tag==='all'&&s.textContent==='全部'))});
+  if(tag==='all'){renderCards(data);return}
+  var r=data.filter(function(i){return i.k.indexOf(tag)>-1});
+  renderCards(r)
+}
 
+// Search
 document.getElementById('logFilter').addEventListener('input',function(){
   var q=this.value.toLowerCase().trim();
-  if(!q){renderLogs(data);return}
+  if(!q){renderCards(data);return}
   var t=q.split(/\s+/);
   var r=data.filter(function(i){return t.every(function(k){return(i.t+' '+i.e+' '+i.k).toLowerCase().indexOf(k)>-1})});
-  renderLogs(r)
+  renderCards(r)
 });
+
+renderCards(data);
 </script>
 </body>
 </html>
