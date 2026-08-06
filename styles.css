@@ -34,7 +34,6 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 /* ── 行情条（滚动式） ── */
 .ticker-bar{background:linear-gradient(100deg,#2A2B78,#4F46E5 55%,#6930C7);height:38px;overflow:hidden;position:sticky;top:0;z-index:100}
 .ticker-track{display:flex;align-items:center;height:38px;width:max-content;will-change:transform;backface-visibility:hidden;animation:scrollTicker 60s linear infinite}
-.ticker-track:hover{animation-play-state:paused}
 @keyframes scrollTicker{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
 .tkr{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.75rem;white-space:nowrap;padding:0 22px;flex-shrink:0}
 .tkr-sep{color:rgba(255,255,255,.28);font-size:.5rem;padding:0 8px;flex-shrink:0;user-select:none}
@@ -47,9 +46,6 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .tkr-price.flash-down{animation:pulse-down .5s var(--ease)}
 .tkr-change{font-size:.6875rem;font-weight:500}
 .tkr-change.up{color:#6EE7B7}.tkr-change.down{color:#FCA5A5}
-.tkr-pct{font-size:.625rem;padding:1px 6px;border-radius:3px;font-weight:600}
-.tkr-pct.up{background:rgba(110,231,183,.18);color:#6EE7B7}
-.tkr-pct.down{background:rgba(252,165,165,.18);color:#FCA5A5}
 .tkr-error{color:rgba(255,255,255,.6);font-size:.75rem}
 
 /* ── 布局 ── */

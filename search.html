@@ -2,26 +2,45 @@
 <html lang="zh-CN">
 <head><meta charset="UTF-8">
 <meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="搜索策略研究日志的全部内容"><title>搜索 — 策略研究日志</title>
+<meta name="description" content="研究日志列表"><title>日志列表 — 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="ticker-bar"><div class="ticker-track" id="ticker-track"><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span></div></div>
+
 <div class="container">
 <header class="site-header"><div class="header-inner">
 <a href="/" class="brand">
 <span class="brand-logo"><span class="ring"></span><svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg></span>
 <span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
 </a>
-<nav class="nav"><a href="/">日志</a><a href="product.html">工作流</a><a href="library.html">资料库</a><a href="search.html">搜索</a><a href="about.html">关于</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
+<nav class="nav"><a href="/">首页</a><a href="product.html">工作流</a><a href="library.html">资料库</a><a href="search.html">日志</a><a href="about.html">关于</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
 </div></header>
 
 <div class="inner">
-<div class="page-header"><div class="page-lvl">05 · 搜索</div><h1 class="page-title">搜索日志</h1></div>
-<div class="search-bar"><input type="text" class="search-input" id="search-input" placeholder="输入关键词搜索日志…" autofocus></div>
-<div class="search-results" id="search-results"><div class="search-hint">输入关键词开始搜索</div></div>
+<div class="page-header"><div class="page-lvl">03 · 日志</div><h1 class="page-title">研究日志</h1></div>
+
+<div style="margin-bottom:16px">
+<input type="text" id="logFilter" class="search-input" placeholder="搜索日志关键词…" autofocus style="background:var(--card);font-size:.8125rem">
+</div>
+
+<div id="logList">
+<div class="log-item"><a href="logs/001.html" class="log-link">
+<div class="log-meta"><span class="log-num">#001</span><span class="log-date">2026.08.06</span></div>
+<div class="log-title">我为什么开始记录这个 AI 策略研究系列</div>
+<div class="log-excerpt">用 Claude 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。</div>
+<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">Prompt</span><span class="log-tag">Claude</span></div></a></div>
+<div class="log-item" style="opacity:.35"><div class="log-link" style="cursor:default">
+<div class="log-meta"><span class="log-num">#002</span><span class="log-date">即将发布</span></div>
+<div class="log-title">AI 辅助分析趋势跟踪策略</div></div></div>
+<div class="log-item" style="opacity:.3"><div class="log-link" style="cursor:default">
+<div class="log-meta"><span class="log-num">#003</span><span class="log-date">选题中</span></div>
+<div class="log-title">一次失败判断的完整复盘</div></div></div>
+</div>
+
+<div id="noResults" style="display:none;text-align:center;padding:32px;color:var(--text-muted);font-size:.8125rem">没有匹配的日志</div>
 
 <footer class="footer">
 <div class="sig">舍予又见</div>
@@ -33,19 +52,25 @@
 </div>
 <script src="js/ticker.js"></script>
 <script>
-(function(){
-var idx=[{t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",w:"AI 分析 美联储 官员 讲话 措辞 通胀 就业 央行 Claude Prompt 优化 回测 XAUUSD 区间 震荡 NFP 数据 阻力位 2650 黄金"}];
-var inp=document.getElementById('search-input');
-var res=document.getElementById('search-results');
-var q=new URLSearchParams(window.location.search).get('q');
-if(q){inp.value=q;doSearch(q)}
-inp.addEventListener('input',function(){doSearch(this.value)});
-function doSearch(s){
-if(!s||s.length<1){res.innerHTML='<div class="search-hint">输入关键词开始搜索</div>';return}
-var t=s.toLowerCase().split(/\s+/);
-var o=idx.filter(function(i){return t.every(function(k){return i.w.toLowerCase().indexOf(k)>-1})});
-res.innerHTML=o.length?o.map(function(i){return'<div class="log-item"><a href="'+i.u+'" class="log-link"><div class="log-meta"><span class="log-num">#'+i.u.match(/\d+/)[0]+'</span><span class="log-date">'+i.d+'</span></div><div class="log-title">'+i.t+'</div></a></div>'}).join(''):'<div class="search-hint">没有找到匹配的日志</div>'
-}}());
+var data=[{t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",e:"用 Claude 分析美联储官员讲话措辞变化",k:"央行分析 Prompt Claude",n:"001"},{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"",k:"复盘 教训"}];
+
+function renderLogs(items){
+  var list=document.getElementById('logList');
+  var nr=document.getElementById('noResults');
+  if(!items.length){list.style.display='none';nr.style.display='block';return}
+  list.style.display='block';nr.style.display='none';
+  list.innerHTML=items.map(function(i){var cls=i.d==='即将发布'?'opacity:.35':i.d==='选题中'?'opacity:.3':'';var link=i.u?'<a href="'+i.u+'" class="log-link">':(cls?'<div class="log-link" style="cursor:default">':'');var end=i.u?'</a>':(cls?'</div>':'');var tags=i.k?i.k.split(' ').map(function(t){return'<span class="log-tag">'+t+'</span>'}).join(''):'';return'<div class="log-item" style="'+cls+'">'+link+'<div class="log-meta"><span class="log-num">#'+i.n+'</span><span class="log-date">'+i.d+'</span></div><div class="log-title">'+i.t+'</div>'+(i.e?'<div class="log-excerpt">'+i.e+'</div>':'')+(tags?'<div class="log-tags">'+tags+'</div>':'')+end+'</div>'}).join('')
+}
+
+renderLogs(data);
+
+document.getElementById('logFilter').addEventListener('input',function(){
+  var q=this.value.toLowerCase().trim();
+  if(!q){renderLogs(data);return}
+  var t=q.split(/\s+/);
+  var r=data.filter(function(i){return t.every(function(k){return(i.t+' '+i.e+' '+i.k).toLowerCase().indexOf(k)>-1})});
+  renderLogs(r)
+});
 </script>
 </body>
 </html>
