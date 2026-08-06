@@ -8,8 +8,7 @@
     { id: 'eur', label: 'EURUSD', src: 'forex', calc: function (r) { return (1 / r.EUR).toFixed(4); } },
     { id: 'gbp', label: 'GBPUSD', src: 'forex', calc: function (r) { return (1 / r.GBP).toFixed(4); } },
     { id: 'jpy', label: 'USDJPY', src: 'forex', calc: function (r) { return r.JPY.toFixed(3); } },
-    { id: 'cad', label: 'USDCAD', src: 'forex', calc: function (r) { return r.CAD.toFixed(4); } },
-    { id: 'dxy', label: 'DXY', src: 'worker' }
+    { id: 'cad', label: 'USDCAD', src: 'forex', calc: function (r) { return r.CAD.toFixed(4); } }
   ];
 
   var data = {};
@@ -85,15 +84,8 @@
       results.cad = prevData.cad;
     }
 
-    /* DXY 走 Worker */
-    try {
-      var dr = await fetch('/api/quotes');
-      var dj = await dr.json();
-      if (!dj.error && dj.dxy) results.dxy = dj.dxy;
-    } catch (e) { results.dxy = prevData.dxy; }
-
     /* 计算涨跌幅 */
-    ['xau', 'eur', 'gbp', 'jpy', 'cad', 'dxy'].forEach(function (id) {
+    ['xau', 'eur', 'gbp', 'jpy', 'cad'].forEach(function (id) {
       var d = results[id];
       if (!d) return;
       var prev = prevData[id];
