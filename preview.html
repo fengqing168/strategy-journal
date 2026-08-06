@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>预览 · 策略研究日志</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F7; --bg-soft:#E5E8F3; --card:#FCFDFF;
+  --ai-1:#5255E8; --ai-2:#7C3AED; --ai-3:#06B6D4;
+  --grad:linear-gradient(135deg,#6366F1,#8B5CF6 55%,#A855F7);
+  --gold:#B45309; --gold-soft:rgba(217,119,6,.10);
+  --text:#161E45; --text-sec:#414771; --text-muted:#7B84A5;
+  --up:#059669; --down:#E11D48;
+  --border:#D3D9EF; --border-soft:#DFE4F4; --border-strong:#C4CBE7;
+  --radius:10px;
+  --font:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --max:1120px; --ease:cubic-bezier(.4,0,.2,1);
+  --bg-grad:
+    radial-gradient(900px 460px at 8% -8%,rgba(99,102,241,.10),transparent 60%),
+    radial-gradient(820px 420px at 95% -4%,rgba(168,85,247,.08),transparent 60%),
+    radial-gradient(700px 460px at 50% 108%,rgba(6,182,212,.06),transparent 60%);
+  --shadow:0 2px 4px rgba(22,30,69,.05),0 10px 30px -12px rgba(99,102,241,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);background-image:var(--bg-grad);color:var(--text);line-height:1.7}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ai-1);outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+svg{display:inline-block;vertical-align:middle;flex-shrink:0}
+.ic-svg{width:19px;height:19px;stroke:var(--ai-1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.preview-tag{position:fixed;top:9px;right:12px;z-index:999;background:#FFF;border:1px solid var(--border);color:var(--text-sec);font-size:10px;letter-spacing:.08em;padding:4px 10px;border-radius:4px;font-family:var(--mono);box-shadow:var(--shadow)}
+
+/* ticker */
+.ticker-bar{background:linear-gradient(100deg,#2A2B78,#4F46E5 55%,#6930C7);height:38px;overflow:hidden;position:sticky;top:0;z-index:100}
+.ticker-track{display:flex;align-items:center;height:38px;width:max-content;animation:scrollTicker 45s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes scrollTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tkr{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.75rem;white-space:nowrap;padding:0 22px;flex-shrink:0}
+.tkr-sep{color:rgba(255,255,255,.28);font-size:.5rem;padding:0 8px;flex-shrink:0}
+.tkr-label{font-weight:600;color:rgba(255,255,255,.72);font-size:.6875rem;letter-spacing:.06em}
+.tkr-price{font-weight:600;font-size:.875rem;color:#FFFFFF}
+.tkr-price.up{color:#6EE7B7}.tkr-price.down{color:#FCA5A5}
+.tkr-pct{font-size:.625rem;padding:1px 6px;border-radius:3px;font-weight:600}
+.tkr-pct.up{background:rgba(110,231,183,.18);color:#6EE7B7}
+.tkr-pct.down{background:rgba(252,165,165,.18);color:#FCA5A5}
+
+.container{max-width:var(--max);margin:0 auto;padding:0 26px}
+
+/* header */
+.site-header{position:sticky;top:38px;z-index:90;background:rgba(250,251,254,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.header-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border-soft);gap:16px}
+/* brand */
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text)}
+.brand-logo{position:relative;width:34px;height:34px;flex-shrink:0}
+.brand-logo .ring{position:absolute;inset:0;border-radius:10px;background:var(--grad);box-shadow:0 4px 14px -3px rgba(99,102,241,.55)}
+.brand-logo svg{position:absolute;inset:4.5px;stroke:#FFFFFF;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.brand-text{line-height:1.25;white-space:nowrap}
+.brand-text .bt-name{display:block;font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:.02em}
+.brand-text .bt-en{display:block;font-size:.625rem;font-weight:600;letter-spacing:.2em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;margin-top:2px}
+/* nav */
+.nav{display:flex;align-items:center;gap:2px}
+.nav-link{position:relative;color:var(--text-sec);text-decoration:none;font-size:.8125rem;font-weight:500;padding:10px 13px;transition:color .15s var(--ease)}
+.nav-link::after{content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;border-radius:1px;background:var(--grad);transform:scaleX(0);transform-origin:left center;transition:transform .22s var(--ease)}
+.nav-link:hover{color:var(--text)}
+.nav-link:hover::after{transform:scaleX(1)}
+.nav-link.active{color:var(--ai-1)}
+.nav-link.active::after{transform:scaleX(1)}
+.nav-cta{margin-left:8px;padding:9px 20px;background:var(--grad);color:#FFF;border-radius:8px;font-weight:600;font-size:.8125rem;text-decoration:none;transition:opacity .15s var(--ease),transform .1s,box-shadow .15s;box-shadow:0 4px 14px -3px rgba(99,102,241,.55)}
+.nav-cta:hover{opacity:.92;box-shadow:0 6px 18px -3px rgba(99,102,241,.7)}
+.nav-cta:active{transform:scale(.97)}
+
+/* view system */
+.view{display:none}
+.view.active{display:block}
+#logs,#lib,#sub,#about{max-width:780px;margin-left:auto;margin-right:auto}
+.page-head{padding:34px 0 18px;border-bottom:1px solid var(--border-soft);margin-bottom:22px}
+.page-head .lvl{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.625rem;letter-spacing:.12em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.page-head .lvl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--grad)}
+.page-head h1{font-size:1.6rem;font-weight:700;color:var(--text);letter-spacing:-.01em;line-height:1.25}
+.page-head p{font-size:.875rem;color:var(--text-sec);margin-top:8px}
+
+/* hero badge + subscribe form（通用） */
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.6875rem;letter-spacing:.16em;text-transform:uppercase;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.28);padding:5px 16px;border-radius:100px;margin-bottom:26px;color:var(--ai-1);font-weight:600}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--grad);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.sub-form{display:flex;gap:8px;background:var(--card);border:1px solid var(--border-strong);border-radius:var(--radius);padding:6px;box-shadow:var(--shadow)}
+.sub-form input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:.875rem;padding:8px 12px}
+.sub-form input::placeholder{color:var(--text-muted)}
+.sub-form input:focus{outline:2px solid rgba(99,102,241,.35);outline-offset:2px;border-radius:7px}
+.sub-form button{padding:10px 22px;background:var(--grad);color:#FFF;border:none;border-radius:calc(var(--radius) - 2px);font-weight:600;font-size:.8125rem;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.sub-form button:hover{opacity:.92}
+.sub-form button:active{transform:scale(.97)}
+
+/* ── 首页新布局：多栏 + 一屏内 ── */
+.home-jumbo{display:grid;grid-template-columns:1.1fr .9fr;gap:26px;align-items:center;padding:42px 0 6px}
+@media(max-width:760px){.home-jumbo{grid-template-columns:1fr;gap:18px}}
+.hj-left{min-width:0}
+.hj-left .hero-badge{margin-bottom:18px}
+.hj-left h1{font-size:2.15rem;line-height:1.14;letter-spacing:-.02em}
+.hj-left h1 .g{background:linear-gradient(120deg,#4F46E5,#8B5CF6 60%,#06B6D4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hj-left .hj-sub{font-size:.9375rem;color:var(--text-sec);margin-top:16px;line-height:1.75;max-width:460px}
+.hj-form{margin:24px 0 0;max-width:440px}
+.hj-trust{margin-top:14px;font-size:.72rem;color:var(--text-muted);font-family:var(--mono);letter-spacing:.03em}
+.hj-trust b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hj-stats{display:flex;gap:30px;margin-top:26px}
+.hj-stat b{display:block;font-family:var(--mono);font-size:1.3rem;font-weight:600;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hj-stat span{font-size:.6875rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase}
+/* 右：今日面板 */
+.flash{background:linear-gradient(165deg,#FFFFFF,#F3F4FF 70%);border:1px solid rgba(99,102,241,.30);border-radius:16px;padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.flash::before{content:"";position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%)}
+.flash .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.flash .fh .l{font-family:var(--mono);font-size:.625rem;letter-spacing:.14em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:600}
+.flash .fh a{color:var(--text-muted);font-size:.7rem;text-decoration:none;font-family:var(--mono)}
+.flash .fh a:hover{color:var(--ai-1)}
+.flash .ft{font-size:1.02rem;font-weight:700;line-height:1.45;margin-bottom:14px}
+.flash .steps{display:grid;gap:8px}
+.flash .st{display:flex;gap:11px;background:#FFF;border:1px solid var(--border-soft);border-radius:12px;padding:10px 12px;box-shadow:0 1px 2px rgba(99,102,241,.06)}
+.flash .st .n{font-family:var(--mono);font-size:.7rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-top:1px}
+.flash .st .tt{font-size:.8rem;font-weight:600;color:var(--text)}
+.flash .st .dd{font-size:.68rem;color:var(--text-sec);margin-top:1px;line-height:1.5}
+.flash .hook{margin-top:16px;border-top:1px dashed var(--border-strong);padding-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.flash .hook .t{font-size:.78rem;color:var(--text-sec)}
+.flash .hook .t b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-family:var(--mono)}
+.flash .hook .go{color:var(--ai-1);font-size:.72rem;font-weight:600;text-decoration:none;white-space:nowrap;border:1px solid rgba(99,102,241,.4);padding:6px 14px;border-radius:8px;transition:all .15s}
+.flash .hook .go:hover{background:var(--grad);color:#FFF}
+/* 信任条（一屏内收紧） */
+.home-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0 0}
+@media(max-width:760px){.home-trust{grid-template-columns:1fr}}
+.ht{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border-soft);border-radius:12px;padding:13px 16px;box-shadow:0 1px 3px rgba(99,102,241,.06);transition:all .2s var(--ease)}
+.ht:hover{border-color:rgba(99,102,241,.4)}
+.ht .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.1);flex-shrink:0}
+.ht .t{font-size:.8125rem;font-weight:600;color:var(--text)}
+.ht .d{font-size:.7rem;color:var(--text-sec);line-height:1.45}
+/* 栏目 pills */
+.home-cols{margin:30px 0 4px}
+.home-cols .hc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.home-cols .hc-head h2{font-size:.95rem;font-weight:600;color:var(--text)}
+.home-cols .hc-head span{font-size:.68rem;color:var(--text-muted);font-family:var(--mono)}
+.col-pills{display:flex;flex-wrap:wrap;gap:8px}
+.col-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;background:var(--card);border:1px solid var(--border-soft);border-radius:100px;color:var(--text-sec);font-size:.78rem;transition:all .15s var(--ease);cursor:pointer;box-shadow:0 1px 2px rgba(99,102,241,.05)}
+.col-pill:hover{border-color:rgba(99,102,241,.5);color:var(--ai-1)}
+.col-pill .no{font-family:var(--mono);font-size:.625rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:600}
+.col-pill.active{background:var(--grad);color:#FFF;border-color:transparent;font-weight:600}
+.col-pill.active .no{-webkit-text-fill-color:#FFF}
+/* 日志筛选条 */
+.log-filter{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 20px;padding-bottom:18px;border-bottom:1px solid var(--border-soft)}
+/* 日志页订阅 CTA */
+.log-cta{margin:26px 0 4px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(99,102,241,.12),rgba(139,92,246,.05) 70%);border:1px solid rgba(99,102,241,.3);border-radius:14px;padding:18px 20px}
+.log-cta .lc-t{font-size:.9375rem;font-weight:700;color:var(--text)}
+.log-cta .lc-d{font-size:.75rem;color:var(--text-sec);margin-top:2px}
+.log-cta .btn-primary[data-v]{padding:10px 22px;font-size:.8125rem}
+@media(max-width:600px){.log-cta{flex-direction:column;align-items:flex-start}.log-cta .btn-primary[data-v]{width:100%}}
+/* 首页底部产品条（一屏内，做成交入口） */
+.mini-product{margin:26px 0 6px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(99,102,241,.12),rgba(139,92,246,.05) 70%);border:1px solid rgba(99,102,241,.3);border-radius:14px;padding:16px 20px}
+.mini-product .mp-t{font-size:.875rem;font-weight:700;color:var(--text)}
+.mini-product .mp-d{font-size:.72rem;color:var(--text-sec);margin-top:2px}
+.mini-product .mp-p{font-family:var(--mono);font-size:1.15rem;font-weight:600;color:var(--gold);margin-left:auto}
+.mini-product .btn-primary{padding:9px 20px;font-size:.78rem}
+@media(max-width:760px){.mini-product .mp-p{margin-left:0}}
+
+/* 主按钮（AI 渐变 · 白字） */
+.btn-primary{display:inline-block;padding:11px 24px;background:var(--grad);color:#FFF;border-radius:9px;text-decoration:none;font-weight:600;font-size:.875rem;transition:opacity .15s,box-shadow .15s;border:none;cursor:pointer;text-align:center;box-shadow:0 5px 16px -4px rgba(99,102,241,.5)}
+.btn-primary:hover{opacity:.92;box-shadow:0 7px 20px -4px rgba(99,102,241,.6)}
+.btn-primary:active{transform:scale(.97)}
+
+/* section title */
+.section-title{display:flex;align-items:center;gap:12px;margin:60px 0 22px}
+.section-title .bar{width:4px;height:18px;border-radius:2px;background:var(--grad)}
+.section-title h2{font-size:1.15rem;font-weight:600;color:var(--text)}
+.section-title .sub{font-size:.75rem;color:var(--text-muted);margin-left:auto;font-family:var(--mono);letter-spacing:.05em}
+
+/* 徽标锁：公开/付费 标注 */
+.s-lock{font-size:.5625rem;color:var(--text-muted);font-family:var(--mono);border:1px solid var(--border);padding:1px 6px;border-radius:4px;margin-left:6px;letter-spacing:.05em}
+.s-lock.free{color:var(--up);border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.06)}
+
+/* logs */
+.log-item{border:1px solid var(--border-soft);border-radius:var(--radius);margin-bottom:14px;transition:all .2s var(--ease);overflow:hidden;background:var(--card);box-shadow:0 1px 3px rgba(99,102,241,.05)}
+.log-item:hover{border-color:rgba(99,102,241,.45);box-shadow:var(--shadow)}
+.log-link{display:block;text-decoration:none;padding:20px;color:inherit}
+.log-meta{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.log-num{font-family:var(--mono);font-size:.6875rem;font-weight:600;background:rgba(99,102,241,.1);color:var(--ai-1);padding:2px 9px;border-radius:5px}
+.log-date{font-family:var(--mono);font-size:.6875rem;color:var(--text-muted);letter-spacing:.05em}
+.log-title{font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.45;transition:color .15s}
+.log-item:hover .log-title{color:var(--ai-1)}
+.log-excerpt{font-size:.8125rem;color:var(--text-sec);margin-top:6px;line-height:1.6}
+.log-tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.log-tag{font-size:.625rem;font-weight:500;color:var(--text-sec);background:var(--bg-soft);border:1px solid var(--border-soft);padding:3px 9px;border-radius:6px;font-family:var(--mono)}
+.more{display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:var(--ai-1);text-decoration:none;font-size:.8125rem;font-weight:600}
+.more:hover{text-decoration:underline}
+
+/* ── 子页面统一版式：与首页同构 ── */
+.sec-h{display:flex;align-items:center;gap:10px;margin:34px 0 14px}
+.sec-h::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--grad);flex-shrink:0}
+.sec-h h3,.sec-h h2{font-size:.9375rem;font-weight:600;color:var(--text)}
+.sec-h .sec-sub{font-size:.68rem;color:var(--text-muted);margin-left:auto;font-family:var(--mono);letter-spacing:.05em}
+
+/* 资料库 */
+.lib-section{margin-bottom:22px}
+.lib-item{padding:16px 18px;margin-bottom:8px;background:var(--card);border:1px solid var(--border-soft);border-radius:var(--radius);transition:all .2s var(--ease);box-shadow:0 1px 3px rgba(99,102,241,.05)}
+.lib-item:hover{border-color:rgba(99,102,241,.45)}
+.lib-item h4{font-size:.875rem;font-weight:600;color:var(--text)}
+.lib-item p{font-size:.75rem;color:var(--text-sec);margin-top:3px;line-height:1.6}
+.lib-item .ref{font-size:.6875rem;color:var(--text-muted);margin-top:6px;font-family:var(--mono)}
+.lib-item .ref a{color:var(--ai-1);text-decoration:none}
+.lib-item .ref a:hover{color:var(--ai-2)}
+
+/* 订阅 benefits */
+.subscribe-box{margin:22px 0;padding:30px;background:linear-gradient(165deg,#FFFFFF,#EEF1FF 80%);border:1px solid rgba(99,102,241,.3);border-radius:20px;text-align:center;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.subscribe-box::before{content:"";position:absolute;top:-46px;right:-46px;width:160px;height:160px;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%)}
+.subscribe-box h3{font-size:1.0625rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.subscribe-box p{font-size:.8125rem;color:var(--text-sec);margin-bottom:16px}
+.subscribe-box .sub-form{max-width:400px;margin:0 auto}
+.sub-benefits{list-style:none;margin:20px 0 0;text-align:left;max-width:420px;margin-left:auto;margin-right:auto}
+.sub-benefits li{padding:7px 0;padding-left:20px;position:relative;font-size:.8125rem;color:var(--text-sec);line-height:1.6}
+.sub-benefits li::before{content:'✓';position:absolute;left:0;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+
+/* about */
+.about p{font-size:.875rem;color:var(--text-sec);margin-bottom:12px;line-height:1.8}
+.about strong{color:var(--text)}
+.disclaimer{margin-top:28px;padding:16px 20px;background:var(--card);border:1px solid var(--border-strong);border-radius:var(--radius);font-size:.75rem;color:var(--text-muted);line-height:1.7}
+
+/* footer */
+.footer{margin-top:56px;padding:34px 0;border-top:1px solid var(--border-soft);text-align:center}
+.footer .sig{font-size:1.6rem;font-weight:700;letter-spacing:.28em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;font-family:var(--font)}
+.footer .sig-sub{font-size:.75rem;color:var(--text-sec);letter-spacing:.14em;margin-bottom:18px}
+.footer .meta{font-size:.6875rem;color:var(--text-muted)}
+.footer .meta a{color:var(--text-sec);text-decoration:none}
+.footer .meta a:hover{color:var(--ai-1)}
+
+@media(max-width:600px){
+  .hj-left h1{font-size:1.8rem}
+  .nav{width:100%;justify-content:space-between;flex-wrap:wrap;margin-top:6px}
+  .nav-link{font-size:.75rem;padding:8px 6px}
+  .nav-link::after{left:6px;right:6px}
+  .brand .bt-en{display:none}
+  .nav-cta{padding:8px 16px;font-size:.75rem;margin-left:0}
+  .header-inner{flex-direction:column;align-items:stretch;gap:4px}
+  .mini-product{flex-direction:column;align-items:stretch;gap:12px}
+  .mini-product .mp-p{margin-left:0}
+  .mini-product .btn-primary{width:100%}
+  .container{padding:0 18px}
+}
+</style>
+</head>
+<body>
+<div class="preview-tag">PREVIEW · 未上线</div>
+
+<div class="ticker-bar"><div class="ticker-track" id="tkr">
+<div class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price up">2,412.50</span><span class="tkr-pct up">+0.42%</span></div><span class="tkr-sep">·</span>
+<div class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price down">1.08641</span><span class="tkr-pct down">-0.13%</span></div><span class="tkr-sep">·</span>
+<div class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price down">1.26984</span><span class="tkr-pct down">-0.08%</span></div><span class="tkr-sep">·</span>
+<div class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price up">153.302</span><span class="tkr-pct up">+0.21%</span></div><span class="tkr-sep">·</span>
+<div class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price up">1.36728</span><span class="tkr-pct up">+0.05%</span></div><span class="tkr-sep">·</span>
+</div></div>
+
+<header class="site-header"><div class="container header-inner">
+<a href="#home" class="brand">
+<span class="brand-logo"><span class="ring"></span>
+<svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg>
+</span>
+<span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
+</a>
+<nav class="nav">
+<a class="nav-link active" data-v="home">首页</a>
+<a class="nav-link" data-v="logs">日志</a>
+<a class="nav-link" data-v="lib">资料库</a>
+<a class="nav-link" data-v="about">关于</a>
+<a class="nav-cta" data-v="sub">订阅</a>
+</nav>
+</div></header>
+
+<div class="container">
+
+<!-- ============ 首页 ============ -->
+<div class="view active" id="home">
+
+<section class="home-jumbo">
+<div class="hj-left">
+<div class="hero-badge"><span class="dot"></span>&ensp;STRATEGY · RESEARCH · AI</div>
+<h1>AI 做分析，<br><span class="g">人来做判断。</span></h1>
+<p class="hj-sub">一个独立策略研究者，每天记录「AI 辅助做决策」的全过程。不卖课、不喊单，只留一份可复盘、可复用的思考。</p>
+<div class="hj-form"><form class="sub-form" onsubmit="event.preventDefault()">
+<input type="email" placeholder="你的邮箱，每周一封" aria-label="邮箱">
+<button>免费订阅</button></form></div>
+<div class="hj-trust">每周日更新 · 随时退订 · 已记录 <b>001</b> 篇</div>
+<div class="hj-stats">
+<div class="hj-stat"><b>1</b><span>研究日志</span></div>
+<div class="hj-stat"><b>5</b><span>跟踪品种</span></div>
+<div class="hj-stat"><b>每周</b><span>更新频率</span></div>
+<div class="hj-stat"><b>0</b><span>付费课程</span></div>
+</div>
+</div>
+
+<div class="hj-right">
+<div class="flash">
+<div class="fh"><span class="l">今日实录 · #001</span><a href="#">全部日志 →</a></div>
+<div class="ft">一条「鸽派措辞」是怎么从新闻走到结论的</div>
+<div class="steps">
+<div class="st"><div class="n">01</div><div class="bd"><div class="tt">事件 → 提取 <span class="s-lock free">✓公开</span></div><div class="dd">AI 抓取讲话原文，按利率立场/通胀/就业切片</div></div></div>
+<div class="st"><div class="n">02</div><div class="bd"><div class="tt">AI 初判 → 分歧</div><div class="dd">AI 判中性，我判偏鸽 — 分歧思路公开</div></div></div>
+<div class="st"><div class="n">03</div><div class="bd"><div class="tt">人工裁决 · 核心逻辑</div><div class="dd">阈值与历史权重算法 ← 完整版在模板内</div></div></div>
+</div>
+<div class="hook">
+<div class="t">整条工作流<b> ¥199</b> 智能体+脚本</div>
+<a href="#" class="go">查看模板 →</a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="home-trust">
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-1 9.9V14l-2 2m3-2a5 5 0 0 0 1-9.9A5 5 0 0 1 13 14v0"></path><path d="M9 18h6"></path></svg></div><div><div class="t">AI × 人</div><div class="d">AI 跑分析，人做判断，分歧也记录</div></div></div>
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div><div class="t">策略裸奔</div><div class="d">赚亏都写，思考过程完整到不敢造假</div></div></div>
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg></div><div><div class="t">不做喊单</div><div class="d">没有暗示、没有课程、没有付费上车</div></div></div>
+</section>
+
+<section class="home-cols">
+<div class="hc-head"><h2>内容栏目</h2><span>选题体系 · 10 大主题</span></div>
+<div class="col-pills">
+<span class="col-pill"><span class="no">实录</span>实盘判断对错账本</span>
+<span class="col-pill"><span class="no">拆解</span>决策全流程复现</span>
+<span class="col-pill"><span class="no">Prompt</span>可复制智能体工作流</span>
+<span class="col-pill"><span class="no">逻辑</span>观点是怎么来的</span>
+<span class="col-pill"><span class="no">复盘</span>失败认账与修正</span>
+<span class="col-pill"><span class="no">工具</span>开源可跑的脚本</span>
+<span class="col-pill"><span class="no">证据</span>AI 效率量化数据</span>
+<span class="col-pill"><span class="no">预告</span>下期追更清单</span>
+<span class="col-pill"><span class="no">入门</span>零基础起步</span>
+<span class="col-pill"><span class="no">独立</span>不喊单实证</span>
+</div>
+</section>
+
+<section class="mini-product">
+<div>
+<div class="mp-t">AI 智能体工作流 · 完整系统</div>
+<div class="mp-d">12 个串联 Prompt + 置信度规则 + 自动化脚本，持续更新</div>
+</div>
+<span class="mp-p">¥199</span>
+<a href="#" class="btn-primary">查看详情 →</a>
+</section>
+</div>
+
+<!-- ============ 日志 ============ -->
+<div class="view" id="logs">
+<div class="page-head"><div class="lvl">01 · 日志</div><h1>研究日志</h1><p>按时间倒序的研究实况。每篇都是一次完整决策的切片。</p></div>
+<div class="log-filter">
+<span class="col-pill active">全部</span>
+<span class="col-pill">央行分析</span>
+<span class="col-pill">智能体</span>
+<span class="col-pill">回测</span>
+<span class="col-pill">复盘</span>
+<span class="col-pill">趋势</span>
+</div>
+<div class="log-item"><a href="#" class="log-link">
+<div class="log-meta"><span class="log-num">#001</span><span class="log-date">2026.08.06</span></div>
+<div class="log-title">为什么我开始用 AI 辅助策略研究</div>
+<div class="log-excerpt">用 AI 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。</div>
+<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">智能体</span><span class="log-tag">Claude</span></div></a></div>
+<div class="log-item" style="opacity:.5"><div class="log-link" style="cursor:default">
+<div class="log-meta"><span class="log-num">#002</span><span class="log-date">即将发布</span></div>
+<div class="log-title">AI 辅助分析趋势跟踪策略</div>
+<div class="log-tags"><span class="log-tag">回测</span><span class="log-tag">趋势</span></div></div></div>
+<div class="log-item" style="opacity:.35"><div class="log-link" style="cursor:default">
+<div class="log-meta"><span class="log-num">#003</span><span class="log-date">选题中</span></div>
+<div class="log-title">一次失败判断的完整复盘</div>
+<div class="log-tags"><span class="log-tag">复盘</span><span class="log-tag">教训</span></div></div></div>
+<div class="log-cta">
+<div>
+<div class="lc-t">不想错过下一篇？</div>
+<div class="lc-d">每周日把更深的思考发到你邮箱，免费。</div>
+</div>
+<a href="#" data-v="sub" class="btn-primary">📬 免费订阅 →</a>
+</div>
+</div>
+
+<!-- ============ 资料库 ============ -->
+<div class="view" id="lib">
+<div class="page-head"><div class="lvl">02 · 资料库</div><h1>研究资料库</h1><p>不是教程，是日常研究中的概念索引，随日志持续扩充。</p></div>
+<div class="lib-section"><div class="sec-h"><h3>市场架构</h3><span class="sec-sub">MARKET STRUCTURE</span></div>
+<div class="lib-item"><h4>XAUUSD 价格形成机制</h4><p>银行间市场如何为国际金提供流动性、报价机制与点差形成原理。</p><div class="ref">相关日志：即将发布</div></div>
+<div class="lib-item"><h4>央行讲话的事件驱动分析框架</h4><p>系统化分析美联储 / 欧央行官员讲话对价格的传导路径。</p><div class="ref">相关日志：<a href="#">#001</a></div></div>
+<div class="lib-item"><h4>行情终端的数据精度与回测陷阱</h4><p>行情软件历史数据的常见问题。</p><div class="ref">相关日志：即将发布</div></div>
+</div>
+<div class="lib-section"><div class="sec-h"><h3>AI 工具使用</h3><span class="sec-sub">AI TOOLKIT</span></div>
+<div class="lib-item"><h4>智能体工程：分级分析框架</h4><p>设计分步骤智能体让 AI 做多层分析。</p><div class="ref">相关日志：<a href="#">#001</a></div></div>
+<div class="lib-item"><h4>AI 辅助策略回测代码生成</h4><p>将策略思路用 AI 转为回测脚本的最佳实践。</p><div class="ref">相关日志：即将发布</div></div>
+</div>
+<div class="lib-section"><div class="sec-h"><h3>技术分析</h3><span class="sec-sub">TECHNICAL</span></div>
+<div class="lib-item"><h4>关键价位与阻力支撑分析</h4><p>历史关键价位区域、AI 辅助识别突破信号。</p><div class="ref">相关日志：即将发布</div></div>
+</div>
+</div>
+
+<!-- ============ 订阅 ============ -->
+<div class="view" id="sub">
+<div class="page-head"><div class="lvl">03 · 订阅</div><h1>每周策略研究周报</h1><p>比公开日志更深一层，每周日发送到邮箱。免费。</p></div>
+<div class="subscribe-box"><h3>免费订阅</h3><p>AI 策略 Prompt 合集 + 每周深度研究报告</p>
+<form class="sub-form" onsubmit="event.preventDefault()"><input type="email" placeholder="你的邮箱地址"><button>订阅</button></form></div>
+<ul class="sub-benefits">
+<li>每周一篇深度复盘——本周最有价值的策略研究展开详解</li>
+<li>公开日志不写的完整 Prompt 和工具链优化细节</li>
+<li>回答读者每周最有价值的问题</li>
+<li>提前预告下周研究方向</li>
+<li>我实际使用的 AI 策略工具合集（订阅即赠）</li>
+</ul>
+<p style="font-size:.75rem;color:var(--text-muted);margin-top:8px">每周一封。不会发垃圾。随时取消。</p>
+</div>
+
+<!-- ============ 关于 ============ -->
+<div class="view" id="about">
+<div class="page-head"><div class="lvl">04 · 关于</div><h1>一个观察者的第二屏幕</h1><p>策略研究日志 · 舍予又见</p></div>
+<div class="about">
+<div class="sec-h"><h2>这是一个观察者的第二屏幕</h2><span class="sec-sub">WHY</span></div>
+<p>舍予又见。长期关注全球宏观数据和价格变化。不是分析师，不是讲师，只是一个把观察当成习惯的人。</p>
+<p>每个人在做判断时都有一个第二屏幕——不在桌面上，在脑子里。这个网站就是那个第二屏幕的公开版本。</p>
+<p>这里没有确定性。只有过程。</p>
+<div class="sec-h"><h2>AI 是研究伙伴，不是决策者</h2><span class="sec-sub">HOW</span></div>
+<p>AI 可以扫数据、跑模型、做总结。但它的输出永远是一份参考，不是一道命令。这个网站记录的就是这件事。</p>
+<p>有时我的判断比 AI 更准。有时 AI 看到的我忽略了。两种情况都写下来，这叫 <strong>策略裸奔</strong>。</p>
+<div class="sec-h"><h2>这里不提供任何建议</h2><span class="sec-sub">DISCLAIMER</span></div>
+<p>你看到的是一份持续更新的研究笔记，不是教程，不是课程。我把思考过程摊开，剩下的你自己判断。</p>
+<div class="disclaimer"><strong>⚠ 声明</strong><br>本站所有内容为个人研究记录，不构成任何形式的分析建议。所有观点仅代表个人，与任何机构无关。</div>
+</div>
+</div>
+
+<footer class="footer">
+<div class="sig">舍予又见</div>
+<div class="sig-sub">STRATEGY · RESEARCH · AI</div>
+<p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="#">关于</a> &nbsp;·&nbsp; <a href="#">订阅</a></p>
+</footer>
+</div>
+
+<script>
+var t=document.querySelector('.ticker-track');if(t)t.innerHTML+=t.innerHTML;
+document.querySelectorAll('.nav-link,.nav-cta,.btn-primary[data-v]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var v=this.getAttribute('data-v');
+    document.querySelectorAll('.nav-link').forEach(function(b){b.classList.remove('active')});
+    document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active')});
+    if(this.classList.contains('nav-link'))this.classList.add('active');
+    document.getElementById(v).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

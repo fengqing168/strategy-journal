@@ -1,26 +1,26 @@
 /* ── 策略研究日志 v4 · AI 浅色主题 ── */
 :root{
-  --bg:#F6F8FC; --bg-soft:#EEF1FB; --card:#FFFFFF;
+  --bg:#EDF0F7; --bg-soft:#E5E8F3; --card:#FCFDFF;
   --ai-1:#5255E8; --ai-2:#7C3AED; --ai-3:#06B6D4;
   --grad:linear-gradient(135deg,#6366F1,#8B5CF6 55%,#A855F7);
-  --navy:#5255E8; --navy-bg:#EEF1FB;
+  --navy:#5255E8; --navy-bg:#E5E8F3;
   --gold:#5255E8; --gold-hover:#4F46E5;
   --gold-bg:rgba(99,102,241,.10);
-  --text:#1B2350; --text-sec:#4A5278; --text-muted:#8A93B5;
+  --text:#161E45; --text-sec:#414771; --text-muted:#7B84A8;
   --up:#059669; --up-bg:rgba(5,150,105,.06);
   --down:#E11D48; --down-bg:rgba(225,29,72,.06);
-  --border:#DDE2F4; --border-soft:#E8ECFA; --border-strong:#CFD6F0;
-  --code-bg:#EEF1FB;
+  --border:#D3D9EF; --border-soft:#DFE4F4; --border-strong:#C4CBE7;
+  --code-bg:#E5E8F3;
   --radius:10px;
   --font:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --mono:'JetBrains Mono',monospace;
   --ease:cubic-bezier(.4,0,.2,1);
   --bg-grad:
-    radial-gradient(900px 460px at 8% -8%,rgba(99,102,241,.14),transparent 60%),
-    radial-gradient(820px 420px at 95% -4%,rgba(168,85,247,.12),transparent 60%),
-    radial-gradient(700px 460px at 50% 108%,rgba(6,182,212,.10),transparent 60%);
-  --shadow:0 2px 4px rgba(27,35,80,.04),0 10px 30px -12px rgba(99,102,241,.18);
-  --shadow-sm:0 1px 3px rgba(99,102,241,.06),0 1px 2px rgba(27,35,80,.04);
+    radial-gradient(900px 460px at 8% -8%,rgba(99,102,241,.10),transparent 60%),
+    radial-gradient(820px 420px at 95% -4%,rgba(168,85,247,.08),transparent 60%),
+    radial-gradient(700px 460px at 50% 108%,rgba(6,182,212,.06),transparent 60%);
+  --shadow:0 2px 4px rgba(22,30,69,.05),0 10px 30px -12px rgba(99,102,241,.15);
+  --shadow-sm:0 1px 3px rgba(99,102,241,.05),0 1px 2px rgba(22,30,69,.04);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
