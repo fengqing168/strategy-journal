@@ -70,12 +70,18 @@
 <div class="pay-steps">
 <span class="ps">① 扫码付 ¥199</span>
 <span class="ar">→</span>
-<span class="pn">② 截图发给卖家</span>
+<span class="pn">② 填邮箱点确认</span>
 <span class="ar">→</span>
-<span class="ps">③ 收到 Token</span>
+<span class="ps">③ 卖家确认 → 自动发 Token</span>
 <span class="ar">→</span>
 <span class="pn">④ 打开运行器 → 开始分析</span>
 </div>
+
+<div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+<input type="email" id="buyerEmail" placeholder="你的邮箱（收取 Token）" style="flex:1;background:var(--card);border:1px solid var(--border-strong);color:var(--text);padding:10px 14px;border-radius:9px;font-size:.78rem;outline:none" autocomplete="email">
+<button class="btn btn-primary" onclick="submitOrder()" id="submitBtn" style="white-space:nowrap">已付款，获取 Token</button>
+</div>
+<div style="font-size:.68rem;color:var(--text-muted);margin-top:6px;display:none" id="orderStatus"></div>
 
 <div class="pay-contact">
 <strong>微信 twzd2519</strong>
@@ -112,5 +118,66 @@
 </footer>
 </div>
 <script src="js/ticker.js"></script>
+<script>
+var orderId = null;
+var pollTimer = null;
+
+async function submitOrder(){
+  var email = document.getElementById('buyerEmail').value.trim();
+  if(!email||!email.includes('@')){ alert('请输入有效的邮箱地址'); return; }
+  var btn = document.getElementById('submitBtn');
+  var st = document.getElementById('orderStatus');
+  btn.disabled = true;
+  btn.textContent = '提交中...';
+  st.style.display = 'block';
+  st.innerHTML = '<span style="color:#FBBF24">创建订单中...</span>';
+
+  try{
+    var r = await fetch('/api/order/create', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email})
+    });
+    var data = await r.json();
+    if(data.id){
+      orderId = data.id;
+      btn.textContent = '已提交';
+      st.innerHTML = '<span style="color:#FBBF24">等待卖家确认付款...（3秒自动刷新）</span><br><span style="font-size:.62rem">付款备注: <b>'+data.ref+'</b></span>';
+      if(pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(checkOrder, 3000);
+    } else {
+      st.innerHTML = '<span style="color:#F87171">提交失败: '+ (data.error||'未知') +'</span>';
+      btn.disabled = false;
+    }
+  }catch(e){
+    st.innerHTML = '<span style="color:#F87171">网络错误，请重试</span>';
+    btn.disabled = false;
+    btn.textContent = '已付款，获取 Token';
+  }
+}
+
+async function checkOrder(){
+  if(!orderId) return;
+  try{
+    var r = await fetch('/api/order/status?id='+orderId);
+    var data = await r.json();
+    var st = document.getElementById('orderStatus');
+    if(data.status === 'approved' && data.token){
+      if(pollTimer) clearInterval(pollTimer);
+      var btn = document.getElementById('submitBtn');
+      st.innerHTML = '<span style="color:var(--up);font-size:.9rem;font-weight:700">支付已确认！</span><br><br>'+
+        '<div style="background:var(--card);border:2px solid rgba(5,150,105,.4);border-radius:12px;padding:16px;text-align:center;margin-top:8px">'+
+        '<div style="font-size:.7rem;color:var(--text-muted);margin-bottom:8px">你的专属 Token · 有效期 90 天</div>'+
+        '<div style="font-family:var(--mono);font-size:.9rem;color:var(--up);word-break:break-all;margin-bottom:12px" id="tokenDisplay">'+data.token+'</div>'+
+        '<button class="btn btn-primary" onclick="var t=document.getElementById(\'tokenDisplay\').textContent;navigator.clipboard.writeText(t);this.textContent=\'已复制\';setTimeout(function(){this.textContent=\'复制 Token\'}.bind(this),2000)" style="font-size:.75rem;padding:8px 16px">复制 Token</button>'+
+        '<a href="workflow.html" class="btn btn-primary" style="display:inline-block;font-size:.75rem;padding:8px 16px;margin-left:8px;text-decoration:none">打开运行器</a>'+
+        '</div>';
+      btn.style.display = 'none';
+    } else if(data.status === 'pending'){
+      st.innerHTML = '<span style="color:#FBBF24">等待卖家确认付款...（自动刷新中）</span>';
+    }
+  }catch(e){}
+}
+</script>
 </body>
 </html>
