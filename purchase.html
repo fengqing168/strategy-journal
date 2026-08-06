@@ -11,19 +11,23 @@
 .pay-page h1{font-size:1.5rem;font-weight:700;margin-bottom:6px;text-align:center}
 .pay-page .pp-sub{color:var(--text-sec);font-size:.875rem;margin-bottom:32px;text-align:center}
 .pay-card{background:var(--card);border:1px solid var(--border-soft);border-radius:16px;padding:28px;box-shadow:var(--shadow);margin-bottom:20px}
-.pay-card h2{font-size:1rem;font-weight:700;margin-bottom:6px}
-.pay-card .pp-badge{display:inline-block;font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
-.pp-badge.rec{background:rgba(5,150,105,.1);color:var(--up)}
-.pp-badge.alt{background:rgba(99,102,241,.1);color:var(--ai-1)}
-.pay-card .pp-price{font-family:var(--mono);font-size:2.2rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:12px 0}
+.pay-card .pp-price{font-family:var(--mono);font-size:2.4rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:12px 0;text-align:center}
 .pay-card .pp-list{list-style:none;margin:16px 0}
 .pay-card .pp-list li{font-size:.8125rem;color:var(--text-sec);padding:5px 0;padding-left:18px;position:relative}
 .pay-card .pp-list li::before{content:'✓';position:absolute;left:0;color:var(--up);font-weight:700}
-.pay-card .pp-flow{display:flex;align-items:center;gap:10px;font-size:.72rem;color:var(--text-muted);margin:14px 0;flex-wrap:wrap;justify-content:center}
-.pay-card .pp-flow span{background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:.65rem}
-.pp-steps{background:var(--bg-soft);border-radius:12px;padding:16px 18px;margin:16px 0;font-size:.72rem;color:var(--text-sec);line-height:2}
-.pp-steps .n{font-family:var(--mono);font-weight:600;color:var(--ai-1);margin-right:6px}
+.step-box{background:var(--bg-soft);border-radius:12px;padding:20px;margin:20px 0}
+.step-box .step{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.step-box .step:last-child{margin-bottom:0}
+.step-box .snum{width:28px;height:28px;border-radius:50%;background:var(--grad);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0}
+.step-box .sinfo{flex:1}
+.step-box .sinfo strong{display:block;font-size:.8125rem;color:var(--text);margin-bottom:2px}
+.step-box .sinfo span{font-size:.72rem;color:var(--text-sec);line-height:1.6}
+.qr-box{text-align:center;padding:16px;margin:16px 0;background:#FFF;border:2px solid rgba(5,150,105,.3);border-radius:16px}
+.qr-box img{width:200px;height:200px;object-fit:contain}
+.qr-box .qr-note{font-size:.7rem;color:var(--text-muted);margin-top:8px}
 .pp-note{font-size:.72rem;color:var(--text-muted);line-height:1.7;margin-top:12px;padding:10px 14px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:8px}
+.pp-note a{color:var(--ai-1)}
+.pp-note code{background:var(--bg-soft);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:.68rem}
 </style>
 </head>
 <body>
@@ -40,54 +44,46 @@
 
 <div class="pay-page">
 <h1>获取 AI 智能体工作流</h1>
-<p class="pp-sub">¥199 · 一次购买 · 永久更新</p>
+<p class="pp-sub">¥199 · 一次购买 · 永久更新 · GitHub 交付</p>
 
-<!-- 爱发电 -->
 <div class="pay-card">
-<h2>方式一：爱发电购买 <span class="pp-badge rec">推荐</span></h2>
-<div class="pp-flow"><span>点击购买</span> → <span>爱发电付款</span> → <span>自动获取Token</span> → <span>进入运行器</span></div>
 <div class="pp-price">¥199</div>
 <ul class="pp-list">
-<li>16 个串联 Prompt（可复制到任意 AI 使用）</li>
-<li>置信度阈值规则表（含加权公式）</li>
-<li>3 个 Python 自动化脚本</li>
-<li>私有 GitHub 仓库永久访问</li>
-<li>网页端一键运行器</li>
-<li>持续更新（月度优化 + 季度大版本）</li>
+<li>16 个串联 Prompt（可复制到 Claude/DeepSeek/GPT 直接使用）</li>
+<li>置信度阈值规则表（含数学公式 + 反例排除条件）</li>
+<li>3 个 Python 自动化脚本（抓取 / 串联 / 计算）</li>
+<li>私有 GitHub 仓库永久访问 + 持续更新</li>
+<li>网页端一键运行器（无需安装，打开即用）</li>
 </ul>
-<div class="pp-steps">
-<div><span class="n">1.</span>点击下方按钮，跳转到爱发电</div>
-<div><span class="n">2.</span>使用微信/支付宝完成 ¥199 支付</div>
-<div><span class="n">3.</span>支付成功后，爱发电会显示「工作流访问Token」和「GitHub仓库链接」</div>
-<div><span class="n">4.</span>复制 Token，粘贴到 <code>shujian.cc/workflow.html</code> 的验证框即可使用</div>
+<ul class="pp-list" style="margin-top:8px">
+<li style="color:var(--up);font-weight:600">7 天无理由退款</li>
+</ul>
+
+<!-- 购买流程 -->
+<div class="step-box">
+<div class="step">
+<div class="snum">1</div>
+<div class="sinfo"><strong>扫码支付 ¥199</strong><span>使用微信或支付宝扫描下方收款码。付款后截图保存。</span></div>
 </div>
-<a href="#" class="btn-primary" style="display:block;text-align:center;font-size:.9375rem;padding:14px;margin-top:16px" id="afdianBtn" target="_blank">前往爱发电购买 ¥199 →</a>
-<p class="pp-note" style="margin-top:12px">
-⚠ 购买前请先在爱发电注册账号。购买后<strong>不要关闭页面</strong>，爱发电会自动显示你的专属访问 Token。Token 有效期 90 天，可重复使用。<br><br>
-首次使用？<a href="#setup" style="color:var(--ai-1)">查看卖家的爱发电配置指南 ↓</a>
-</p>
+<div class="step">
+<div class="snum">2</div>
+<div class="sinfo"><strong>发截图给卖家</strong><span>将付款截图通过微信或邮件发给卖家。</span></div>
+</div>
+<div class="step">
+<div class="snum">3</div>
+<div class="sinfo"><strong>收到专属 Token</strong><span>卖家确认到账后（通常几分钟内），发给你一个专属访问 Token。</span></div>
+</div>
+<div class="step">
+<div class="snum">4</div>
+<div class="sinfo"><strong>打开运行器 → 粘贴 Token</strong><span>访问 <code>shujian.cc/workflow.html</code>，粘贴 Token 验证，即刻使用。</span></div>
+</div>
 </div>
 
-<!-- Seller setup guide -->
-<div class="pay-card" id="setup">
-<h2>卖家配置指南 <span class="pp-badge alt">卖家看</span></h2>
-<div class="pp-steps">
-<div><span class="n">1.</span>注册爱发电：<a href="https://afdian.com" target="_blank" style="color:var(--ai-1)">afdian.com</a> → 创作者入驻</div>
-<div><span class="n">2.</span>创建「方案」→ 一次性赞助 ¥199</div>
-<div><span class="n">3.</span>在方案描述中填写：</div>
-<div style="background:var(--bg-soft);border-radius:8px;padding:10px;margin:8px 0;font-family:var(--mono);font-size:.68rem;line-height:1.8">
-感谢购买！你的访问 Token 和后文链接：<br>
-<br>
-🔑 访问 Token：<span style="color:var(--up)">【在此粘贴 generate_token.py 生成的 Token】</span><br>
-📂 GitHub 仓库：github.com/fengqing168/strategy-journal-workflow<br>
-🌐 网页运行器：shujian.cc/workflow.html<br>
-<br>
-使用方式：打开运行器→输入Token→粘贴文本→一键分析。
-</div>
-<div><span class="n">4.</span>每次有新买家，用 <code>generate_token.py</code> 生成新 Token，更新爱发电方案描述</div>
-<div><span class="n">5.</span>将此页面的「前往爱发电购买」按钮链接改为你的爱发电主页</div>
-</div>
-<a href="https://afdian.com" class="btn-primary" style="display:block;text-align:center;margin-top:16px;background:var(--card);color:var(--ai-1);border:1px solid rgba(99,102,241,.4);box-shadow:none" target="_blank">前往爱发电注册 →</a>
+<p class="pp-note">
+⚠ <strong>付款前注意</strong>：付款时请在备注里写你的<strong>邮箱地址</strong>，Token 会发到你的邮箱。如果忘记备注，直接在微信/支付宝对话框发付款截图即可。<br><br>
+📧 卖家微信/联系方式见网站关于页：<a href="about.html">shujian.cc/about.html</a><br>
+🔑 Token 有效期 90 天，期间可无限次使用运行器
+</p>
 </div>
 
 </div>
