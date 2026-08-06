@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>XAUUSD 智能体工作流</title>
+<style>
+:root{--bg:#0F1118;--card:#181B28;--card2:#1E2133;--border:#252940;--accent:#5255E8;--accent2:#7C3AED;--grad:linear-gradient(135deg,#6366F1,#8B5CF6 55%,#A855F7);--text:#E2E4F0;--text2:#959AB8;--text3:#6B6F8A;--up:#34D399;--down:#F87171;--warn:#FBBF24;--radius:10px;--font:system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono','Cascadia Code',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:flex;min-height:100vh}
+.sidebar{width:280px;background:var(--card);border-right:1px solid var(--border);padding:20px;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar h2{font-size:1rem;margin-bottom:4px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar .sub{font-size:.7rem;color:var(--text3);margin-bottom:20px}
+.key-row{display:flex;gap:6px;margin-bottom:14px}
+.key-row input{flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:.72rem;font-family:var(--mono)}
+.key-row input::placeholder{color:var(--text3)}
+.key-row button{background:var(--grad);color:#FFF;border:none;border-radius:6px;padding:6px 12px;font-size:.72rem;cursor:pointer;white-space:nowrap}
+.key-row button:hover{opacity:.9}
+.step-list{flex:1;overflow-y:auto}
+.step-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;margin-bottom:3px;font-size:.72rem;cursor:pointer;transition:background .15s;color:var(--text2)}
+.step-item:hover{background:var(--card2)}
+.step-item .n{font-family:var(--mono);font-size:.6rem;background:rgba(99,102,241,.15);color:var(--accent);padding:2px 6px;border-radius:4px;width:22px;text-align:center;flex-shrink:0}
+.step-item.done .n{background:rgba(52,211,153,.15);color:var(--up)}
+.step-item.running .n{background:var(--grad);color:#FFF;animation:pulse 1.5s infinite}
+.step-item.error .n{background:rgba(248,113,113,.15);color:var(--down)}
+.step-item .st{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-item.done{color:var(--up)}
+.step-item.running{color:var(--text);font-weight:600}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.main{flex:1;display:flex;flex-direction:column;padding:24px 28px;overflow-y:auto}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.top-bar h1{font-size:1.25rem;font-weight:700}
+.top-bar h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.controls{display:flex;gap:8px}
+.btn{padding:10px 20px;border-radius:8px;font-size:.81rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-run{background:var(--grad);color:#FFF;box-shadow:0 4px 14px -3px rgba(99,102,241,.55)}
+.btn-run:hover{opacity:.92}
+.btn-run:disabled{opacity:.4;cursor:not-allowed}
+.btn-stop{background:var(--card2);color:var(--down);border:1px solid rgba(248,113,113,.3)}
+.btn-stop:hover{border-color:var(--down)}
+.btn-clear{background:var(--card2);color:var(--text2);border:1px solid var(--border)}
+.btn-clear:hover{color:var(--text)}
+.input-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.input-area textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:.81rem;line-height:1.7;resize:vertical;min-height:120px;outline:none}
+.input-area textarea::placeholder{color:var(--text3)}
+.input-hint{font-size:.65rem;color:var(--text3);margin-top:8px;display:flex;gap:12px}
+.output-area{flex:1;overflow-y:auto}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.result-card .rc-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--card2);border-bottom:1px solid var(--border);cursor:pointer}
+.result-card .rc-header .rc-title{font-size:.78rem;font-weight:600}
+.result-card .rc-header .rc-badge{font-size:.6rem;font-family:var(--mono);padding:2px 8px;border-radius:4px}
+.rc-badge.up{background:rgba(52,211,153,.1);color:var(--up)}
+.rc-badge.down{background:rgba(248,113,113,.1);color:var(--down)}
+.rc-badge.warn{background:rgba(251,191,36,.1);color:var(--warn)}
+.rc-badge.info{background:rgba(99,102,241,.1);color:var(--accent)}
+.result-card .rc-body{padding:16px;font-family:var(--mono);font-size:.72rem;line-height:1.8;color:var(--text2);max-height:400px;overflow-y:auto;white-space:pre-wrap}
+.human-input-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:999}
+.him-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:560px;max-width:90vw}
+.him-box h3{font-size:1rem;margin-bottom:4px}
+.him-box .him-sub{font-size:.72rem;color:var(--text3);margin-bottom:12px}
+.him-box .him-preview{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.7rem;color:var(--text2);max-height:120px;overflow-y:auto;margin-bottom:12px;font-family:var(--mono);white-space:pre-wrap}
+.him-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.75rem;font-family:var(--font);resize:vertical;min-height:100px;outline:none}
+.him-box .him-btns{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+.empty-state{text-align:center;padding:80px 20px;color:var(--text3)}
+.empty-state .icon{font-size:3rem;margin-bottom:16px}
+.empty-state p{font-size:.81rem;line-height:1.7}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:700px){.app{flex-direction:column}.sidebar{width:100%;max-height:180px}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sidebar">
+<h2>XAUUSD 智能体</h2>
+<div class="sub">16 Prompt · 工作流</div>
+<div class="key-row">
+<input type="password" id="apiKey" placeholder="DeepSeek API Key" autocomplete="off">
+<button id="saveKey">保存</button>
+</div>
+<div class="step-list" id="stepList"></div>
+</div>
+<div class="main">
+<div class="top-bar">
+<h1><span>AI 智能体工作流</span> · 一键分析</h1>
+<div class="controls">
+<button class="btn btn-stop" id="btnStop" style="display:none">停 止</button>
+<button class="btn btn-clear" id="btnClear">清 空</button>
+<button class="btn btn-run" id="btnRun">▶ 运行分析</button>
+</div>
+</div>
+<div class="input-area">
+<textarea id="inputText" placeholder="粘贴 FOMC 声明 / 央行讲话 / 宏观报告全文到此处..."></textarea>
+<div class="input-hint">
+<span>16 步串联分析 → 鹰鸽打分 → AI初判 → 人机对比 → 决策 → 入场计划 → 仓位风险</span>
+<span style="margin-left:auto">Ctrl+Enter 运行</span>
+</div>
+</div>
+<div class="output-area" id="outputArea">
+<div class="empty-state">
+<div class="icon">📊</div>
+<p>在左侧输入 DeepSeek API Key<br>上方粘贴分析文本<br>点击「运行分析」开始</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="human-input-modal" id="himModal" style="display:none">
+<div class="him-box">
+<h3>⚠ 人工判断环节 (Step 9/16)</h3>
+<div class="him-sub">AI 已经给出初判。请根据你自己的经验输入判断。</div>
+<div class="him-preview" id="himPreview"></div>
+<textarea id="himInput" placeholder="输入你的判断：
+方向：看涨/看跌/横盘
+置信度：1-10
+依据：技术面/基本面/直觉
+与AI一致/不一致的地方..."></textarea>
+<div class="him-btns">
+<button class="btn btn-clear" id="himSkip">跳过（用AI判断）</button>
+<button class="btn btn-run" id="himSubmit">提交 → 继续</button>
+</div>
+</div>
+</div>
+
+<script>
+// ── 16 Prompts ──
+const PROMPTS={
+1:`你是一位宏观信息过滤器，专门识别与黄金（XAUUSD）价格相关的新闻和事件。
+
+当前日期：{date}
+当前环境：联邦基金利率 3.50%-3.75%，最新 FOMC（7月29日）9-3 维持不变，通胀仍高于 2% 目标。
+
+输入 — 一批新闻/信息：
+{raw_text}
+
+请对每条内容进行两步筛选：
+Step 1 — 相关性判断：相关（直接影响利率/美元/避险/通胀）或 无关
+Step 2 — 对相关条目标注影响类型：货币政策信号 / 经济数据 / 地缘政治 / 市场结构 / 其他
+
+输出 JSON：{"relevant":[{"title":"...","type":["货币政策信号"],"impact":"正面/负面/中性","urgency":"高/中/低","reason":"一句话"}],"irrelevant_count":N,"summary":"本批共 X 条，Y 条相关，重点关注 Z"}`,
+
+2:`你是金融信息分析师，从央行讲话/经济报告中提取影响黄金价格的 5 个维度关键点。
+
+输入 — 全文：
+{raw_text}
+
+从以下 5 个维度提取有"信息增量"的内容：
+
+1. **利率立场** — 加息/降息/观望的信号词
+2. **通胀描述** — 用词强度（elevated/persistent/sticky/transitory）
+3. **就业市场** — tight/balanced/softening
+4. **风险平衡** — 上行风险 vs 下行风险，是否新增风险
+5. **异常措辞** — 与历史惯例不同的表述
+
+输出 JSON：{"利率立场":{"extracted":["关键句"],"direction":"偏鹰/偏鸽/中性","new_info":true/false},"通胀描述":{...},"就业市场":{...},"风险平衡":{...},"异常措辞":[{"passage":"原文","annotation":"为什么异常"}]}`,
+
+3:`你是数据结构化专家。将前面的 5 维度 JSON 结果压平为标准表格。
+
+输入：{output_2}
+
+输出一张 Markdown 表格，每个维度一行：
+| 维度 | 关键摘录 | 方向(+1/-1/0) | 信号强度(1-5) | 新增信息？ | 变化描述 |
+信号强度：1=微弱 3=中等 5=强烈。如有异常措辞，表格下方单独列出。`,
+
+4:`你是央行政策分析师。对官员讲话进行 5 维度鹰鸽打分。
+
+背景：当前联邦基金利率 3.50%-3.75%，最新 FOMC 7月29日 9-3 投票维持不变，Hammack/Kashkari/Logan 投加息反对票。
+
+讲话关键语句：{raw_text}
+
+从以下 5 个维度打分，每个 -5 到 +5（正=鹰派，负=鸽派）：
+1. 利率指引 2. 通胀措辞 3. 就业评估 4. 风险提及 5. 语气方向
+
+输出 JSON：{"scores":{"利率指引":X,"通胀措辞":X,"就业评估":X,"风险提及":X,"语气方向":X},"total":X,"verdict":"鹰派(15~25)/偏鹰(5~14)/中性(-4~4)/偏鸽(-14~-5)/鸽派(-25~-15)","certainty":"高/中/低","key_evidence":["引用原文"],"risk_flag":"是否触发预警"}`,
+
+5:`你是宏观策略分析师。将鹰鸽打分映射为对 XAUUSD 的 4 条传导路径。
+
+鹰鸽评分：{output_4}
+
+分析 4 条路径（每条 -3 到 +3，正=对金价利好）：
+1. 利率预期路径 2. 美元强弱路径 3. 风险情绪路径 4. 通胀预期路径
+
+输出 JSON：{"pathways":{"利率预期":{"score":X,"rationale":"","confidence":"高/中/低"},...},"composite":X,"composite_direction":"看涨/中性偏涨/中性/中性偏跌/看跌","dominant_pathway":""}`,
+
+6:`你是央行政策历史分析师。将当前讲话与前次表态做对比。
+
+本次：{raw_text}
+上次：{previous_statement}
+
+逐维度对比趋势输出 JSON：{"comparisons":[{"dimension":"利率立场","本次":"摘要","上次":"摘要","trend":"持续偏鹰/偏鸽/由鹰转鸽/...","magnitude":1-3,"is_reversal":true/false}],"overall_trend":"","significance":"常规变动/值得注意/重大信号"}`,
+
+7:`你是分析质检员。检查前面的分析是否存在内部矛盾或可疑结论。
+
+原文：{raw_text}
+鹰鸽打分：{output_4}
+传导路径：{output_5}
+历史对比：{output_6}
+
+检查 5 类问题：内部矛盾/路径矛盾/引用漂移/历史偏差/过度自信
+输出 JSON：{"issues_found":[{"type":"...","severity":"严重/中等/轻微","description":"","suggested_fix":""}],"clean":true/false,"summary":""}`,
+
+8:`你是黄金策略分析师。基于前面所有分析，给出对 XAUUSD 的 AI 初判。
+
+鹰鸽评分：{output_4} | 传导路径：{output_5} | 历史对比：{output_6} | 质量审核：{output_7}
+
+输出 JSON：{"event_id":"{event_id}","judgment":{"direction":"看涨/看跌/横盘","confidence":1-10,"time_horizon":"描述","target_zone":{"upside":X,"downside":X},"rationale":"3-5句","uncertainties":["..."],"invalidation_condition":"什么情况证明你错了"}}`,
+
+9:`人工判断模板。请交易者回答：
+当前 XAUUSD：{current_price}
+AI 初判：{output_8}
+
+1. 方向判断？[看涨/看跌/横盘] 2. 确信度(1-10) 3.判断依据？[技术面/基本面/直觉] 4.与AI一致点？ 5.与AI不一致点？ 6.最大风险？
+输出 JSON：{"source":"human","direction":"","confidence":1-10,"basis":{"technical":{},"fundamental":{},"intuition":{}},"agree_with_ai":"","disagree_with_ai":"","risk_assessment":""}`,
+
+10:`你是决策审计师。对比 AI 和人工判断。
+
+AI 判断：{output_8}
+人工判断：{output_9}
+
+输出 JSON：{"direction_match":true/false,"confidence_gap":X,"logic_divergence":{"ai_focus":[],"human_focus":[],"overlap":[],"ai_only":[],"human_only":[]},"divergence_score":1-10,"divergence_level":"高度一致/部分分歧/严重分歧","recommendation":"以AI为准/以人为主/各半加权/建议观望"}`,
+
+11:`你是量化决策引擎。计算最终交易信号。
+
+AI 判断：{output_8} | 人工判断：{output_9} | 分歧分析：{output_10}
+
+规则：方向不一致→NO TRADE。加权得分=(AI置信度×0.5+人置信度×0.5)/1.0。分歧≥7×0.5, 4-6×0.8, ≤3×1.0。≥7=STRONG, 5-6.9=WEAK, 3-4.9=MONITOR, <3=NO TRADE。
+
+输出 JSON：{"decision":"STRONG_SIGNAL/WEAK_SIGNAL/MONITOR/NO_TRADE","direction":"LONG/SHORT/NONE","position_size":"标准/半仓/零","weighted_score":X.X,"score_breakdown":{"ai_contribution":X,"human_contribution":X,"divergence_penalty":X},"caution":""}`,
+
+12:`你是交易复盘分析师。对本次工作流进行事后审计。
+
+工作流：{output_8} | 决策：{output_11} | 结果：{trade_result} | 事后信息：{hindsight}
+
+输出 JSON：{"outcome":{"result":"盈利/亏损/未触发","pnl":X},"signal_audit":{},"decision_audit":{"rule_followed":true/false},"information_gaps":[],"process_improvements":[],"lessons":[]}`,
+
+13:`你是 XAUUSD 技术分析师。基于以下数值判断技术结构。
+
+当前价格：{current_price} | 周期：{timeframe} | 基本面：{output_8}
+
+价格数据：高点 {recent_high} | 低点 {recent_low} | 短均 {ma_short} | 长均 {ma_long} | RSI {rsi} | 成交量 {volume_note} | 形态 {pattern_notes}
+
+分析：趋势方向/强度、关键支撑阻力、RSI信号、均线信号、技术面结论、与基本面一致性。
+
+输出 JSON：{"trend":{"direction":"多头/空头/震荡","strength":1-5},"key_levels":{"resistances":[{"price":X,"reason":""}],"supports":[{"price":X,"reason":""}]},"rsi":{"value":X,"zone":"超买/超卖/中性","divergence":true/false},"ma":{"golden_cross":true/false,"price_vs_ma":"之上/之下"},"tech_conclusion":{"direction":"偏多/偏空/中性","confidence":1-10},"vs_fundamental":{"consistent":true/false,"comment":""}}`,
+
+14:`你是黄金市场分析师。分析 XAUUSD 6 个特有驱动因子。
+
+价格：{current_price} | DXY：{dxy} | 10Y TIPS：{real_yield}
+ETF持仓：{etf_holdings} | 央行购金：{cb_buying} | CME期货：{cme_futures} | 实物需求：{india_china_demand}
+
+6 因子打分（+3到-3，正=利好金价）：实际利率、美元DXY、ETF资金流、央行购金、实物需求、投机仓位。
+
+输出 JSON：{"factors":{"实际利率":{"score":X},"美元":{"score":X},...},"composite_gold_score":X,"dominant_factor":"","warning":""}`,
+
+15:`你是 XAUUSD 交易策略师。确认入场计划。
+
+当前价格：{current_price} | ATR(14)：{atr}
+决策：{output_11} | 技术面：{output_13}
+
+Step 1：入场条件审核（5项）。Step 2：入场价位（激进/保守）。Step 3：止损（1.5×ATR）。Step 4：止盈 TP1/TP2 + 盈亏比。
+
+输出 JSON：{"entry_check":{"all_clear":true/false,"missing":[]},"entry":{"direction":"LONG/SHORT","price":X,"type":"市价/回撤"},"stop_loss":{"price":X,"distance_atr":X,"based_on":""},"take_profit":{"tp1":{"price":X,"rr":X},"tp2":{"price":X,"rr":X}},"warnings":[]}`,
+
+16:`你是风险管理师。执行仓位和风险计算。
+
+账户余额：{account_balance} | 已有暴露：{current_exposure} | 最大回撤：{max_drawdown_pct}%
+入场计划：{output_15} | 近期交易：{recent_trades}
+
+1. Kelly公式 2. 2%规则 3. 压力测试（连亏3/5笔回撤）4. 风控清单
+
+输出 JSON：{"position":{"kelly_pct":X,"final_lots":X,"risk_pct":X},"stress_test":{"dd_3_losses_pct":X,"dd_5_losses_pct":X,"exceeds_limit":true/false},"checklist":{"all_clear":true/false,"failed_items":[]},"final_approval":"APPROVED/CAUTION/REJECTED"}`}
+
+const STAGE_NAMES={1:'信息筛选',2:'关键提取',3:'结构化',4:'鹰鸽打分',5:'多维影响',6:'历史对比',7:'异常检测',8:'AI初判',9:'人工判断',10:'人机分歧',11:'决策矩阵',12:'事后复盘',13:'技术分析',14:'黄金因子',15:'入场确认',16:'仓位风险'}
+
+// ── State ──
+let apiKey=localStorage.getItem('xau_ds_key')||''
+let running=false, stopped=false, results={}, ctx={}
+
+// ── Init ──
+document.getElementById('apiKey').value=apiKey
+if(apiKey)document.getElementById('saveKey').textContent='✓ 已保存'
+buildStepList()
+document.getElementById('btnRun').addEventListener('click',run)
+document.getElementById('btnStop').addEventListener('click',()=>{stopped=true})
+document.getElementById('btnClear').addEventListener('click',clearAll)
+document.getElementById('saveKey').addEventListener('click',saveKey)
+document.getElementById('himSubmit').addEventListener('click',submitHuman)
+document.getElementById('himSkip').addEventListener('click',skipHuman)
+document.getElementById('inputText').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')run()})
+
+function saveKey(){apiKey=document.getElementById('apiKey').value.trim();localStorage.setItem('xau_ds_key',apiKey);document.getElementById('saveKey').textContent=apiKey?'✓ 已保存':'保存'}
+
+function buildStepList(){
+  let h=''
+  for(let i=1;i<=16;i++){let cls='';if(results[i])cls='done';h+=`<div class="step-item ${cls}" id="step-${i}" onclick="scrollToResult(${i})"><span class="n">${i}</span><span class="st">${STAGE_NAMES[i]}</span></div>`}
+  document.getElementById('stepList').innerHTML=h
+}
+
+function updateStep(i,cls){let el=document.getElementById('step-'+i);if(el){el.className='step-item '+cls;if(cls==='done'||cls==='running')el.scrollIntoView({block:'nearest'})}}
+
+function clearAll(){results={};ctx={};buildStepList();document.getElementById('outputArea').innerHTML=`<div class="empty-state"><div class="icon">📊</div><p>在左侧输入 DeepSeek API Key<br>上方粘贴分析文本<br>点击「运行分析」开始</p></div>`;document.getElementById('himModal').style.display='none'}
+
+// ── API Call ──
+async function callDS(prompt){
+  let resp=await fetch('https://api.deepseek.com/v1/chat/completions',{
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+    body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:'你是专业XAUUSD金融分析师。只输出JSON，不要任何额外解释。'},{role:'user',content:prompt}],temperature:0.3,max_tokens:4096})
+  })
+  if(!resp.ok)throw new Error(`API ${resp.status}`)
+  let data=await resp.json()
+  return data.choices[0].message.content
+}
+
+function extractJSON(text){
+  try{return JSON.parse(text)}catch(e){}
+  let m=text.match(/```(?:json)?\s*([\s\S]*?)```/)||text.match(/\{[\s\S]*\}/)
+  if(m)try{return JSON.parse(m[1]||m[0])}catch(e){}
+  return {_raw:text.substring(0,500)}
+}
+
+// ── Run ──
+async function run(){
+  if(running)return
+  let text=document.getElementById('inputText').value.trim()
+  if(!text){alert('请先粘贴分析文本');return}
+  if(!apiKey){alert('请先输入 DeepSeek API Key');return}
+
+  running=true;stopped=false;results={}
+  ctx={raw_text:text,date:new Date().toLocaleDateString('zh-CN'),event_id:'XAU-'+Date.now(),current_price:'2650',timeframe:'4H',recent_high:'4303',recent_low:'4245',ma_short:'20EMA',ma_long:'50SMA',rsi:'55',volume_note:'正常',pattern_notes:'无',price_structure:'区间震荡',dxy:'104.5',real_yield:'2.15%',etf_holdings:'850吨',cb_buying:'中国连续8月增持',cme_futures:'净多仓中等',india_china_demand:'淡季',atr:'25',account_balance:'10000',current_exposure:'0',max_drawdown_pct:'20',recent_trades:'无',previous_statement:'（暂无上次数据）'}
+  document.getElementById('outputArea').innerHTML=''
+  buildStepList()
+  document.getElementById('btnRun').disabled=true
+  document.getElementById('btnStop').style.display='inline-block'
+
+  for(let step=1;step<=16;step++){
+    if(stopped)break
+    updateStep(step,'running')
+
+    if(step===9){
+      // Human judgment modal
+      let preview=''
+      if(results[8]){
+        try{let j=extractJSON(results[8]);let d=j.judgment||j;preview=`AI方向: ${d.direction||'?'}  置信度: ${d.confidence||'?'}\n${(d.rationale||'').substring(0,200)}`}catch(e){preview=results[8].substring(0,300)}
+      }
+      document.getElementById('himPreview').textContent=preview
+      document.getElementById('himInput').value=''
+      document.getElementById('himModal').style.display='flex'
+      document.getElementById('himInput').focus()
+      await new Promise(r=>{window._resolveHuman=r})
+      updateStep(9,'done')
+      addResultCard(9,STAGE_NAMES[9],results[9]||'(已跳过)','info')
+      continue
+    }
+
+    let template=PROMPTS[step]
+    for(let [k,v]of Object.entries(ctx)){
+      template=template.replace(new RegExp(`\\{${k}\\}`,'g'),typeof v==='object'?JSON.stringify(v):String(v||''))
+    }
+
+    try{
+      let resp=await callDS(template)
+      results[step]=resp
+      ctx['output_'+step]=resp
+      updateStep(step,'done')
+      let parsed=extractJSON(resp)
+      let badgeCls='info'
+      if(step===11){
+        let d=parsed.decision||'';badgeCls=d.includes('STRONG')?'up':d.includes('WEAK')?'warn':d.includes('MONITOR')?'info':'down'
+      }
+      if(step===16){badgeCls=parsed.final_approval==='APPROVED'?'up':parsed.final_approval==='CAUTION'?'warn':'down'}
+      addResultCard(step,STAGE_NAMES[step],resp,badgeCls,parsed)
+    }catch(e){
+      results[step]='[错误] '+e.message
+      updateStep(step,'error')
+      addResultCard(step,STAGE_NAMES[step],'✗ '+e.message,'down')
+      break
+    }
+    await new Promise(r=>setTimeout(r,300))
+  }
+
+  running=false;stopped=false
+  document.getElementById('btnRun').disabled=false
+  document.getElementById('btnStop').style.display='none'
+  buildStepList()
+}
+
+function submitHuman(){
+  let v=document.getElementById('himInput').value.trim()
+  if(!v)v='{"source":"human","direction":"横盘","confidence":5,"notes":"待定"}'
+  results[9]=v;ctx['output_9']=v
+  document.getElementById('himModal').style.display='none'
+  window._resolveHuman()
+}
+function skipHuman(){
+  results[9]='{"source":"human","direction":"同AI","confidence":5,"notes":"跳过，以AI判断为准"}'
+  ctx['output_9']=results[9]
+  document.getElementById('himModal').style.display='none'
+  window._resolveHuman()
+}
+
+// ── Output ──
+function addResultCard(step,title,text,badgeCls,parsed){
+  let summary=''
+  if(step===4&&parsed&&parsed.scores){summary=`总分 ${parsed.total} · ${parsed.verdict||''}`}
+  if(step===8&&parsed){let d=parsed.judgment||parsed;summary=`${d.direction||''} · 置信度 ${d.confidence||''}`}
+  if(step===10&&parsed){summary=`分歧 ${parsed.divergence_score||''} · ${parsed.divergence_level||''}`}
+  if(step===11&&parsed){summary=`${parsed.decision||''} · ${parsed.direction||''} · ${parsed.position_size||''}`}
+  if(step===15&&parsed){let e=parsed.entry||{};summary=`${e.direction||''} @ ${e.price||'?'} · 止损 ${(parsed.stop_loss||{}).price||'?'}`}
+  if(step===16&&parsed){summary=`${parsed.final_approval||''} · ${(parsed.position||{}).final_lots||'?'}手`}
+
+  let card=`<div class="result-card" id="card-${step}">
+    <div class="rc-header" onclick="this.parentElement.querySelector('.rc-body').classList.toggle('collapsed')">
+      <span class="rc-title">Step ${step}: ${title} ${summary?`<span style="font-weight:400;color:var(--text3);font-size:.68rem">· ${summary}</span>`:''}</span>
+      <span class="rc-badge ${badgeCls}">${STAGE_NAMES[step]}</span>
+    </div>
+    <div class="rc-body">${escapeHTML(text)}</div>
+  </div>`
+  document.getElementById('outputArea').insertAdjacentHTML('beforeend',card)
+}
+
+function scrollToResult(i){
+  let el=document.getElementById('card-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})
+}
+
+function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+</script>
+</body>
+</html>
