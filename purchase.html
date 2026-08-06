@@ -7,25 +7,33 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-.pay-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;min-height:calc(100vh - 260px);padding:20px 0}
-@media(max-width:700px){.pay-wrap{grid-template-columns:1fr;min-height:auto}}
-.pay-left h1{font-size:1.6rem;font-weight:700;line-height:1.2;margin-bottom:6px}
-.pay-left h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.pay-price{font-family:var(--mono);font-size:2rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0 14px}
-.pay-feat{list-style:none}
-.pay-feat li{font-size:.8125rem;color:var(--text-sec);padding:3px 0;padding-left:16px;position:relative}
-.pay-feat li::before{content:'✓';position:absolute;left:0;color:var(--up);font-weight:700}
-.pay-feat li.green{color:var(--up);font-weight:600}
-.pay-right{display:flex;flex-direction:column;align-items:center}
-.qr-wrap{display:flex;gap:20px;align-items:flex-start;justify-content:center}
-.qr-item{text-align:center}
-.qr-item img{width:170px;height:170px;object-fit:contain;border-radius:12px;border:2px solid rgba(5,150,105,.25);background:#FFF;display:block}
-.qr-item .ql{font-size:.68rem;color:var(--text-muted);margin-top:4px}
-.pay-steps{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.pay-steps span{font-size:.65rem;color:var(--text-sec);background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:20px;padding:3px 10px;white-space:nowrap}
-.pay-steps span b{color:var(--ai-1)}
-.pay-note{font-size:.68rem;color:var(--text-muted);text-align:center;margin-top:10px;line-height:1.6}
-.pay-note a{color:var(--ai-1)}
+.pay-page{max-width:860px;margin:16px auto}
+.pay-hero{display:flex;align-items:baseline;gap:14px;margin-bottom:14px}
+.pay-hero h1{font-size:1.25rem;font-weight:700;line-height:1.1}
+.pay-hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pay-price{font-family:var(--mono);font-size:1.7rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0}
+.pay-body{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:center}
+@media(max-width:720px){.pay-body{grid-template-columns:1fr}}
+.pay-info{padding-right:8px}
+.pay-feat{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:1px 18px;margin-bottom:10px}
+@media(max-width:480px){.pay-feat{grid-template-columns:1fr}}
+.pay-feat li{font-size:.75rem;color:var(--text-sec);padding:2px 0;padding-left:14px;position:relative;line-height:1.4}
+.pay-feat li::before{content:'✓';position:absolute;left:0;color:var(--up);font-weight:700;font-size:.62rem}
+.pay-feat li.em{color:var(--up);font-weight:600;font-size:.78rem}
+.pay-steps{display:flex;gap:6px;margin:10px 0;font-size:.7rem;align-items:center;flex-wrap:wrap}
+.pay-steps .ps{background:rgba(99,102,241,.08);color:var(--ai-1);padding:3px 10px;border-radius:16px;font-weight:600;white-space:nowrap}
+.pay-steps .pn{color:var(--text-sec)}
+.pay-steps .ar{color:var(--text-muted);font-size:.6rem}
+.pay-contact{font-size:.68rem;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.pay-contact strong{color:var(--text)}
+.pay-contact a{color:var(--ai-1);text-decoration:none}
+.pay-qr{border:1px solid var(--border-soft);border-radius:14px;padding:12px;background:var(--card);box-shadow:var(--shadow-sm)}
+.pay-qr .qr-row{display:flex;gap:10px}
+.pay-qr .qr-col{flex:1;text-align:center}
+.pay-qr img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:10px;border:2px solid rgba(5,150,105,.22);background:#FFF;display:block}
+.pay-qr .qr-label{font-size:.68rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.pay-qr .qr-name{font-size:.62rem;color:var(--text-muted);margin-top:3px}
+.pay-qr .qr-tip{font-size:.6rem;color:var(--text-muted);margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -40,46 +48,59 @@
 <nav class="nav"><a href="/">日志</a><a href="product.html">工作流</a><a href="library.html">资料库</a><a href="about.html">关于</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
 </div></header>
 
-<div class="pay-wrap">
+<div class="pay-page">
 
-<!-- 左侧：介绍 -->
-<div class="pay-left">
+<div class="pay-hero">
 <h1>获取 <span class="g">AI 智能体工作流</span></h1>
-<div class="pay-price">¥199</div>
-<ul class="pay-feat">
-<li>16 个串联 Prompt（复制即用到 Claude / DeepSeek / GPT）</li>
-<li>置信度阈值规则表（含数学公式 + 反例排除条件）</li>
-<li>3 个 Python 自动化脚本（抓取 / 串联 / 计算）</li>
-<li>私有 GitHub 仓库永久访问 + 持续更新</li>
-<li>网页端一键运行器（无需安装，打开即用）</li>
-<li class="green">7 天无理由退款</li>
-</ul>
-<div style="margin-top:18px">
-<div class="pay-steps">
-<span><b>①</b> 扫码付 ¥199</span>
-<span><b>②</b> 截图发给卖家</span>
-<span><b>③</b> 收到专属 Token</span>
-<span><b>④</b> 粘贴→开始分析</span>
+<span class="pay-price">¥199</span>
 </div>
-<p class="pay-note">
-付款备注写<strong>邮箱</strong>，Token 发到你邮箱。<br>
-卖家微信 <strong>twzd2519</strong> · 邮箱 <a href="mailto:362092939@qq.com">362092939@qq.com</a> · Token 90 天有效
-</p>
+
+<div class="pay-body">
+
+<div class="pay-info">
+<ul class="pay-feat">
+<li>16 个串联 Prompt · 复制即用</li>
+<li>置信度阈值规则表 + 公式</li>
+<li>3 个 Python 自动化脚本</li>
+<li>私有 GitHub 仓库 · 持续更新</li>
+<li>网页端一键运行器 · 无需安装</li>
+<li class="em" style="grid-column:1/-1">↳ 7 天无理由退款</li>
+</ul>
+
+<div class="pay-steps">
+<span class="ps">① 扫码付 ¥199</span>
+<span class="ar">→</span>
+<span class="pn">② 截图发给卖家</span>
+<span class="ar">→</span>
+<span class="ps">③ 收到 Token</span>
+<span class="ar">→</span>
+<span class="pn">④ 打开运行器 → 开始分析</span>
+</div>
+
+<div class="pay-contact">
+<strong>微信 twzd2519</strong>
+<span>·</span>
+<a href="mailto:362092939@qq.com">362092939@qq.com</a>
+<span>·</span>
+付款备注写<strong>邮箱</strong>&nbsp;Token 90天有效
 </div>
 </div>
 
-<!-- 右侧：收款码 -->
-<div class="pay-right">
-<div class="qr-wrap">
-<div class="qr-item">
+<div class="pay-qr">
+<div class="qr-label">📱 扫码付款</div>
+<div class="qr-row">
+<div class="qr-col">
 <img src="images/pay-wechat.png.jpg" alt="微信收款码">
-<div class="ql">微信扫码 ¥199</div>
+<div class="qr-name">微信 ¥199</div>
 </div>
-<div class="qr-item">
+<div class="qr-col">
 <img src="images/pay-zhifubao.png.jpg" alt="支付宝收款码">
-<div class="ql">支付宝扫码 ¥199</div>
+<div class="qr-name">支付宝 ¥199</div>
 </div>
 </div>
+<div class="qr-tip">用手机扫此二维码 · 或截图后从相册识别</div>
+</div>
+
 </div>
 
 </div>
