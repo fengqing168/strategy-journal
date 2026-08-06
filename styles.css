@@ -62,17 +62,17 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .brand-text .bt-name{display:block;font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:.02em}
 .brand-text .bt-en{display:block;font-size:.625rem;font-weight:600;letter-spacing:.2em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;margin-top:2px}
 .nav{display:flex;align-items:center;gap:2px}
-.nav a{position:relative;color:var(--text-sec);text-decoration:none;font-size:.8125rem;font-weight:500;padding:10px 13px;transition:color .15s var(--ease)}
-/* 5个文字链接由浅到深 */
-.nav a:nth-child(1){color:#A5B4FC}  /* 首页 - 最浅 */
-.nav a:nth-child(2){color:#9089FA}  /* 日志 */
-.nav a:nth-child(3){color:#7C6DF6}  /* 资料库 */
-.nav a:nth-child(4){color:#6960F0}  /* 关于 */
-.nav a:nth-child(5){color:#5255E8}  /* 工作流 - 最深 锚定订阅渐变 */
-.nav a::after{content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;border-radius:1px;background:var(--grad);transform:scaleX(0);transform-origin:left center;transition:transform .22s var(--ease)}
-.nav a:hover{color:var(--text)}
+.nav a{position:relative;color:var(--text-sec);text-decoration:none;font-size:.8125rem;font-weight:500;padding:8px 13px;border-radius:7px;transition:all .15s var(--ease)}
+/* 5栏背景色块 由浅到深 锚定订阅渐变 */
+.nav a:nth-child(1){background:rgba(99,102,241,.06);color:#6366F1}   /* 首页-最浅 */
+.nav a:nth-child(2){background:rgba(99,102,241,.10);color:#5B5FEF}   /* 日志 */
+.nav a:nth-child(3){background:rgba(99,102,241,.14);color:#5255E8}   /* 资料库 */
+.nav a:nth-child(4){background:rgba(99,102,241,.18);color:#4F46E5}   /* 关于 */
+.nav a:nth-child(5){background:rgba(99,102,241,.22);color:#4338CA}   /* 工作流-最深 */
+.nav a::after{content:"";position:absolute;left:13px;right:13px;bottom:2px;height:2px;border-radius:1px;background:var(--grad);transform:scaleX(0);transform-origin:left center;transition:transform .22s var(--ease)}
+.nav a:hover{background:rgba(99,102,241,.18);color:var(--ai-1)}
 .nav a:hover::after{transform:scaleX(1)}
-.nav a.active,.nav a[aria-current]{color:var(--ai-1);font-weight:600}
+.nav a.active,.nav a[aria-current]{background:rgba(99,102,241,.24);color:var(--ai-1);font-weight:600}
 .nav a.active::after{transform:scaleX(1)}
 .nav-cta{margin-left:8px;padding:9px 20px;background:var(--grad);color:#FFF;border-radius:8px;font-weight:600;font-size:.8125rem;text-decoration:none;transition:opacity .15s var(--ease),transform .1s,box-shadow .15s;box-shadow:0 4px 14px -3px rgba(99,102,241,.55)}
 .nav-cta::after{display:none}
