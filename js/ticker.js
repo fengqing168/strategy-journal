@@ -1,107 +1,134 @@
-/* ── 滚动行情条 · 多品种实时报价 ── */
+/* ── 新浪财经 JSONP 实时行情条 ── */
 (function () {
   var track = document.getElementById('ticker-track');
   if (!track) return;
 
-  var symbols = [
-    { id: 'xau', label: 'XAUUSD', src: 'gold' },
-    { id: 'eur', label: 'EURUSD', src: 'forex', calc: function (r) { return (1 / r.EUR).toFixed(4); } },
-    { id: 'gbp', label: 'GBPUSD', src: 'forex', calc: function (r) { return (1 / r.GBP).toFixed(4); } },
-    { id: 'jpy', label: 'USDJPY', src: 'forex', calc: function (r) { return r.JPY.toFixed(3); } },
-    { id: 'cad', label: 'USDCAD', src: 'forex', calc: function (r) { return r.CAD.toFixed(4); } }
-  ];
+  /* 符号配置：代码 → 标签 + 价格字段索引 */
+  var CFG = {
+    hf_XAU:       { label: 'XAUUSD',  idx: 0, dec: 2 },
+    fx_seurusd:   { label: 'EURUSD',  idx: 1, dec: 4 },
+    fx_sgbpusd:   { label: 'GBPUSD',  idx: 1, dec: 4 },
+    fx_susdjpy:   { label: 'USDJPY',  idx: 1, dec: 3 },
+    fx_susdcad:   { label: 'USDCAD',  idx: 1, dec: 4 }
+  };
 
-  var data = {};
-  var prevData = {};
+  var KEYS = Object.keys(CFG);
+  var CACHE_KEY = 'tkr_sina_v1';
+  var INTERVAL = 5000; /* 5 秒刷新 */
+  var FETCHING = false;
 
-  function fmtNum(v, dec) { return parseFloat(v).toFixed(dec); }
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveCache(d) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+  }
 
-  function buildTrack() {
-    var items = [];
-    symbols.forEach(function (s) {
-      var d = data[s.id];
+  var cache = loadCache();
+
+  /* 构建滚动 HTML */
+  function build(items) {
+    var html = '';
+    KEYS.forEach(function (k) {
+      var d = items[k];
       if (!d) return;
-      var price = d.price, change = d.change || 0, pct = d.pct || '--';
-      var dir = change >= 0 ? 'up' : 'down';
-      var arrow = change >= 0 ? '▲' : '▼';
-      var chStr = (change >= 0 ? '+' : '') + change.toFixed(s.label.indexOf('JPY') > -1 ? 3 : 4);
+      var cfg = CFG[k];
+      var price = d.price, pre = d.prev, ch = d.change, pct = d.pct;
+      var dir = ch >= 0 ? 'up' : 'down';
+      var arrow = ch >= 0 ? '▲' : '▼';
+      var chStr = (ch >= 0 ? '+' : '') + ch.toFixed(cfg.dec);
 
-      var prev = prevData[s.id];
       var flashClass = '';
-      if (prev && prev.price !== price) {
-        flashClass = price > prev.price ? 'flash-up' : 'flash-down';
-      }
+      if (pre !== null && pre !== price) flashClass = price > pre ? 'flash-up' : 'flash-down';
 
-      items.push(
+      html +=
         '<span class="tkr">' +
-        '<span class="tkr-label">' + s.label + '</span>' +
-        '<span class="tkr-price ' + dir + ' ' + flashClass + '">' + fmtNum(price, s.label.indexOf('JPY') > -1 ? 3 : 2) + '</span>' +
+        '<span class="tkr-label">' + cfg.label + '</span>' +
+        '<span class="tkr-price ' + dir + ' ' + flashClass + '">' + price.toFixed(cfg.dec) + '</span>' +
         '<span class="tkr-change ' + dir + '">' + arrow + ' ' + chStr + '</span>' +
-        '<span class="tkr-pct ' + dir + '">' + pct + '</span>' +
-        '</span><span class="tkr-sep">◆</span>'
-      );
+        '<span class="tkr-pct ' + dir + '">' + (pct || '--') + '</span>' +
+        '</span><span class="tkr-sep">◆</span>';
     });
-    return items.join('');
+    return html;
   }
 
-  function render() {
-    var inner = buildTrack();
+  function render(items) {
+    var inner = build(items);
     if (!inner) return;
-    track.innerHTML = inner + inner; /* 双份 — 无缝循环 */
-    prevData = JSON.parse(JSON.stringify(data));
+
+    /* 暂停动画 → 更新内容 → 重启动画 */
+    track.style.animation = 'none';
+    track.innerHTML = inner + inner;
+    track.offsetHeight; /* force reflow */
+    track.style.animation = '';
+    track.style.animation = 'scrollTicker 60s linear infinite';
+
+    /* 更新缓存 */
+    var toCache = {};
+    KEYS.forEach(function (k) {
+      if (items[k]) toCache[k] = { price: items[k].price };
+    });
+    saveCache(toCache);
   }
 
-  async function fetchAll() {
-    var results = {};
+  /* JSONP 拉取 */
+  function fetchData() {
+    if (FETCHING) return;
+    FETCHING = true;
 
-    /* XAUUSD 直连 */
-    try {
-      var r = await fetch('https://api.gold-api.com/price/XAU');
-      var j = await r.json();
-      results.xau = { price: j.price, change: 0 };
-      if (prevData.xau) results.xau.change = j.price - prevData.xau.price;
-    } catch (e) { results.xau = prevData.xau; }
+    var script = document.createElement('script');
+    var done = false;
+    var timer = setTimeout(function () { cleanup(); }, 4000);
 
-    /* 外汇 直连 */
-    try {
-      var fr = await fetch('https://open.er-api.com/v6/latest/USD');
-      var fj = await fr.json();
-      var rates = fj.rates;
-
-      var eurPrice = 1 / rates.EUR;
-      var gbpPrice = 1 / rates.GBP;
-      var jpyPrice = rates.JPY;
-      var cadPrice = rates.CAD;
-
-      results.eur = { price: eurPrice, change: prevData.eur ? eurPrice - prevData.eur.price : 0 };
-      results.gbp = { price: gbpPrice, change: prevData.gbp ? gbpPrice - prevData.gbp.price : 0 };
-      results.jpy = { price: jpyPrice, change: prevData.jpy ? jpyPrice - prevData.jpy.price : 0 };
-      results.cad = { price: cadPrice, change: prevData.cad ? cadPrice - prevData.cad.price : 0 };
-    } catch (e) {
-      results.eur = prevData.eur;
-      results.gbp = prevData.gbp;
-      results.jpy = prevData.jpy;
-      results.cad = prevData.cad;
+    function cleanup() {
+      FETCHING = false;
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
     }
 
-    /* 计算涨跌幅 */
-    ['xau', 'eur', 'gbp', 'jpy', 'cad'].forEach(function (id) {
-      var d = results[id];
-      if (!d) return;
-      var prev = prevData[id];
-      if (prev && prev.price) {
-        d.change = d.price - prev.price;
-        d.pct = ((d.change / prev.price) * 100).toFixed(2) + '%';
-      } else {
-        d.pct = '--';
-      }
-    });
+    script.src = 'https://hq.sinajs.cn/list=' + KEYS.join(',') + '&_=' + Date.now();
+    script.onload = function () {
+      done = true;
+      cleanup();
 
-    data = results;
-    render();
+      var items = {};
+
+      KEYS.forEach(function (k) {
+        var v = window['hq_str_' + k];
+        if (!v) return;
+        var parts = v.split(',');
+        var cfg = CFG[k];
+        var price = parseFloat(parts[cfg.idx]) || 0;
+        if (!price) return;
+
+        var prev = cache[k] ? cache[k].price : null;
+        var change = (prev !== null) ? price - prev : 0;
+        var pctVal = (prev && prev !== 0) ? ((change / prev) * 100).toFixed(2) + '%' : null;
+
+        items[k] = { price: price, prev: prev, change: change, pct: pctVal };
+      });
+
+      if (KEYS.some(function (k) { return items[k]; })) {
+        render(items);
+        cache = loadCache(); /* 重新读取最新缓存 */
+        /* 合并新数据到 cache */
+        KEYS.forEach(function (k) {
+          if (items[k]) cache[k] = { price: items[k].price };
+        });
+        saveCache(cache);
+      }
+    };
+
+    script.onerror = function () {
+      cleanup();
+      /* 失败静默，保留上一次数据 */
+    };
+
+    document.head.appendChild(script);
   }
 
-  fetchAll();
-  setInterval(fetchAll, 10000);
+  /* 启动 */
+  fetchData();
+  setInterval(fetchData, INTERVAL);
 
 })();
