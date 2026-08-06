@@ -33,9 +33,9 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 
 /* ── 行情条（滚动式） ── */
 .ticker-bar{background:linear-gradient(100deg,#2A2B78,#4F46E5 55%,#6930C7);height:38px;overflow:hidden;position:sticky;top:0;z-index:100}
-.ticker-track{display:flex;align-items:center;height:38px;width:max-content;animation:scrollTicker 60s linear infinite}
+.ticker-track{display:flex;align-items:center;height:38px;width:max-content;will-change:transform;backface-visibility:hidden;animation:scrollTicker 60s linear infinite}
 .ticker-track:hover{animation-play-state:paused}
-@keyframes scrollTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes scrollTicker{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
 .tkr{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:.75rem;white-space:nowrap;padding:0 22px;flex-shrink:0}
 .tkr-sep{color:rgba(255,255,255,.28);font-size:.5rem;padding:0 8px;flex-shrink:0;user-select:none}
 .tkr-label{font-weight:600;color:rgba(255,255,255,.72);font-size:.6875rem;letter-spacing:.06em}

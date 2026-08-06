@@ -44,10 +44,7 @@
   function render(items) {
     var inner = buildHTML(items);
     if (!inner) return;
-    track.style.animation = 'none';
     track.innerHTML = inner + inner;
-    void track.offsetWidth;
-    track.style.animation = 'scrollTicker 60s linear infinite';
     var toSave = {};
     KEYS.forEach(function (k) { if (items[k]) toSave[k] = { price: items[k].price }; });
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(toSave)); } catch (e) {}
