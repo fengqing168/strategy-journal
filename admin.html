@@ -44,7 +44,7 @@ body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min
 <div class="lg-sub">请输入管理员密码</div>
 <input type="password" id="lgPw" placeholder="输入密码" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
 <div class="lg-err" id="lgErr">密码错误</div>
-<button class="btn btn-primary" onclick="doLogin()" style="width:100%">验证进入</button>
+<button class="btn btn-primary" onclick="doLogin()" style="width:100%" type="button">验证进入</button>
 </div>
 </div>
 
@@ -97,6 +97,7 @@ var PW = 'xau2026twzd';
 async function doLogin(){
   var pw = document.getElementById('lgPw').value.trim();
   if(!pw) return;
+  var err = document.getElementById('lgErr');
   try{
     var r = await fetch(API+'/token/generate?pw='+encodeURIComponent(pw));
     if(r.ok){
@@ -105,12 +106,13 @@ async function doLogin(){
       document.getElementById('mainApp').style.display = 'block';
       checkAPI();
     } else {
-      document.getElementById('lgErr').style.display = 'block';
-      setTimeout(function(){ document.getElementById('lgErr').style.display = 'none' }, 2000);
+      err.textContent = '密码错误';
+      err.style.display = 'block';
+      setTimeout(function(){ err.style.display = 'none' }, 2000);
     }
   }catch(e){
-    document.getElementById('lgErr').textContent = 'API 不可达，请确认 Worker 已部署';
-    document.getElementById('lgErr').style.display = 'block';
+    err.textContent = '网络错误或 Worker 未部署: ' + e.message;
+    err.style.display = 'block';
   }
 }
 
