@@ -47,7 +47,12 @@ if "%choice%"=="4" (
     goto end
 )
 if "%choice%"=="5" (
-    start xau_workflow.html
+    if exist "%~dp0xau_workflow.html" (
+        start "" "%~dp0xau_workflow.html"
+    ) else (
+        echo   File not found: xau_workflow.html
+        echo   Make sure this bat is in the workflow folder
+    )
     goto end
 )
 
