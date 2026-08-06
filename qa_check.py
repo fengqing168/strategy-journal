@@ -160,6 +160,8 @@ for page in PAGES:
     for h in hrefs:
         # Skip external, anchors, mailto, js-generated templates
         if any(h.startswith(x) for x in ['http','#','mailto:','javascript:']) or '{' in h or '}' in h or "'" in h or '+' in h: continue
+        h = h.split('#')[0]  # strip anchor
+        if not h: continue
         if h == '/' or h == '': continue  # root link = index.html, valid
         resolved = h if h.startswith('/') else os.path.normpath(os.path.join(page_dir, h))
         resolved = resolved.lstrip('/')
