@@ -8,52 +8,106 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
 
 <div class="container">
+
 <header class="site-header"><div class="header-inner">
-<a href="/" class="brand"><span class="brand-gold">◆</span> 策略研究日志</a>
-<nav class="nav"><a href="/">日志</a><a href="library.html">资料库</a><a href="search.html">搜索</a><a href="subscribe.html">订阅</a><a href="about.html">关于</a></nav>
+<a href="/" class="brand">
+<span class="brand-logo"><span class="ring"></span><svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg></span>
+<span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
+</a>
+<nav class="nav"><a href="/">日志</a><a href="library.html">资料库</a><a href="search.html">搜索</a><a href="about.html">关于</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
 </div></header>
 
-<section class="hero fade-in"><div class="hero-badge">STRATEGY · RESEARCH · AI</div>
-<h1>一个观察者的<br><em>AI 辅助策略研究</em> 记录</h1>
-<p>AI 做分析，人做判断。每日更新，持续记录。</p></section>
+<section class="home-jumbo">
+<div class="hj-left">
+<div class="hero-badge"><span class="dot"></span>&ensp;STRATEGY · RESEARCH · AI</div>
+<h1>AI 做分析，<br><span class="g">人来做判断。</span></h1>
+<p class="hj-sub">一个独立策略研究者，每天记录「AI 辅助做决策」的全过程。不卖课、不喊单，只留一份可复盘、可复用的思考。</p>
+<div class="hj-form"><form class="sub-form" action="subscribe.html" method="get">
+<input type="email" name="email" placeholder="你的邮箱，每周一封" aria-label="邮箱">
+<button>免费订阅</button></form></div>
+<div class="hj-trust">每周日更新 · 随时退订 · 已记录 <b>001</b> 篇</div>
+<div class="hj-stats">
+<div class="hj-stat"><b>1</b><span>研究日志</span></div>
+<div class="hj-stat"><b>5</b><span>跟踪品种</span></div>
+<div class="hj-stat"><b>每周</b><span>更新频率</span></div>
+<div class="hj-stat"><b>0</b><span>付费课程</span></div>
+</div>
+</div>
 
-<hr class="divider">
+<div class="hj-right">
+<div class="flash">
+<div class="fh"><span class="l">今日实录 · #001</span><a href="logs/001.html">全部日志 →</a></div>
+<div class="ft">一条「鸽派措辞」是怎么从新闻走到结论的</div>
+<div class="steps">
+<div class="st"><div class="n">01</div><div class="bd"><div class="tt">事件 → 提取 <span class="s-lock free">✓公开</span></div><div class="dd">AI 抓取讲话原文，按利率立场/通胀/就业切片</div></div></div>
+<div class="st"><div class="n">02</div><div class="bd"><div class="tt">AI 初判 → 分歧</div><div class="dd">AI 判中性，我判偏鸽 — 分歧思路公开</div></div></div>
+<div class="st"><div class="n">03</div><div class="bd"><div class="tt">人工裁决 · 核心逻辑</div><div class="dd">阈值与历史权重算法 ← 完整版在模板内</div></div></div>
+</div>
+<div class="hook">
+<div class="t">整条工作流<b> ¥199</b> 智能体+脚本</div>
+<a href="subscribe.html" class="go">查看模板 →</a>
+</div>
+</div>
+</div>
+</section>
 
-<div class="home-grid">
-<div>
-<ul class="log-list">
-<li class="log-item fade-in"><a href="logs/001.html" class="log-link">
+<section class="home-trust">
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-1 9.9V14l-2 2m3-2a5 5 0 0 0 1-9.9A5 5 0 0 1 13 14v0"></path><path d="M9 18h6"></path></svg></div><div><div class="t">AI × 人</div><div class="d">AI 跑分析，人做判断，分歧也记录</div></div></div>
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div><div class="t">策略裸奔</div><div class="d">赚亏都写，思考过程完整到不敢造假</div></div></div>
+<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg></div><div><div class="t">不做喊单</div><div class="d">没有暗示、没有课程、没有付费上车</div></div></div>
+</section>
+
+<section class="home-cols">
+<div class="hc-head"><h2>内容栏目</h2><span>选题体系 · 10 大主题</span></div>
+<div class="col-pills">
+<a class="col-pill" href="library.html"><span class="no">实录</span>实盘判断对错账本</a>
+<a class="col-pill" href="library.html"><span class="no">拆解</span>决策全流程复现</a>
+<a class="col-pill" href="library.html"><span class="no">Prompt</span>可复制智能体工作流</a>
+<a class="col-pill" href="library.html"><span class="no">逻辑</span>观点是怎么来的</a>
+<a class="col-pill" href="library.html"><span class="no">复盘</span>失败认账与修正</a>
+<a class="col-pill" href="library.html"><span class="no">工具</span>开源可跑的脚本</a>
+<a class="col-pill" href="library.html"><span class="no">证据</span>AI 效率量化数据</a>
+<a class="col-pill" href="library.html"><span class="no">预告</span>下期追更清单</a>
+<a class="col-pill" href="library.html"><span class="no">入门</span>零基础起步</a>
+<a class="col-pill" href="library.html"><span class="no">独立</span>不喊单实证</a>
+</div>
+</section>
+
+<div class="section-title"><span class="bar"></span><h2>最近日志</h2><span class="sub">LATEST</span></div>
+<div class="inner">
+<div class="log-item"><a href="logs/001.html" class="log-link">
 <div class="log-meta"><span class="log-num">#001</span><span class="log-date">2026.08.06</span></div>
 <div class="log-title">我为什么开始记录这个 AI 策略研究系列</div>
 <div class="log-excerpt">用 AI 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。</div>
-<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">Prompt</span><span class="log-tag">Claude</span></div>
-</a></li>
-<li class="log-item" style="opacity:.35"><div class="log-link" style="cursor:default">
+<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">Prompt</span><span class="log-tag">Claude</span></div></a></div>
+<div class="log-item"><div class="log-link" style="cursor:default">
 <div class="log-meta"><span class="log-num">#002</span><span class="log-date">即将发布</span></div>
 <div class="log-title">AI 辅助分析趋势跟踪策略</div>
-</div></li>
-</ul>
+<div class="log-tags"><span class="log-tag">回测</span><span class="log-tag">趋势</span></div></div></div>
 </div>
 
-<aside class="sidebar fade-in">
-<div class="sidebar-section"><h4>热门标签</h4>
-<div class="tag-cloud">
-<a href="search.html?q=Claude">Claude</a><a href="search.html?q=央行分析">央行分析</a><a href="search.html?q=Prompt">Prompt</a><a href="search.html?q=回测">回测</a><a href="search.html?q=XAUUSD">XAUUSD</a>
-</div></div>
-<div class="sidebar-section">
-<a href="subscribe.html" style="display:block;padding:12px 14px;background:var(--gold);color:#FFF;text-align:center;text-decoration:none;border-radius:var(--radius);font-size:.75rem;font-weight:600;letter-spacing:.03em;transition:opacity .15s">免费订阅周报 →</a>
+<section class="mini-product">
+<div>
+<div class="mp-t">AI 智能体工作流 · 完整系统</div>
+<div class="mp-d">12 个串联 Prompt + 置信度规则 + 自动化脚本，持续更新</div>
 </div>
-</aside>
-</div>
+<span class="mp-p">¥199</span>
+<a href="subscribe.html" class="btn-primary">查看详情 →</a>
+</section>
 
-<footer class="footer"><p>舍予又见 &copy; 2026 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p></footer>
+<footer class="footer">
+<div class="sig">舍予又见</div>
+<div class="sig-sub">STRATEGY · RESEARCH · AI</div>
+<p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
+</footer>
+
 </div>
 
 <script src="js/main.js"></script>
