@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="AI 智能体工作流 · 完整系统。12个串联 Prompt + 置信度规则 + Python 脚本，XAUUSD 策略研究的 AI 辅助决策系统。">
+<meta name="description" content="AI 智能体工作流 · 完整系统。16个串联 Prompt + 置信度规则 + Python 脚本，XAUUSD 策略研究的 AI 辅助决策系统。">
 <title>工作流 — 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
 <div class="wf-hero">
 <div class="wf-badge">PRODUCT · 智能体系统</div>
 <h1>AI 智能体工作流<br><span class="g">完整系统</span></h1>
-<p class="wf-sub">一套基于 AI 智能体的策略研究流水线。不是"AI替你决策"，而是用 12 个串联 Prompt 跑完从信息收集到决策验证的全过程——留一个可供审阅、可反复使用的思考外脑。</p>
+<p class="wf-sub">一套基于 AI 智能体的策略研究流水线。不是"AI替你决策"，而是用 16 个串联 Prompt 跑完从信息收集到决策验证的全过程——留一个可供审阅、可反复使用的思考外脑。</p>
 <div class="wf-price">¥199</div>
 <div class="wf-actions">
 <a href="#preview" class="btn-primary" style="background:var(--card);color:var(--ai-1);border:1px solid rgba(99,102,241,.4);box-shadow:none">先看免费 Prompt ↓</a>
@@ -37,7 +37,7 @@
 
 <!-- 流程图 -->
 <div class="wf-flow" id="flow">
-<div class="wf-flow-title">工作流架构 · 4 阶段 12 节点</div>
+<div class="wf-flow-title">工作流架构 · 5 阶段 16 节点</div>
 <div class="wf-phases">
 <div class="wf-phase">
 <div class="ph-icon">🔍</div>
@@ -75,8 +75,18 @@
 <span class="wf-node locked">⑫复盘</span>
 </div>
 </div>
+<div class="wf-phase">
+<div class="ph-icon">🎯</div>
+<div class="ph-name">阶段五 · 技术执行</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑬技术</span>
+<span class="wf-node locked">⑭因子</span>
+<span class="wf-node locked">⑮入场</span>
+<span class="wf-node locked">⑯风控</span>
 </div>
-<div class="wf-arrows"><span>采集</span> → <span>AI分析</span> → <span>人机对比</span> → <span>决策复盘</span></div>
+</div>
+</div>
+<div class="wf-arrows"><span>采集</span> → <span>AI分析</span> → <span>人机对比</span> → <span>决策</span> → <span>技术执行</span></div>
 </div>
 
 <!-- Prompt #4 免费预览 -->
@@ -94,9 +104,9 @@
 你是一位央行政策分析师，专门解读美联储官员的讲话措辞。
 
 <span class="hl"># Context</span>
-当前联邦基金利率：<span class="ph">{{fed_rate}}</span>
-最近一次 FOMC 决议：<span class="ph">{{latest_fomc_date}}</span>，投票结果 <span class="ph">{{fomc_vote}}</span>
-宏观背景：<span class="ph">{{macro_context}}</span>
+当前联邦基金利率：<span class="ph">3.50%-3.75%</span>
+最近一次 FOMC 决议：<span class="ph">2026年7月29日</span>，投票结果 <span class="ph">9-3 维持不变（Hammack/Kashkari/Logan 投加息反对票）</span>
+宏观背景：<span class="ph">通胀仍高于2%目标，中东冲突首次被FOMC声明点名；9月会议市场定价35%概率加息；XAUUSD当前 $4269</span>
 
 <span class="hl"># Input</span>
 官员信息：<span class="ph">{{speaker_name}}</span>，职务 <span class="ph">{{speaker_role}}</span>
@@ -138,16 +148,16 @@
 </div>
 
 <div class="pp-demo">
-<div class="dm-label">真实演示 · 2026.08.06</div>
+<div class="dm-label">真实演示 · 2026.08.06 · XAUUSD $4269</div>
 <div class="dm-text">
-<strong>输入：</strong>7月29日 FOMC 声明全文（节选）— "Inflation remains elevated relative to the Committee's 2 percent goal... The Committee will deliver price stability." 三位委员（Hammack/Kashkari/Logan）投反对票要求 +25bp 加息。<br><br>
-<strong>AI 输出：</strong>
-· 利率指引：+4（明确拒绝降息讨论，三位委员要求加息）
-· 通胀措辞：+5（首次使用"will deliver price stability"而非"monitor risks"）
-· 就业评估：+1（"job gains have kept pace with the workforce"→ 中性偏鹰）
-· 风险提及：+2（中东冲突首次被写入声明作为不确定性来源）
+<strong>输入：</strong>7月29日 FOMC 声明 — "Inflation remains elevated... The Committee will deliver price stability." 首次在声明中点名"the conflict in the Middle East"作为不确定性来源。三位委员投反对票要求 +25bp 加息，投票从6月的 12-0 变为 9-3。<br><br>
+<strong>AI 输出（DeepSeek 实测）：</strong>
+· 利率指引：+4（三位委员要求加息，"will deliver price stability"）
+· 通胀措辞：+4（首次点名能源供应冲击推升通胀）
+· 就业评估：+1（"job gains have kept pace with the workforce"）
+· 风险提及：+2（中东冲突首次被明确写入声明）
 · 语气方向：+4（措辞比6月声明明显更强硬）<br><br>
-<strong>总分：+16/25 判定为「偏鹰」· 可信度：高</strong>
+<strong>总分：+15/25 判定为「鹰派」· 可信度：高</strong>
 </div>
 </div>
 </div>
@@ -158,7 +168,7 @@
 <div class="wf-includes fade-in">
 <h2>你将获得</h2>
 <div class="wf-grid">
-<div class="wf-card"><div class="wfc-icon">📋</div><div><div class="wfc-t">12 个即用 Prompt</div><div class="wfc-d">中文模板，复制到 Claude / GPT / 通义千问直接可用。每份含输入变量说明、输出格式与调节参数。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">📋</div><div><div class="wfc-t">16 个即用 Prompt</div><div class="wfc-d">中文模板，复制到 Claude / GPT / 通义千问直接可用。每份含输入变量说明、输出格式与调节参数。</div></div></div>
 <div class="wf-card"><div class="wfc-icon">📐</div><div><div class="wfc-t">置信度规则表</div><div class="wfc-d">阈值定义、历史权重公式、AI与人工得分的加权算法——不是模糊的建议，是精确的数值规则。</div></div></div>
 <div class="wf-card"><div class="wfc-icon">🐍</div><div><div class="wfc-t">3 个 Python 脚本</div><div class="wfc-d">新闻抓取器、Prompt 串联执行器、阈值计算器。从数据进入管道到拿到最终决策信号，全程可自动化。</div></div></div>
 <div class="wf-card"><div class="wfc-icon">🔄</div><div><div class="wfc-t">持续更新</div><div class="wfc-d">你买到的不只是一份文档。每次工作流有新优化、新 Prompt、新脚本，都会推送到你的 GitHub Repo，永久同步。</div></div></div>
@@ -170,7 +180,7 @@
 <!-- Buy CTA -->
 <div class="wf-buy fade-in">
 <h3>AI 智能体工作流 · 完整系统</h3>
-<p>12个Prompt + 置信度规则 + Python脚本 + 持续更新</p>
+<p>16个Prompt + 置信度规则 + Python脚本 + 持续更新</p>
 <div style="font-family:var(--mono);font-size:1.6rem;font-weight:700;margin:8px 0 16px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">¥199</div>
 <a href="purchase.html" class="btn-primary">获取完整版 ¥199 →</a>
 <div class="wf-note">购买后通过邮箱收到 GitHub 仓库邀请 + PDF 下载链接</div>

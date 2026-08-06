@@ -294,8 +294,9 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 /* 流程图 */
 .wf-flow{max-width:780px;margin:42px auto;padding:28px 22px;background:var(--card);border:1px solid var(--border-soft);border-radius:16px;box-shadow:var(--shadow)}
 .wf-flow-title{font-size:.9375rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:18px}
-.wf-phases{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-@media(max-width:700px){.wf-phases{grid-template-columns:repeat(2,1fr)}}
+.wf-phases{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:800px){.wf-phases{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:500px){.wf-phases{grid-template-columns:repeat(2,1fr)}}
 .wf-phase{border:1px solid var(--border-soft);border-radius:12px;padding:14px;text-align:center;background:var(--bg-soft)}
 .wf-phase .ph-icon{font-size:1.4rem;margin-bottom:6px}
 .wf-phase .ph-name{font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:8px;font-family:var(--mono);letter-spacing:.04em}
