@@ -72,7 +72,7 @@
       if (script.parentNode) script.parentNode.removeChild(script);
     }
 
-    script.src = 'https://hq.sinajs.cn/list=' + KEYS.join(',') + '&r=' + Math.random();
+    script.src = 'https://sina-quotes.362092939.workers.dev/?_=' + Date.now();
     script.onload = function () { ok = true; parse(); done(); };
     script.onerror = function () { done(); };
 
