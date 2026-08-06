@@ -93,7 +93,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <textarea id="inputText" placeholder="粘贴 FOMC 声明 / 央行讲话 / 宏观报告全文到此处..."></textarea>
 <div class="input-hint">
 <span>16 步串联分析 → 鹰鸽打分 → AI初判 → 人机对比 → 决策 → 入场计划 → 仓位风险</span>
-<span style="margin-left:auto">Ctrl+Enter 运行</span>
+<span style="margin-left:auto"><a href="#" onclick="loadDemo();return false" style="color:var(--accent);text-decoration:none">📋 加载示例文本</a> &nbsp; Ctrl+Enter 运行</span>
 </div>
 </div>
 <div class="output-area" id="outputArea">
@@ -289,6 +289,20 @@ document.getElementById('himSkip').addEventListener('click',skipHuman)
 document.getElementById('inputText').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')run()})
 
 function saveKey(){apiKey=document.getElementById('apiKey').value.trim();localStorage.setItem('xau_ds_key',apiKey);document.getElementById('saveKey').textContent=apiKey?'✓ 已保存':'保存'}
+
+function loadDemo(){
+  document.getElementById('inputText').value=`The Federal Reserve held the federal funds rate at 3.50%-3.75% on July 29, 2026, in a 9-3 vote — the first divided decision of the year. Dissenters Hammack, Kashkari, and Logan each favored a +25bp rate hike, signaling growing hawkish pressure inside the FOMC after the previous unanimous 12-0 hold in June.
+
+Key statement language:
+  • "Inflation remains elevated relative to the Committee's 2 percent goal, in part reflecting supply shocks that have driven price increases in certain sectors, including energy."
+  • "The Committee will deliver price stability." — a notably absolute commitment replacing the usual "seeks" or "monitors" language.
+  • "Economic activity is expanding at a solid pace despite elevated uncertainty that owes, in part, to the conflict in the Middle East."
+  • "Job gains have kept pace with the workforce, and the unemployment rate has changed little."
+
+This is the first time the FOMC statement has explicitly named a specific geopolitical conflict ("the conflict in the Middle East") as a source of uncertainty. Previously, statements referred only to "geopolitical tensions" generically.
+
+Market reaction: Fed funds futures now price a 35% probability of a +25bp hike at the September 15-16 FOMC meeting, up from 15% before the statement. U.S. 10-year yields rose 8bp to 4.32%. XAUUSD initially dipped to $2,645 before recovering to $2,660 on Middle East safe-haven flows. The hawkish shift in the vote tally (from unanimous to 9-3) represents the most significant change in FOMC dynamics since rate hikes paused in late 2023.`
+}`
 
 function buildStepList(){
   let h=''
