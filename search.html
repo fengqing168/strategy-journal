@@ -128,7 +128,7 @@
 </div>
 <script src="js/ticker.js"></script>
 <script>
-var data=[{n:"001",t:"我为什么开始记录这个 AI 策略研究系列",d:"2026.08.06",u:"logs/001.html",e:"用 Claude 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。",k:"央行分析 Prompt Claude"},{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"用 AI 回测趋势策略的历史表现，量化不同参数组合的胜率与回撤。",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"坦白局：当时为什么判断错了，工作流在哪个环节出了问题。",k:"复盘 教训"},{n:"004",t:"中东冲突如何重塑金价逻辑",d:"选题中",e:"从 FOMC 声明首次点名地缘冲突看避险定价的结构性变化。",k:"地缘 避险 央行分析"},{n:"005",t:"我的 AI 工作流：从 0 到 1",d:"选题中",e:"16 步 Prompt 链的设计思路与踩坑实录。",k:"Prompt AI 工作流"}];
+var data=[{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"用 AI 回测趋势策略的历史表现，量化不同参数组合的胜率与回撤。",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"坦白局：当时为什么判断错了，工作流在哪个环节出了问题。",k:"复盘 教训"},{n:"004",t:"中东冲突如何重塑金价逻辑",d:"选题中",e:"从 FOMC 声明首次点名地缘冲突看避险定价的结构性变化。",k:"地缘 避险 央行分析"},{n:"005",t:"我的 AI 工作流：从 0 到 1",d:"选题中",e:"16 步 Prompt 链的设计思路与踩坑实录。",k:"Prompt AI 工作流"}];
 
 var activeTag='all';
 
@@ -157,7 +157,7 @@ document.getElementById('logFilter').addEventListener('input',function(){
   var q=this.value.toLowerCase().trim();
   if(!q){renderCards(data);return}
   var t=q.split(/\s+/);
-  var r=data.filter(function(i){return t.every(function(k){return(i.t+' '+i.e+' '+i.k).toLowerCase().indexOf(k)>-1})});
+  var r=data.filter(function(i){return t.every(function(k){return(i.t+' '+i.e+' '+i.k+' '+i.n+' '+i.d).toLowerCase().indexOf(k)>-1})});
   renderCards(r)
 });
 

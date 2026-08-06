@@ -57,7 +57,18 @@ textarea::placeholder{color:var(--text3)}
 </style>
 </head>
 <body>
-<div class="app">
+<div id="tokenGate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px">
+<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px 28px;text-align:center;max-width:440px;width:100%">
+<div style="font-size:3rem;margin-bottom:12px">🔐</div>
+<h2 style="font-size:1.1rem;margin-bottom:6px">AI 智能体工作流</h2>
+<div style="font-size:.72rem;color:var(--text3);margin-bottom:18px">购买后获得专属访问 Token</div>
+<input type="text" id="tokenInput" placeholder="粘贴你的 Token" autocomplete="off" onkeydown="if(event.key==='Enter')verifyToken()" style="width:100%;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px 16px;font-size:.85rem;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;margin-bottom:10px">
+<div id="tgError" style="color:var(--down);font-size:.7rem;margin-bottom:8px;display:none">Token 无效或已过期</div>
+<button class="btn btn-run" onclick="verifyToken()" style="width:100%">验证并进入</button>
+<div style="font-size:.7rem;color:var(--text3);margin-top:14px">还没有 Token？<a href="purchase.html" style="color:var(--accent);text-decoration:none">前往购买 ¥199 →</a></div>
+</div>
+</div>
+<div class="app" id="mainApp" style="display:none">
 <h1><span>XAUUSD 智能体工作流</span></h1>
 <div class="sub">16 Prompt 串联 · 一键分析 · DeepSeek 驱动</div>
 
@@ -100,6 +111,35 @@ textarea::placeholder{color:var(--text3)}
 </div>
 
 <script>
+// ── Token 验证 ──
+async function verifyToken(){
+  var t=document.getElementById('tokenInput').value.trim();
+  if(!t)return;
+  try{
+    var r=await fetch('/api/token/validate?token='+encodeURIComponent(t));
+    var j=await r.json();
+    if(j.valid){
+      localStorage.setItem('xau_token',t);
+      document.getElementById('tokenGate').style.display='none';
+      document.getElementById('mainApp').style.display='block';
+    }else{
+      var e=document.getElementById('tgError');
+      e.textContent=j.reason==='expired'?'Token 已过期（'+j.age+'）':'Token 无效';
+      e.style.display='block';
+    }
+  }catch(e){document.getElementById('tgError').textContent='网络错误';document.getElementById('tgError').style.display='block'}
+}
+// Check saved token
+(async function(){
+  var saved=localStorage.getItem('xau_token');
+  var urlToken=new URLSearchParams(location.search).get('token');
+  var t=urlToken||saved;
+  if(t){
+    document.getElementById('tokenInput').value=t;
+    try{var r=await fetch('/api/token/validate?token='+encodeURIComponent(t));var j=await r.json();if(j.valid){document.getElementById('tokenGate').style.display='none';document.getElementById('mainApp').style.display='block';return}}catch(e){}
+  }
+  document.getElementById('tokenGate').style.display='flex';
+})()
 // ── 16 Prompts ──
 var P={}
 P[1]="你是宏观信息过滤器，识别与黄金（XAUUSD）相关的新闻。\n\n当前日期：{date}\n环境：联邦基金利率 3.50%-3.75%，7月29日 FOMC 9-3维持不变。\n\n输入：\n{raw_text}\n\n两步筛选：1）相关性（相关/无关）2）标注类型和影响。输出JSON：{\"relevant\":[{\"title\":\"\",\"type\":[],\"impact\":\"正面/负面/中性\",\"urgency\":\"高/中/低\",\"reason\":\"\"}],\"irrelevant_count\":N,\"summary\":\"\"}"
@@ -260,6 +300,5 @@ function skipHuman(){
 
 function escapeHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 </script>
-<script src="js/ticker.js"></script>
 </body>
 </html>

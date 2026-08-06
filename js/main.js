@@ -49,6 +49,6 @@ function subscribeForm(form) {
       }
     })
     .catch(function () {
-      form.innerHTML = '<div style="text-align:center;padding:14px;color:var(--up);font-weight:600">✓ 订阅成功！每周日发送到你的邮箱</div>';
+      form.innerHTML = '<div style="text-align:center;padding:14px;color:var(--down)">发送失败，请直接联系微信 twzd2519 订阅</div>';
     });
 }
