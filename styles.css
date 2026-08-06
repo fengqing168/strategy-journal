@@ -358,16 +358,43 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .fade-in.visible{opacity:1;transform:translateY(0)}
 
 /* ── 响应式 ── */
-@media(max-width:600px){
+@media(max-width:760px){
+  .home-jumbo{grid-template-columns:1fr;gap:18px}
+  .home-trust{grid-template-columns:1fr}
+  .mini-product{flex-direction:column;align-items:stretch;gap:12px}
+  .mini-product .mp-p{margin-left:0}
+  .mini-product .btn-primary{width:100%}
+  .log-cta{flex-direction:column;align-items:flex-start}
+  .log-cta .btn-primary{width:100%}
+  .pay-body{grid-template-columns:1fr}
+  .wf-grid{grid-template-columns:1fr}
+  .wf-phases{grid-template-columns:repeat(3,1fr)}
+  .log-page{grid-template-columns:1fr}
+  .log-side{position:static;top:auto}
+  .home-grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .lib-grid{grid-template-columns:1fr}
+  .sub-value{grid-template-columns:1fr}
+}
+@media(max-width:500px){
   html{font-size:15px}
-  .container{padding:0 18px}
+  .container{padding:0 16px}
   .header-inner{flex-direction:column;align-items:stretch;gap:4px}
-  .nav{flex-wrap:wrap;justify-content:flex-start}
-  .nav a{font-size:.75rem;padding:8px 6px}
-  .nav a::after{left:6px;right:6px}
+  .nav{flex-wrap:wrap;justify-content:flex-start;gap:3px}
+  .nav a{font-size:.72rem;padding:6px 8px}
+  .nav a::after{left:8px;right:8px}
   .brand .bt-en{display:none}
-  .nav-cta{padding:8px 16px;font-size:.75rem;margin-left:0}
-  .hj-left h1{font-size:1.8rem}
+  .nav-cta{padding:6px 14px;font-size:.72rem;margin-left:0}
+  .hj-left h1{font-size:1.55rem}
   .sub-form{flex-direction:column}
   .article-nav{flex-direction:column;gap:8px;align-items:flex-start}
+  .wf-phases{grid-template-columns:repeat(2,1fr)}
+  .wf-hero h1{font-size:1.6rem}
+  .lib-stats{grid-template-columns:repeat(2,1fr)}
+  .log-grid{grid-template-columns:1fr}
+  .pay-page{margin:12px auto}
+  .trust-cards{grid-template-columns:1fr}
+  .hj-stats{flex-wrap:wrap;gap:16px}
+  .wf-actions{flex-direction:column}
+  .prompt-preview{margin:20px 0}
 }
