@@ -77,15 +77,9 @@ body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min
 <div class="status" id="valStatus"></div>
 </div>
 
-<!-- 待确认订单 -->
-<div class="card">
-<h2>4. 待确认订单 <button class="btn btn-secondary" onclick="loadOrders()" style="font-size:.65rem;padding:4px 10px;margin-left:8px">刷新</button></h2>
-<div id="orderList" style="font-size:.75rem;color:var(--text2)">加载中...</div>
-</div>
-
 <!-- 快速链接 -->
 <div class="card">
-<h2>5. 快速链接</h2>
+<h2>4. 快速链接</h2>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
 <button class="btn btn-secondary" onclick="window.open('/workflow.html')">打开运行器</button>
 <button class="btn btn-secondary" onclick="window.open('/purchase.html')">打开购买页</button>
@@ -133,53 +127,6 @@ async function doLogin(){
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
 checkAPI();
-
-// ── 订单管理 ──
-async function loadOrders(){
-  var list = document.getElementById('orderList');
-  list.innerHTML = '加载中...';
-  var pw = localStorage.getItem('xau_admin_pw')||'';
-  try{
-    var r = await fetch(API+'/order/list?pw='+encodeURIComponent(pw));
-    var orders = await r.json();
-    if(!orders.length){ list.innerHTML = '暂无待确认订单'; return; }
-    var h = '';
-    orders.forEach(function(o){
-      var cls = o.status==='approved'?'up':'warn';
-      h += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center">'+
-        '<div><b style="font-size:.75rem">'+o.email+'</b> <span style="color:var(--text3);font-size:.62rem">'+o.ref+'</span></div>'+
-        (o.status==='pending'?'<button class="btn btn-primary" onclick="approveOrder(\''+o.id+'\')" style="font-size:.68rem;padding:5px 12px">确认付款</button>':'<span style="color:var(--up);font-size:.68rem">已确认</span>')+
-        '</div>'+
-        (o.token?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--up);word-break:break-all;margin-top:4px">Token: '+o.token+'</div>':'')+
-        '<div style="font-size:.6rem;color:var(--text3)">'+o.createdAt+'</div>'+
-        '</div>';
-    });
-    list.innerHTML = h;
-  }catch(e){list.innerHTML = '加载失败: '+e.message}
-}
-
-async function approveOrder(id){
-  var pw = localStorage.getItem('xau_admin_pw')||'';
-  try{
-    var r = await fetch(API+'/order/approve',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({pw:pw,id:id})
-    });
-    var d = await r.json();
-    if(d.token){
-      alert('已确认！Token:\n\n'+d.token+'\n\n已复制到剪贴板');
-      navigator.clipboard.writeText(d.token).catch(function(){});
-      loadOrders();
-    } else {
-      alert('确认失败: '+(d.error||'未知'));
-    }
-  }catch(e){alert('网络错误')}
-}
-
-// Auto-load orders
-loadOrders();
-setInterval(loadOrders, 10000);
         return;
       }
     }catch(e){}
