@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="策略研究日志 — 舍予又见的 AI 辅助策略研究记录。观察市场，记录判断。">
-<title>策略研究日志 · AI 辅助 XAUUSD 策略研究 | 舍予又见</title>
+<meta name="description" content="AI 智能体工作流 · 完整系统。16个串联 Prompt + 置信度规则 + Python 脚本，把 XAUUSD 策略研究变成可复现的决策系统。">
+<title>AI 智能体工作流 · 16 Prompt 完整系统 ¥199 | 策略研究日志</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<meta property="og:title" content="策略研究日志 · AI 辅助 XAUUSD 策略研究 | 舍予又见">
-<meta property="og:description" content="AI 做分析，人做判断。独立策略研究者每天记录 AI 辅助决策全过程。不卖课，不喊单，只留可复盘可复用的思考。">
+<meta property="og:title" content="AI 智能体工作流 · 16 Prompt 完整系统 ¥199 | 策略研究日志">
+<meta property="og:description" content="16个串联 Prompt + 置信度规则 + Python 脚本。把 XAUUSD 策略研究变成可复现的决策系统。可先免费试用一个节点。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shujian.cc/">
 <meta property="og:image" content="https://shujian.cc/images/og-default.png">
@@ -28,85 +28,215 @@
 <span class="brand-logo"><span class="ring"></span><svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg></span>
 <span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
 </a>
-<nav class="nav"><a href="/">首页</a><a href="search.html">日志</a><a href="library.html">资料库</a><a href="about.html">关于</a><a href="product.html">工作流</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
+<nav class="nav"><a href="/" class="active">工作流</a><a href="search.html">运行日志</a><a href="about.html">关于</a><a href="subscribe.html">订阅</a><a href="purchase.html" class="nav-cta">获取完整版</a></nav>
 </div></header>
 
-<section class="home-jumbo">
-<div class="hj-left">
-<div class="hero-badge"><span class="dot"></span>&ensp;STRATEGY · RESEARCH · AI</div>
-<h1>AI 做分析，<br><span class="g">人来做判断。</span></h1>
-<p class="hj-sub">一个独立策略研究者，每天记录「AI 辅助做决策」的全过程。不卖课、不喊单，只留一份可复盘、可复用的思考。</p>
-<div class="hj-form"><form class="sub-form" onsubmit="subscribeForm(this);return false">
+<!-- Hero -->
+<div class="wf-hero" style="padding-top:50px">
+<div class="wf-badge">PRODUCT · 智能体系统</div>
+<h1>把策略研究，<br><span class="g">变成可复现的系统。</span></h1>
+<p class="wf-sub">一套基于 AI 智能体的研究流水线。16 个串联 Prompt 从信息采集一路跑到决策验证——留一个可供审阅、可反复使用的思考外脑。不是 AI 替你决策，而是它帮你看到原本看不见的细节，判断终须你来做。</p>
+<div class="wf-actions">
+<a href="#preview" class="btn-primary">先看一个节点怎么跑（无需购买）</a>
+</div>
+</div>
+
+<!-- 工作流架构 -->
+<div class="wf-flow fade-in" id="flow">
+<div class="wf-flow-title">工作流架构 · 5 阶段 16 节点</div>
+<div class="wf-phases">
+<div class="wf-phase">
+<div class="ph-icon">🔍</div>
+<div class="ph-name">阶段一 · 采集</div>
+<div class="ph-nodes">
+<span class="wf-node locked">①筛选</span>
+<span class="wf-node locked">②提取</span>
+<span class="wf-node locked">③格式化</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">🧠</div>
+<div class="ph-name">阶段二 · AI分析</div>
+<div class="ph-nodes">
+<span class="wf-node free">④鹰鸽预览</span>
+<span class="wf-node locked">⑤多维</span>
+<span class="wf-node locked">⑥历史</span>
+<span class="wf-node locked">⑦异常</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">⚖️</div>
+<div class="ph-name">阶段三 · 人机对比</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑧初判</span>
+<span class="wf-node locked">⑨人判</span>
+<span class="wf-node locked">⑩分歧</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">✅</div>
+<div class="ph-name">阶段四 · 决策</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑪决策</span>
+<span class="wf-node locked">⑫复盘</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">🎯</div>
+<div class="ph-name">阶段五 · 技术执行</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑬技术</span>
+<span class="wf-node locked">⑭因子</span>
+<span class="wf-node locked">⑮入场</span>
+<span class="wf-node locked">⑯风控</span>
+</div>
+</div>
+</div>
+<div class="wf-arrows"><span>采集</span> → <span>AI分析</span> → <span>人机对比</span> → <span>决策</span> → <span>技术执行</span></div>
+<p style="text-align:center;font-size:.68rem;color:var(--text-muted);margin-top:6px">完整版含 15/16 个节点 · 仅 ④ 免费公开 · 购买后全部解锁</p>
+</div>
+
+<!-- Prompt #4 免费预览 -->
+<div class="prompt-preview fade-in" id="preview">
+<div class="pp-header">
+<div class="pp-title">节点 #4 · 鹰鸽打分（免费公开）</div>
+<div class="pp-badge">可先看，不送</div>
+</div>
+<div class="pp-body">
+<div class="pp-label">用途</div>
+<div class="pp-desc">对央行官员讲话做 5 维度量化评分（利率指引 / 通胀措辞 / 就业评估 / 风险提及 / 语气方向），每个维度 -5 到 +5，最终汇总为鹰鸽裁决。这是整套流水线的"翻译官"——把政策语言，翻成可量化的分数。看完这一个节点，你会清楚整条流水线的水准；完整的连接方式，在购买后解锁。</div>
+<div class="pp-label">完整 Prompt（可直接复制到 Claude/GPT）</div>
+<div class="pp-prompt">
+<span class="hl"># Role</span>
+你是一位央行政策分析师，专门解读美联储官员的讲话措辞。
+
+<span class="hl"># Context</span>
+当前联邦基金利率：<span class="ph">3.50%-3.75%</span>
+最近一次 FOMC 决议：<span class="ph">2026年7月29日</span>，投票结果 <span class="ph">9-3 维持不变（Hammack/Kashkari/Logan 投加息反对票）</span>
+宏观背景：<span class="ph">通胀仍高于2%目标，中东冲突首次被FOMC声明点名；9月会议市场定价35%概率加息；XAUUSD当前 $4269</span>
+
+<span class="hl"># Input</span>
+官员信息：<span class="ph">{{speaker_name}}</span>，职务 <span class="ph">{{speaker_role}}</span>
+历史倾向：<span class="ph">{{speaker_history}}</span>
+
+本次关键语句（已由前置 Prompt 提取）：
+<span class="ph">{{key_passages}}</span>
+
+同一官员上次讲话摘要（供对比）：
+<span class="ph">{{previous_statement_summary}}</span>
+
+<span class="hl"># Task</span>
+从以下 5 个维度打分，每个维度 -5 到 +5（正 = 鹰派，负 = 鸽派）：
+
+1. <b>利率指引</b> — 是否暗示加息/降息/观望
+2. <b>通胀措辞</b> — 对通胀的描述用词强度
+3. <b>就业评估</b> — 劳动力市场判断方向
+4. <b>风险提及</b> — 新增或强调的风险偏向
+5. <b>语气方向</b> — 整体措辞的立场偏移
+
+<span class="hl"># Output Format</span>
+```json
+{
+  "speaker": "",
+  "scores": {"利率指引":X,"通胀措辞":X,"就业评估":X,"风险提及":X,"语气方向":X},
+  "total": X,
+  "verdict": "鹰派/偏鹰/中性/偏鸽/鸽派",
+  "certainty": "高/中/低",
+  "key_evidence": ["引用原文词句"],
+  "vs_previous": "变鹰/变鸽/不变，原因",
+  "risk_flag": "是否触发预警"
+}
+```
+
+<span class="hl"># Rules</span>
+- 如果打分在 +3 以上，必须有至少一条原文引用支撑
+- 如果"vs_previous"与"verdict"方向相反（比如措辞变鸽但打分仍是鹰），需要额外解释
+- 当同一维度对比上次出现 ≥±2 的偏移时，触发 `risk_flag`
+</div>
+
+<div class="pp-demo">
+<div class="dm-label">真实演示 · 2026.08.06 · XAUUSD $4269</div>
+<div class="dm-text">
+<strong>输入：</strong>7月29日 FOMC 声明 — "Inflation remains elevated... The Committee will deliver price stability." 首次在声明中点名"the conflict in the Middle East"作为不确定性来源。三位委员投反对票要求 +25bp 加息，投票从6月的 12-0 变为 9-3。<br><br>
+<strong>AI 输出（DeepSeek 实测）：</strong>
+· 利率方向：+4（三位委员要求加息）
+· 通胀措辞：+4（首次点名能源供应冲击推升通胀）
+· 就业评估：+1（"job gains have kept pace with the workforce"）
+· 风险提及：+2（中东冲突首次被明确写入声明）
+· 语气方向：+4（措辞比6月声明明显更强硬）<br><br>
+<strong>总分：+15/25 判定为「鹰派」· 可信度：高</strong>
+</div>
+</div>
+</div>
+<div class="pp-copy"><button onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.querySelector('.pp-prompt').innerText);this.textContent='✓ 已复制';setTimeout(()=>this.textContent='复制 Prompt',2000)">复制 Prompt</button></div>
+</div>
+
+<!-- 首发赠品 -->
+<div class="wf-flow fade-in" style="margin-top:0;border:1px solid rgba(34,211,238,.3);background:linear-gradient(165deg,rgba(34,211,238,.04),rgba(6,182,212,.02))">
+<div style="text-align:center;font-size:.78rem;color:var(--text-sec);line-height:1.7">
+🎁 <strong style="color:var(--ai-1)">首发赠品</strong>：前 50 名购买者获一次 <strong style="color:var(--text)">1v1 配置咨询（15 分钟）</strong>——帮你把这套 Prompt 在 Claude/DeepSeek 里配好，打开即用。
+</div>
+</div>
+
+<!-- 交付清单 -->
+<div class="wf-includes fade-in">
+<h2>你将获得</h2>
+<div class="wf-grid">
+<div class="wf-card"><div class="wfc-icon">📋</div><div><div class="wfc-t">一套完整方法论</div><div class="wfc-d">16 个串联 Prompt，中文模板，复制到任意主流模型即可用。每份含输入变量、输出格式与调节参数。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">📐</div><div><div class="wfc-t">精确的规则</div><div class="wfc-d">置信度阈值、历史权重公式、AI 与人工打分的加权算法——不是模糊建议，是明确的数值规则。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">🐍</div><div><div class="wfc-t">自动化脚本</div><div class="wfc-d">新闻抓取、流水线串联执行、阈值计算。从信息进入管道到拿到决策信号，全程可自动化。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">🔄</div><div><div class="wfc-t">持续更新</div><div class="wfc-d">你买到的不只是一份文档。每次有新的优化、新的节点、新的脚本，都会推送到你的仓库，永久同步。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">📦</div><div><div class="wfc-t">双格式交付</div><div class="wfc-d">GitHub 私有仓库（持续更新自动同步）+ PDF/Markdown 下载包（离线可用）。</div></div></div>
+<div class="wf-card"><div class="wfc-icon">💡</div><div><div class="wfc-t">真实案例</div><div class="wfc-d">基于最新市场数据的实操样本（含 7/29 FOMC 声明分析）。不是理论，是在用的流水线。</div></div></div>
+</div>
+</div>
+
+<!-- 运行日志衔接 -->
+<div class="wf-flow fade-in" style="margin-top:0">
+<div class="wf-flow-title" style="font-size:.9rem">这套系统，每天都在官网运行</div>
+<p style="font-size:.8125rem;color:var(--text-sec);line-height:1.8;text-align:center;max-width:600px;margin:0 auto">「运行日志」记录的就是这套工作流真实跑出来的分析过程与复盘。你可以先看它几周，再决定要不要拥有它。</p>
+<div style="text-align:center;margin-top:16px"><a href="search.html" class="btn-primary" style="padding:10px 24px;font-size:.8125rem">查看系统运行日志 →</a></div>
+</div>
+
+<!-- Buy CTA -->
+<div class="wf-buy fade-in">
+<h3>AI 智能体工作流 · 完整系统</h3>
+<p>16 个 Prompt + 置信度规则 + Python 脚本 + 持续更新</p>
+<a href="purchase.html" class="btn-primary">获取完整版 ¥199 →</a>
+<div class="wf-note">付款后通过邮件收到 GitHub 仓库邀请 + PDF 下载链接</div>
+</div>
+
+<!-- FAQ -->
+<div class="wf-faq fade-in">
+<h2>常见问题</h2>
+<dl>
+<dt>需要什么技术基础？</dt>
+<dd>会用 Claude/GPT/DeepSeek 对话就行。Prompt 直接复制粘贴；脚本有说明文档。零基础也能用网页端手动执行版。</dd>
+<dt>支持哪些模型？</dt>
+<dd>基于 Claude 构建并实测，同时适配 GPT-4/4o、DeepSeek、Gemini、通义千问。每个节点标注了不同模型的调整建议。</dd>
+<dt>和直接写 Prompt 有什么区别？</dt>
+<dd>直接问 AI，是散点。这套流水线，把散点连成一条线——前一个的输出喂给下一个，从信息采集到决策验证自动衔接。不是更快，是更完整。</dd>
+<dt>和 Coze、Dify 这类工具有什么区别？</dt>
+<dd>它们是通用工具，要你自己设计流程。这套是针对 XAUUSD 策略研究的专用方案，16 个 Prompt 都是现成的，不需要从头搭，也可复制到任意平台使用。</dd>
+<dt>多久更新一次？</dt>
+<dd>有优化就更新。小优化随时推，大版本每季一次。所有更新推送到你说的仓库，永久同步。</dd>
+<dt>买了不适合能退吗？</dt>
+<dd>购买后 7 天内可直接退款。如果这套系统对你没用，它不值得你留着。</dd>
+<dt>适合哪些品种？</dt>
+<dd>基于 XAUUSD 设计，但所有 Prompt 均可参数化——替换品种相关变量，即可用于外汇、黄金、原油、股指等宏观驱动品种。</dd>
+<dt>它能帮我赚钱吗？</dt>
+<dd>不能保证。它做的是让你看见原本忽略的信息，最终判断永远是人做的。如果你需要一个点了就动的按钮，它不适合你；如果你需要一套尽量少犯错的系统，它的意义在这里。</dd>
+</dl>
+</div>
+
+<!-- 订阅 -->
+<section class="subscribe-box fade-in" style="max-width:640px;margin:0 auto">
+<h3>先不买，也可以</h3>
+<p>订阅，让这套系统每周真实跑出的结果直接连着订阅信息发送。看几周再说，随时订阅。</p>
+<form class="sub-form" onsubmit="subscribeForm(this);return false">
 <input type="email" placeholder="你的邮箱，每周一封" aria-label="邮箱" required>
-<button type="submit">免费订阅</button></form></div>
-<div class="hj-trust">每周日更新 · 随时退订 · 已记录 <b>001</b> 篇</div>
-<div class="hj-stats">
-<div class="hj-stat"><b>1</b><span>研究日志</span></div>
-<div class="hj-stat"><b>5</b><span>跟踪品种</span></div>
-<div class="hj-stat"><b>每周</b><span>更新频率</span></div>
-<div class="hj-stat"><b>16</b><span>Prompt工作流</span></div>
-</div>
-</div>
-
-<div class="hj-right">
-<div class="flash">
-<div class="fh"><span class="l">今日实录 · #001</span><a href="logs/001.html">全部日志 →</a></div>
-<div class="ft">一条「鸽派措辞」是怎么从新闻走到结论的</div>
-<div class="steps">
-<div class="st"><div class="n">01</div><div class="bd"><div class="tt">事件 → 提取 <span class="s-lock free">✓公开</span></div><div class="dd">AI 抓取讲话原文，按利率立场/通胀/就业切片</div></div></div>
-<div class="st"><div class="n">02</div><div class="bd"><div class="tt">AI 初判 → 分歧</div><div class="dd">AI 判中性，我判偏鸽 — 分歧思路公开</div></div></div>
-<div class="st"><div class="n">03</div><div class="bd"><div class="tt">人工裁决 · 核心逻辑</div><div class="dd">阈值与历史权重算法 ← 完整版在模板内</div></div></div>
-</div>
-<div class="hook">
-<div class="t">整条工作流<b> ¥199</b> 智能体+脚本</div>
-<a href="product.html" class="go">查看模板 →</a>
-</div>
-</div>
-</div>
-</section>
-
-<section class="home-trust">
-<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-1 9.9V14l-2 2m3-2a5 5 0 0 0 1-9.9A5 5 0 0 1 13 14v0"></path><path d="M9 18h6"></path></svg></div><div><div class="t">AI × 人</div><div class="d">AI 跑分析，人做判断，分歧也记录</div></div></div>
-<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div><div class="t">策略裸奔</div><div class="d">赚亏都写，思考过程完整到不敢造假</div></div></div>
-<div class="ht"><div class="ic"><svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg></div><div><div class="t">不做喊单</div><div class="d">没有暗示、没有课程、没有付费上车</div></div></div>
-</section>
-
-<section class="home-cols">
-<div class="hc-head"><h2>内容栏目</h2><span>选题体系 · 10 大主题</span></div>
-<div class="col-pills">
-<a class="col-pill" href="library.html"><span class="no">实录</span>实盘判断对错账本</a>
-<a class="col-pill" href="library.html"><span class="no">拆解</span>决策全流程复现</a>
-<a class="col-pill" href="library.html"><span class="no">Prompt</span>可复制智能体工作流</a>
-<a class="col-pill" href="library.html"><span class="no">逻辑</span>观点是怎么来的</a>
-<a class="col-pill" href="library.html"><span class="no">复盘</span>失败认账与修正</a>
-<a class="col-pill" href="library.html"><span class="no">工具</span>开源可跑的脚本</a>
-<a class="col-pill" href="library.html"><span class="no">证据</span>AI 效率量化数据</a>
-<a class="col-pill" href="library.html"><span class="no">预告</span>下期追更清单</a>
-<a class="col-pill" href="library.html"><span class="no">入门</span>零基础起步</a>
-<a class="col-pill" href="library.html"><span class="no">独立</span>不喊单实证</a>
-</div>
-</section>
-
-<div class="section-title"><span class="bar"></span><h2>最近日志</h2><span class="sub">LATEST</span></div>
-<div class="inner">
-<div class="log-item"><a href="logs/001.html" class="log-link">
-<div class="log-meta"><span class="log-num">#001</span><span class="log-date">2026.08.06</span></div>
-<div class="log-title">我为什么开始记录这个 AI 策略研究系列</div>
-<div class="log-excerpt">用 AI 分析美联储官员讲话措辞变化。AI 的文字对比能力很强，但缺乏历史语境的全局把握。</div>
-<div class="log-tags"><span class="log-tag">央行分析</span><span class="log-tag">Prompt</span><span class="log-tag">Claude</span></div></a></div>
-<div class="log-item"><div class="log-link" style="cursor:default">
-<div class="log-meta"><span class="log-num">#002</span><span class="log-date">即将发布</span></div>
-<div class="log-title">AI 辅助分析趋势跟踪策略</div>
-<div class="log-tags"><span class="log-tag">回测</span><span class="log-tag">趋势</span></div></div></div>
-</div>
-
-<section class="mini-product">
-<div>
-<div class="mp-t">AI 智能体工作流 · 完整系统</div>
-<div class="mp-d">16 个串联 Prompt + 置信度规则 + 自动化脚本，持续更新</div>
-</div>
-<span class="mp-p">¥199</span>
-<a href="product.html" class="btn-primary">查看详情 →</a>
+<button type="submit">订阅</button></form>
+<div style="font-size:.68rem;color:var(--text-muted);margin-top:10px">每周一封 · 随时退订 · 不发垃圾</div>
 </section>
 
 <footer class="footer">
@@ -115,6 +245,26 @@
 <p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="about.html#privacy">隐私</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
 </footer>
 
+</div>
+
+<!-- 浮动咨询按钮 -->
+<div style="position:fixed;bottom:24px;right:72px;z-index:99">
+<button onclick="document.getElementById('consultOverlay').style.display='flex'" style="width:44px;height:44px;border-radius:50%;background:var(--grad);color:#FFF;border:none;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px -3px rgba(6,182,212,.45);transition:all .15s" title="购买咨询">💬</button>
+</div>
+
+<!-- 购买咨询弹窗 -->
+<div id="consultOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:var(--card);border:1px solid var(--border-strong);border-radius:16px;padding:28px;max-width:420px;width:90vw;text-align:center">
+<div style="font-size:2rem;margin-bottom:8px">💬</div>
+<h3 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px">购买咨询</h3>
+<p style="font-size:.78rem;color:var(--text-sec);margin-bottom:18px;line-height:1.6">关于 AI 智能体工作流有任何疑问，可直接与我确认</p>
+<div style="text-align:left;font-size:.78rem;color:var(--text-sec);line-height:2.2">
+<div>💬 微信：<strong style="color:var(--text)">twzd2519</strong></div>
+<div>📧 邮箱：<a href="mailto:362092939@qq.com" style="color:var(--ai-1)">362092939@qq.com</a></div>
+<div>🔑 <a href="purchase.html" style="color:var(--ai-1)">直接购买 ¥199 →</a></div>
+</div>
+<button onclick="document.getElementById('consultOverlay').style.display='none'" style="margin-top:16px;width:100%;padding:10px;background:var(--card);color:var(--text-sec);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem">关闭</button>
+</div>
 </div>
 
 <script src="js/main.js"></script>

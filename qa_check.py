@@ -89,7 +89,7 @@ for page in PAGES:
         continue
     hrefs = re.findall(r'href="([^"]+)"', nav.group(1))
     is_logs = page == "logs/001.html"
-    expected = ['../index.html','../search.html','../library.html','../about.html','../product.html','../subscribe.html'] if is_logs else ['/','search.html','library.html','about.html','product.html','subscribe.html']
+    expected = ['../index.html','../search.html','../about.html','../subscribe.html','../purchase.html'] if is_logs else ['/','search.html','about.html','subscribe.html','purchase.html']
     if hrefs == expected:
         ok(f"{page}: 导航正确 ✓")
     else:
