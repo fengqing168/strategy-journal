@@ -1,4 +1,4 @@
-/* ── 新浪实时行情 ── */
+/* ── 新浪实时行情（SW 代理） ── */
 (function () {
   var track = document.getElementById('ticker-track');
   if (!track) return;
@@ -12,17 +12,24 @@
   };
 
   var KEYS = Object.keys(CFG);
-  var CACHE_KEY = 'tkr_v3';
+  var CACHE_KEY = 'tkr_v4';
   var busy = false;
+  var cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) {}
 
-  function loadCache() {
-    try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) { return {}; }
+  function parseSina(text) {
+    var items = {};
+    var lines = text.split(';');
+    lines.forEach(function (line) {
+      var m = line.match(/hq_str_(\w+)="(.+)"/);
+      if (!m) return;
+      var key = m[1], fields = m[2].split(','), cfg = CFG[key];
+      if (!cfg) return;
+      var price = parseFloat(fields[cfg.idx]);
+      if (!isNaN(price)) items[key] = { price: price, raw: fields };
+    });
+    return items;
   }
-  function saveCache(d) {
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {}
-  }
-
-  var cache = loadCache();
 
   function buildHTML(items) {
     var h = '';
@@ -31,9 +38,9 @@
       if (!d) return;
       var cfg = CFG[k];
       var p = d.price, pre = d.prev, ch = d.change, pct = d.pct || '--';
-      var dir = ch >= 0 ? 'up' : 'down';
-      var arrow = ch >= 0 ? '▲' : '▼';
-      var chStr = (ch >= 0 ? '+' : '') + ch.toFixed(cfg.dec);
+      var dir = (ch === 1e9 || ch >= 0) ? 'up' : 'down';  /* ch=1e9 = first-load */
+      var arrow = (ch === 1e9 || ch >= 0) ? '▲' : '▼';
+      var chStr = (ch === 1e9) ? '——' : ((ch >= 0 ? '+' : '') + ch.toFixed(cfg.dec));
       var flash = (pre !== null && pre !== p) ? (p > pre ? 'flash-up' : 'flash-down') : '';
 
       h += '<span class="tkr">' +
@@ -51,12 +58,11 @@
     if (!inner) return;
     track.style.animation = 'none';
     track.innerHTML = inner + inner;
-    void track.offsetWidth;               /* force reflow to restart animation */
+    void track.offsetWidth;
     track.style.animation = 'scrollTicker 60s linear infinite';
-
     var toSave = {};
     KEYS.forEach(function (k) { if (items[k]) toSave[k] = { price: items[k].price }; });
-    saveCache(toSave);
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(toSave)); } catch (e) {}
     cache = items;
   }
 
@@ -64,21 +70,19 @@
     if (busy) return;
     busy = true;
     try {
-      var resp = await fetch('https://sina-proxy.362092939.workers.dev/');
+      var resp = await fetch('/__sina');
       if (!resp.ok) return;
-      var data = await resp.json();
+      var text = await resp.text();
+      var fresh = parseSina(text);
 
       var items = {};
       KEYS.forEach(function (k) {
-        var p = data[k];
-        if (!p || !p.price) return;
-        var price = p.price;
-        if (isNaN(price)) return;
-
+        var n = fresh[k];
+        if (!n) return;
+        var price = n.price;
         var old = cache[k] ? cache[k].price : null;
-        var change = (old !== null) ? price - old : 0;
+        var change = (old !== null) ? (price - old) : 1e9;  /* 1e9 = first load */
         var pct = (old && old !== 0) ? ((change / old) * 100).toFixed(2) + '%' : null;
-
         items[k] = { price: price, prev: old, change: change, pct: pct };
       });
 
@@ -86,11 +90,16 @@
         render(items);
       }
     } catch (e) {
-      /* keep static fallback visible */
+      /* keep static fallback */
     }
     busy = false;
   }
 
-  doFetch();
-  setInterval(doFetch, 3000);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+    navigator.serviceWorker.ready.then(function () {
+      doFetch();
+      setInterval(doFetch, 3000);
+    });
+  }
 })();
