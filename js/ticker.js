@@ -64,7 +64,7 @@
     if (busy) return;
     busy = true;
     try {
-      var resp = await fetch('/api/sina');
+      var resp = await fetch('https://sina-proxy.362092939.workers.dev/');
       if (!resp.ok) return;
       var data = await resp.json();
 
