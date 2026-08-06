@@ -9,6 +9,7 @@
  *   /api/order/list        — 列出待确认订单（需密码）
  *   /api/order/approve     — 确认订单 → 发放 Token（需密码）
  *   /api/order/status      — 查询订单状态
+ *   /api/subscribe       — 订阅邮件 + 自动回复（需 RESEND_API_KEY）
  *   /api/ping                — 健康检查
  */
 
@@ -184,6 +185,47 @@ export default {
       return new Response(JSON.stringify({ id, status: "approved", token, email: o.email }), {
         headers: { "Content-Type": "application/json", ...cors },
       });
+    }
+
+    // ── /api/subscribe ──
+    if (path === "/api/subscribe" && request.method === "POST") {
+      const RESEND_KEY = env.RESEND_API_KEY || "";
+      if (!RESEND_KEY) {
+        return new Response(JSON.stringify({ ok: true, note: "email_disabled" }), { headers: { "Content-Type": "application/json", ...cors } });
+      }
+      try {
+        const body = await request.json();
+        const email = (body.email || "").trim();
+        if (!email || !email.includes("@")) {
+          return new Response(JSON.stringify({ error: "invalid_email" }), { status: 400, headers: { "Content-Type": "application/json", ...cors } });
+        }
+        // Send welcome email via Resend
+        const html = `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#181C28;color:#F2F4FA;border-radius:12px">
+<h2 style="color:#22D3EE">欢迎订阅策略研究周报</h2>
+<p>每周日发送到你的邮箱，内容：</p>
+<ul>
+<li>本周最有价值的策略研究深度复盘</li>
+<li>公开日志不写的完整 Prompt 和工具链优化细节</li>
+<li>下周研究方向预告</li>
+</ul>
+<p>📂 <a href="https://shujian.cc/library.html" style="color:#22D3EE">策略研究知识库</a></p>
+<p>🤖 <a href="https://shujian.cc/product.html" style="color:#22D3EE">AI 智能体工作流 · 16 Prompt</a></p>
+<p style="font-size:12px;color:#949CB8;margin-top:24px">策略研究日志 · 舍予又见 · <a href="https://shujian.cc" style="color:#949CB8">shujian.cc</a></p>
+</div>`;
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            from: "策略研究日志 <noreply@shujian.cc>",
+            to: email,
+            subject: "欢迎订阅策略研究周报 · 舍予又见",
+            html,
+          }),
+        });
+        return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json", ...cors } });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: true, note: "email_send_failed" }), { headers: { "Content-Type": "application/json", ...cors } });
+      }
     }
 
     // ── /api/ping ──

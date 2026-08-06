@@ -211,6 +211,26 @@
 <p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
 </footer>
 
+<!-- 购买咨询弹窗 -->
+<div id="consultOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+<div style="background:var(--card);border:1px solid var(--border-strong);border-radius:16px;padding:28px;max-width:420px;width:90vw;text-align:center">
+<div style="font-size:2rem;margin-bottom:8px">💬</div>
+<h3 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px">购买咨询</h3>
+<p style="font-size:.78rem;color:var(--text-sec);margin-bottom:18px;line-height:1.6">关于 AI 智能体工作流有任何问题，直接联系卖家</p>
+<div style="text-align:left;font-size:.78rem;color:var(--text-sec);line-height:2.2">
+<div>💬 微信：<strong style="color:var(--text)">twzd2519</strong></div>
+<div>📧 邮箱：<a href="mailto:362092939@qq.com" style="color:var(--ai-1)">362092939@qq.com</a></div>
+<div>🔑 <a href="purchase.html" style="color:var(--ai-1)">直接购买 ¥199 →</a></div>
+</div>
+<button onclick="document.getElementById('consultOverlay').style.display='none'" style="margin-top:16px;width:100%;padding:10px;background:var(--card);color:var(--text-sec);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem">关闭</button>
+</div>
+</div>
+
+<!-- 浮动咨询按钮 -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:99">
+<button onclick="document.getElementById('consultOverlay').style.display='flex'" style="width:44px;height:44px;border-radius:50%;background:var(--grad);color:#FFF;border:none;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px -3px rgba(6,182,212,.45);transition:all .15s" title="购买咨询">💬</button>
+</div>
+
 </div>
 </div>
 <script src="js/main.js"></script><script src="js/ticker.js"></script>

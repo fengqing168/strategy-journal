@@ -350,6 +350,9 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .wf-faq dt{font-size:.8125rem;font-weight:600;color:var(--text);margin-top:16px;cursor:pointer}
 .wf-faq dd{font-size:.78rem;color:var(--text-sec);line-height:1.7;margin:6px 0 0 0;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
 
+/* ── 文章评论 ── */
+.article-comments{margin-top:24px;padding-top:8px;border-top:1px solid var(--border-soft)}
+
 /* ── 可见性动画 ── */
 .fade-in{opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .fade-in.visible{opacity:1;transform:translateY(0)}

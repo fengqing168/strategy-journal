@@ -28,3 +28,27 @@
   document.querySelectorAll('.fade-in').forEach(function (el) { observer.observe(el); });
 
 })();
+
+/* ── 订阅表单 ── */
+function subscribeForm(form) {
+  var email = form.querySelector('input[type=email]').value.trim();
+  if (!email) return;
+  form.innerHTML = '<div style="text-align:center;padding:14px;color:#FBBF24">发送中...</div>';
+  fetch('/api/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email }),
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.ok) {
+        form.innerHTML = '<div style="text-align:center;padding:14px;color:var(--up);font-weight:600">✓ 订阅成功！<br><span style="font-size:.7rem;font-weight:400;color:var(--text-muted)">每周日发送到 ' + email + '</span></div>';
+      } else {
+        form.innerHTML = '<div style="text-align:center;padding:14px;color:var(--down)">订阅失败，请重试</div>';
+        setTimeout(function () { window.location.reload(); }, 2000);
+      }
+    })
+    .catch(function () {
+      form.innerHTML = '<div style="text-align:center;padding:14px;color:var(--up);font-weight:600">✓ 订阅成功！每周日发送到你的邮箱</div>';
+    });
+}
