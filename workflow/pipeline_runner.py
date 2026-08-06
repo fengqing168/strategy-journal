@@ -26,7 +26,7 @@ from pathlib import Path
 # ── 配置 ──
 API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 MODEL = "claude-sonnet-4-20250514"  # 或 "claude-opus-4-20250514"
-PROMPTS_DIR = Path(__file__).parent / "prompts"
+PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 
 # Prompt 1-12 的输入模板文件名
 PROMPT_FILES = {
