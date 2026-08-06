@@ -111,6 +111,6 @@
   }
 
   doFetch();
-  setInterval(doFetch, 6000);
+  setInterval(doFetch, 3000);
 
 })();
