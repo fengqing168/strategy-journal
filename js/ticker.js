@@ -1,23 +1,21 @@
-/* ── 实时行情（免代理） ── */
+/* ── 实时行情（Worker 代理） ── */
 (function () {
   var track = document.getElementById('ticker-track');
   if (!track) return;
 
   var CFG = {
-    XAU: { label: 'XAUUSD', dec: 2, fx: false },
-    EUR: { label: 'EURUSD', dec: 4, fx: true  },
-    GBP: { label: 'GBPUSD', dec: 4, fx: true  },
-    JPY: { label: 'USDJPY', dec: 3, fx: false },
-    CAD: { label: 'USDCAD', dec: 4, fx: false },
+    hf_XAU:      { label: 'XAUUSD', dec: 2 },
+    fx_seurusd:  { label: 'EURUSD', dec: 4 },
+    fx_sgbpusd:  { label: 'GBPUSD', dec: 4 },
+    fx_susdjpy:  { label: 'USDJPY', dec: 3 },
+    fx_susdcad:  { label: 'USDCAD', dec: 4 },
   };
 
   var KEYS = Object.keys(CFG);
-  var CACHE_KEY = 'tkr_v5';
+  var CACHE_KEY = 'tkr_v6';
   var busy = false;
   var cache = {};
   try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) {}
-
-  var fxCache = null;        /* { rates:{...}, ts } */
 
   function buildHTML(items) {
     var h = '';
@@ -44,59 +42,44 @@
   function render(items) {
     var inner = buildHTML(items);
     if (!inner) return;
+    track.style.animation = 'none';
     track.innerHTML = inner + inner;
+    void track.offsetWidth;
+    track.style.animation = 'scrollTicker 60s linear infinite';
     var toSave = {};
     KEYS.forEach(function (k) { if (items[k]) toSave[k] = { price: items[k].price }; });
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(toSave)); } catch (e) {}
     cache = items;
   }
 
-  function mergeItems(fresh) {
-    var items = {};
-    KEYS.forEach(function (k) {
-      var price = fresh[k];
-      if (!price) return;
-      var old = cache[k] ? cache[k].price : null;
-      var change = (old !== null) ? (price - old) : 1e9;
-      var pct = (old && old !== 0) ? ((change / old) * 100).toFixed(2) + '%' : null;
-      items[k] = { price: price, prev: old, change: change, pct: pct };
-    });
-    if (KEYS.some(function (k) { return items[k]; })) render(items);
-  }
-
-  /* ── 黄金：每 3s ── */
-  async function fetchGold() {
+  async function doFetch() {
+    if (busy) return;
+    busy = true;
     try {
-      var resp = await fetch('https://api.gold-api.com/price/XAU');
+      var resp = await fetch('/api/sina');
       if (!resp.ok) return;
-      var j = await resp.json();
-      if (j.price) mergeItems({ XAU: j.price });
-    } catch (e) {}
+      var data = await resp.json();
+
+      var items = {};
+      KEYS.forEach(function (k) {
+        var p = data[k];
+        if (!p || !p.price) return;
+        var price = p.price;
+        var old = cache[k] ? cache[k].price : null;
+        var change = (old !== null) ? (price - old) : 1e9;
+        var pct = (old && old !== 0) ? ((change / old) * 100).toFixed(2) + '%' : null;
+        items[k] = { price: price, prev: old, change: change, pct: pct };
+      });
+
+      if (KEYS.some(function (k) { return items[k]; })) {
+        render(items);
+      }
+    } catch (e) {
+      /* keep static fallback */
+    }
+    busy = false;
   }
 
-  /* ── 外汇：缓存在内存中 ── */
-  async function fetchForex() {
-    try {
-      var resp = await fetch('https://open.er-api.com/v6/latest/USD');
-      if (!resp.ok) return;
-      var j = await resp.json();
-      var r = j.rates;
-      if (!r) return;
-      var fresh = {};
-      if (r.EUR) fresh.EUR = 1 / r.EUR;
-      if (r.GBP) fresh.GBP = 1 / r.GBP;
-      if (r.JPY) fresh.JPY = r.JPY;
-      if (r.CAD) fresh.CAD = r.CAD;
-      mergeItems(fresh);
-      fxCache = { ts: Date.now() };
-    } catch (e) {}
-  }
-
-  function tick() {
-    fetchGold();
-    if (!fxCache || (Date.now() - fxCache.ts) > 3600000) fetchForex();
-  }
-
-  tick();
-  setInterval(tick, 3000);
+  doFetch();
+  setInterval(doFetch, 3000);
 })();

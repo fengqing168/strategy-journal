@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>管理面板 · 策略研究日志</title>
+<style>
+:root{--bg:#0F1118;--card:#181B28;--card2:#1E2133;--border:#252940;--accent:#6366F1;--grad:linear-gradient(135deg,#6366F1,#8B5CF6);--text:#E2E4F0;--text2:#959AB8;--up:#34D399;--down:#F87171;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:40px 20px}
+.app{max-width:720px;width:100%}
+.app h1{font-size:1.3rem;font-weight:700;margin-bottom:24px}
+.app h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.card h2{font-size:.9rem;font-weight:600;margin-bottom:12px}
+.card .row{display:flex;gap:8px;align-items:center}
+.card input[type=text],.card input[type=password]{flex:1;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:.82rem;outline:none;font-family:'JetBrains Mono',monospace}
+.card input:focus{border-color:var(--accent)}
+.btn{font-size:.78rem;font-weight:600;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--grad);color:#FFF}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
+.token-output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--up);text-align:center;word-break:break-all;margin-top:10px;display:none}
+.token-output.show{display:block}
+.status{font-size:.7rem;color:var(--text2);margin-top:6px}
+.indicator{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.indicator.green{background:var(--up);box-shadow:0 0 6px rgba(52,211,153,.4)}
+.indicator.red{background:var(--down)}
+.indicator.yellow{background:#FBBF24}
+</style>
+</head>
+<body>
+<div class="app">
+<h1><span>管理面板</span> · 策略研究日志</h1>
+
+<!-- API 状态 -->
+<div class="card">
+<h2>1. API 状态检查</h2>
+<div id="apiStatus"><span class="indicator yellow"></span> 检查中...</div>
+<button class="btn btn-secondary" onclick="checkAPI()" style="margin-top:8px">重新检查</button>
+<div class="status" id="apiDetail"></div>
+</div>
+
+<!-- 生成 Token -->
+<div class="card">
+<h2>2. 生成新 Token</h2>
+<div class="row">
+<input type="password" id="adminPw" placeholder="管理员密码" autocomplete="off">
+<button class="btn btn-primary" onclick="genToken()">生成 Token</button>
+</div>
+<div class="token-output" id="tokenOut"></div>
+<div class="status" id="genStatus"></div>
+</div>
+
+<!-- 验证 Token -->
+<div class="card">
+<h2>3. 验证 Token</h2>
+<div class="row">
+<input type="text" id="checkToken" placeholder="粘贴 Token 验证是否有效" autocomplete="off">
+<button class="btn btn-secondary" onclick="validate()">验证</button>
+</div>
+<div class="status" id="valStatus"></div>
+</div>
+
+<!-- 快速命令 -->
+<div class="card">
+<h2>4. 快速链接</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-secondary" onclick="window.open('/workflow.html')">打开运行器</button>
+<button class="btn btn-secondary" onclick="window.open('/purchase.html')">打开购买页</button>
+<button class="btn btn-secondary" onclick="window.open('/product.html')">打开产品页</button>
+</div>
+<div class="status" style="margin-top:8px">行情代理: shujian.cc/api/sina &nbsp;|&nbsp; Token生成: /api/token/generate?pw=xxx &nbsp;|&nbsp; Token验证: /api/token/validate?token=xxx</div>
+</div>
+
+</div>
+<script>
+var API = '/api';
+var PW = 'xau2026twzd';
+
+async function checkAPI(){
+  var s = document.getElementById('apiStatus');
+  var d = document.getElementById('apiDetail');
+  s.innerHTML = '<span class="indicator yellow"></span> 检查中...';
+  try{
+    var r = await fetch(API+'/ping');
+    if(r.ok){
+      s.innerHTML = '<span class="indicator green"></span> API 在线';
+      d.textContent = '响应正常 · 时间: ' + new Date().toLocaleTimeString();
+    } else {
+      s.innerHTML = '<span class="indicator red"></span> API 异常 HTTP ' + r.status;
+    }
+  }catch(e){
+    s.innerHTML = '<span class="indicator red"></span> API 不可达';
+    d.textContent = '错误: ' + e.message + ' · 请确认 Worker 已部署并绑定路由';
+  }
+}
+
+async function genToken(){
+  var pw = document.getElementById('adminPw').value;
+  if(!pw){ document.getElementById('genStatus').textContent = '请输入管理员密码'; return; }
+  document.getElementById('genStatus').textContent = '生成中...';
+  try{
+    var r = await fetch(API+'/token/generate?pw='+encodeURIComponent(pw));
+    var j = await r.json();
+    if(j.token){
+      var out = document.getElementById('tokenOut');
+      out.textContent = j.token;
+      out.className = 'token-output show';
+      document.getElementById('genStatus').textContent = '✓ 生成成功 · 有效期 90 天 · ' + j.generated;
+      // Copy to clipboard
+      navigator.clipboard.writeText(j.token).catch(function(){});
+    } else {
+      document.getElementById('genStatus').textContent = '✗ ' + (j.error||'未知错误');
+    }
+  }catch(e){
+    document.getElementById('genStatus').textContent = '✗ API 不可达: ' + e.message;
+  }
+}
+
+async function validate(){
+  var t = document.getElementById('checkToken').value.trim();
+  if(!t){ document.getElementById('valStatus').textContent = '请粘贴 Token'; return; }
+  try{
+    var r = await fetch(API+'/token/validate?token='+encodeURIComponent(t));
+    var j = await r.json();
+    if(j.valid){
+      document.getElementById('valStatus').innerHTML = '<span class="indicator green" style="display:inline-block"></span> 有效 · 已使用 ' + j.age;
+    } else {
+      document.getElementById('valStatus').innerHTML = '<span class="indicator red" style="display:inline-block"></span> 无效 · ' + (j.reason==='expired'?'已过期('+j.age+')':j.reason==='invalid'?'签名不匹配':'格式错误');
+    }
+  }catch(e){
+    document.getElementById('valStatus').textContent = '✗ API 不可达';
+  }
+}
+
+// Init
+checkAPI();
+</script>
+</body>
+</html>
