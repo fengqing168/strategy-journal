@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>XAUUSD 智能体工作流</title>
+<style>
+:root{--bg:#0F1118;--card:#181B28;--border:#252940;--accent:#6366F1;--grad:linear-gradient(135deg,#6366F1,#8B5CF6 55%,#A855F7);--text:#E2E4F0;--text2:#959AB8;--text3:#6B6F8A;--up:#34D399;--down:#F87171;--warn:#FBBF24;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;padding:40px 20px;min-height:100vh}
+.app{max-width:900px;width:100%}
+.app h1{font-size:1.4rem;margin-bottom:4px}
+.app h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.app .sub{font-size:.75rem;color:var(--text3);margin-bottom:24px}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.section label{display:block;font-size:.75rem;color:var(--text2);margin-bottom:6px;font-weight:600}
+textarea{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.81rem;line-height:1.7;padding:14px;resize:vertical;min-height:160px;outline:none;font-family:system-ui,sans-serif}
+textarea:focus{border-color:var(--accent)}
+textarea::placeholder{color:var(--text3)}
+.btn-row{display:flex;gap:10px;align-items:center;margin-top:12px}
+.btn{font-size:.85rem;font-weight:600;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;transition:all .15s}
+.btn-run{background:var(--grad);color:#FFF;box-shadow:0 4px 16px -3px rgba(99,102,241,.5)}
+.btn-run:hover{opacity:.92;transform:translateY(-1px)}
+.btn-run:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-clear{background:var(--card);color:var(--text2);border:1px solid var(--border)}
+.btn-clear:hover{color:var(--text)}
+.status{font-size:.72rem;color:var(--text3);margin-left:12px}
+.progress{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px}
+.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s}
+.prog-dot.done{background:var(--up);box-shadow:0 0 6px rgba(52,211,153,.4)}
+.prog-dot.running{background:var(--accent);animation:pulse .8s infinite}
+.prog-dot.error{background:var(--down)}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.result{margin-top:16px}
+.result-card{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.result-card .rc-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(99,102,241,.06);cursor:pointer;font-size:.75rem;font-weight:600}
+.result-card .rc-head:hover{background:rgba(99,102,241,.12)}
+.result-card .rc-body{font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.8;color:var(--text2);padding:14px 16px;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none}
+.result-card .rc-body.open{display:block}
+.badge{font-size:.6rem;padding:2px 8px;border-radius:4px}
+.badge.up{background:rgba(52,211,153,.12);color:var(--up)}
+.badge.down{background:rgba(248,113,113,.12);color:var(--down)}
+.badge.warn{background:rgba(251,191,36,.12);color:var(--warn)}
+.badge.info{background:rgba(99,102,241,.12);color:var(--accent)}
+.him-cover{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99}
+.him-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:520px;max-width:90vw}
+.him-box h3{font-size:1rem;margin-bottom:8px}
+.him-box .preview{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.7rem;color:var(--text2);max-height:120px;overflow-y:auto;margin-bottom:12px;white-space:pre-wrap}
+.him-box input[type=text],.him-box textarea{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:.78rem;margin-bottom:8px;outline:none}
+.him-box .him-btns{display:flex;gap:8px}
+.api-row{display:flex;gap:8px}
+.api-row input{flex:1;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:.78rem;outline:none;font-family:'JetBrains Mono',monospace}
+.api-row input:focus{border-color:var(--accent)}
+.final{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.3);border-radius:12px;padding:18px 20px;margin-top:16px;text-align:center}
+.final .f-decision{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+.final .f-detail{font-size:.75rem;color:var(--text2)}
+</style>
+</head>
+<body>
+<div class="app">
+<h1><span>XAUUSD 智能体工作流</span></h1>
+<div class="sub">16 Prompt 串联 · 一键分析 · DeepSeek 驱动</div>
+
+<div class="section">
+<label>DeepSeek API Key（只存你本地浏览器）</label>
+<div class="api-row">
+<input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+<button class="btn btn-clear" onclick="saveKey()" style="white-space:nowrap">保存</button>
+</div>
+</div>
+
+<div class="section">
+<label>分析文本 — 粘贴 FOMC 声明 / 央行讲话 / 宏观报告</label>
+<textarea id="inputText" placeholder="在此粘贴要分析的文本..."></textarea>
+<div class="btn-row">
+<button class="btn btn-run" id="btnRun" onclick="run()">▶ 开始分析</button>
+<button class="btn btn-clear" onclick="loadSample()">📋 加载示例</button>
+<button class="btn btn-clear" onclick="clearAll()">清空</button>
+<span class="status" id="status">就绪</span>
+</div>
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="section" id="finalBox" style="display:none"></div>
+<div class="result" id="results"></div>
+</div>
+
+<div class="him-cover" id="himCover" style="display:none">
+<div class="him-box">
+<h3>⚠ 人工判断 (Step 9/16)</h3>
+<div class="preview" id="himPreview"></div>
+<input type="text" id="himDir" placeholder="方向：看涨/看跌/横盘">
+<input type="text" id="himConf" placeholder="置信度：1-10">
+<textarea id="himNotes" placeholder="判断依据、与AI一致/不一致的地方..." rows="3"></textarea>
+<div class="him-btns">
+<button class="btn btn-run" onclick="submitHuman()" style="flex:1">提交 → 继续分析</button>
+<button class="btn btn-clear" onclick="skipHuman()">跳过（用AI判断）</button>
+</div>
+</div>
+</div>
+
+<script>
+// ── 16 Prompts ──
+var P={}
+P[1]="你是宏观信息过滤器，识别与黄金（XAUUSD）相关的新闻。\n\n当前日期：{date}\n环境：联邦基金利率 3.50%-3.75%，7月29日 FOMC 9-3维持不变。\n\n输入：\n{raw_text}\n\n两步筛选：1）相关性（相关/无关）2）标注类型和影响。输出JSON：{\"relevant\":[{\"title\":\"\",\"type\":[],\"impact\":\"正面/负面/中性\",\"urgency\":\"高/中/低\",\"reason\":\"\"}],\"irrelevant_count\":N,\"summary\":\"\"}"
+P[2]="从原文提取5维度关键点。\n\n全文：{raw_text}\n\n维度：1利率立场 2通胀描述 3就业市场 4风险平衡 5异常措辞。输出JSON：{\"利率立场\":{\"extracted\":[],\"direction\":\"偏鹰/偏鸽/中性\",\"new_info\":true/false},...\"异常措辞\":[{\"passage\":\"\",\"annotation\":\"\"}]}"
+P[3]="将5维度JSON压平为标准表格。\n\n输入：{output_2}\n\n表格列：维度 | 关键摘录 | 方向(+1/-1/0) | 信号强度(1-5) | 新增信息？ | 变化描述。信号强度：1微弱 3中等 5强烈。"
+P[4]="对官员讲话进行5维度鹰鸽打分。\n\n背景：联邦基金利率3.50%-3.75%，7月FOMC 9-3维持。\n讲话：{raw_text}\n\n5维度（-5到+5，正=鹰派）：利率指引/通胀措辞/就业评估/风险提及/语气方向。输出JSON：{\"scores\":{\"利率指引\":X,...},\"total\":X,\"verdict\":\"鹰派(15~25)/偏鹰(5~14)/中性(-4~4)/偏鸽(-14~-5)/鸽派(-25~-15)\",\"certainty\":\"高/中/低\",\"key_evidence\":[],\"risk_flag\":\"\"}"
+P[5]="将鹰鸽打分映射为XAUUSD传导路径。\n\n鹰鸽评分：{output_4}\n\n4条路径（-3到+3，正=利好金价）：利率预期/美元强弱/风险情绪/通胀预期。输出JSON：{\"pathways\":{\"利率预期\":{\"score\":X,\"rationale\":\"\"},...},\"composite\":X,\"composite_direction\":\"看涨/中性/看跌\",\"dominant_pathway\":\"\"}"
+P[6]="历史语境对比。\n\n本次：{raw_text}\n上次：{previous_statement}\n\n逐维度对比趋势。输出JSON：{\"comparisons\":[{\"dimension\":\"\",\"本次\":\"\",\"上次\":\"\",\"trend\":\"\",\"magnitude\":1-3}],\"overall_trend\":\"\",\"significance\":\"\"}"
+P[7]="分析质检。检查内部矛盾、路径矛盾、引用漂移、历史偏差、过度自信。\n\n原文：{raw_text}\n打分：{output_4}\n路径：{output_5}\n历史：{output_6}\n\n输出JSON：{\"issues_found\":[{\"type\":\"\",\"severity\":\"严重/中等/轻微\",\"description\":\"\",\"suggested_fix\":\"\"}],\"clean\":true/false,\"summary\":\"\"}"
+P[8]="AI初判。综合前面分析给出XAUUSD方向判断。\n\n打分：{output_4}\n路径：{output_5}\n历史：{output_6}\n质检：{output_7}\n\n输出JSON：{\"judgment\":{\"direction\":\"看涨/看跌/横盘\",\"confidence\":1-10,\"time_horizon\":\"\",\"target_zone\":{\"upside\":X,\"downside\":X},\"rationale\":\"\",\"uncertainties\":[],\"invalidation_condition\":\"\"}}"
+P[9]="人工判断模板。\nAI初判：{output_8}\n\n请交易者输入：方向、置信度1-10、依据、与AI一致/不一致点、风险判断。输出JSON：{\"source\":\"human\",\"direction\":\"\",\"confidence\":1-10,\"agree_with_ai\":\"\",\"disagree_with_ai\":\"\",\"risk_assessment\":\"\"}"
+P[10]="人机分歧对比。\n\nAI：{output_8}\n人工：{output_9}\n\n对比方向一致度、置信度差、逻辑差异、风险差异、分歧评分。输出JSON：{\"direction_match\":true/false,\"confidence_gap\":X,\"divergence_score\":1-10,\"divergence_level\":\"高度一致/部分分歧/严重分歧\",\"recommendation\":\"\"}"
+P[11]="量化决策引擎。\n\nAI判断：{output_8}\n人工判断：{output_9}\n分歧：{output_10}\n\n规则：方向不一致→NO TRADE。加权得分=(AI置信×0.5+人置信×0.5)。分歧≥7×0.5，4-6×0.8。≥7=STRONG，5-6.9=WEAK，3-4.9=MONITOR，<3=NO TRADE。输出JSON：{\"decision\":\"STRONG_SIGNAL/WEAK_SIGNAL/MONITOR/NO_TRADE\",\"direction\":\"LONG/SHORT/NONE\",\"position_size\":\"标准/半仓/零\",\"weighted_score\":X.X,\"score_breakdown\":{},\"caution\":\"\"}"
+P[12]="事后复盘。\n\n工作流：{output_8}\n决策：{output_11}\n实际结果：{trade_result}\n事后信息：{hindsight}\n\n复盘框架：信号质量/决策质量/信息缺口/流程改进/知识更新。输出JSON：{\"outcome\":{},\"lessons\":[],\"process_improvements\":[]}"
+P[13]="技术面分析。\n\n当前价：{current_price}\n高{recent_high} 低{recent_low} 短均{ma_short} 长均{ma_long} RSI{rsi} 量{volume_note} 形态{pattern_notes}\n\n分析趋势/支撑阻力/RSI/均线/技术结论/与基本面一致性。输出JSON：{\"trend\":{\"direction\":\"\",\"strength\":1-5},\"key_levels\":{\"resistances\":[],\"supports\":[]},\"tech_conclusion\":{\"direction\":\"\",\"confidence\":1-10},\"vs_fundamental\":{\"consistent\":true/false}}"
+P[14]="黄金特有因子。\n\n价{current_price} DXY{dxy} TIPS{real_yield}\nETF{etf_holdings} 央行{cb_buying} CME{cme_futures} 实物{india_china_demand}\n\n6因子打分（+3到-3，正=利好金价）：实际利率/美元/ETF/央行/实物/投机。输出JSON：{\"factors\":{\"实际利率\":{\"score\":X},...},\"composite_gold_score\":X}"
+P[15]="入场信号确认。\n\n价{current_price} ATR{atr}\n决策{output_11} 技术{output_13}\n\n审核5条件。入场价/止损/止盈TP1+TP2+盈亏比。输出JSON：{\"entry_check\":{\"all_clear\":true/false},\"entry\":{\"direction\":\"\",\"price\":X},\"stop_loss\":{\"price\":X},\"take_profit\":{\"tp1\":{\"price\":X,\"rr\":X},\"tp2\":{\"price\":X,\"rr\":X}}}"
+P[16]="仓位风险管理。\n\n账户{account_balance} 暴露{current_exposure} 回撤{max_drawdown_pct}%\n入场{output_15}\n\nKelly/2%规则/压力测试/风控清单。输出JSON：{\"position\":{\"kelly_pct\":X,\"final_lots\":X},\"stress_test\":{\"dd_3_losses_pct\":X},\"checklist\":{\"all_clear\":true/false},\"final_approval\":\"APPROVED/CAUTION/REJECTED\"}"
+
+var NAMES={1:'信息筛选',2:'关键提取',3:'结构化',4:'鹰鸽打分',5:'多维影响',6:'历史对比',7:'异常检测',8:'AI初判',9:'人工判断',10:'人机分歧',11:'决策矩阵',12:'事后复盘',13:'技术分析',14:'黄金因子',15:'入场确认',16:'仓位风险'}
+
+var SAMPLE='The Federal Reserve held the federal funds rate at 3.50%-3.75% on July 29, 2026, in a 9-3 vote — the first divided decision of the year. Dissenters Hammack, Kashkari, and Logan each favored a +25bp rate hike.\n\nKey statements:\n• "Inflation remains elevated relative to the Committee\'s 2 percent goal, in part reflecting supply shocks that have driven price increases in certain sectors, including energy."\n• "The Committee will deliver price stability." — replacing usual "seeks" language.\n• "Economic activity is expanding at a solid pace despite elevated uncertainty that owes, in part, to the conflict in the Middle East."\n• "Job gains have kept pace with the workforce."\n\nFirst time FOMC explicitly names a specific conflict. Vote went from unanimous 12-0 in June to 9-3 in July. Markets now price 35% chance of Sept hike.'
+
+var running=false,stopped=false,results={},ctx={},key=''
+
+// Init
+key=localStorage.getItem('xau_key')||''
+document.getElementById('apiKey').value=key
+buildProgress()
+
+function saveKey(){key=document.getElementById('apiKey').value.trim();localStorage.setItem('xau_key',key);setStatus(key?'✓ 已保存':'已清除')}
+function loadSample(){document.getElementById('inputText').value=SAMPLE;setStatus('已加载 FOMC 示例')}
+function clearAll(){results={};ctx={};document.getElementById('results').innerHTML='';document.getElementById('finalBox').style.display='none';buildProgress();setStatus('已清空')}
+function setStatus(s){document.getElementById('status').textContent=s}
+function buildProgress(){var h='';for(var i=1;i<=16;i++){var c='prog-dot';if(results[i])c+=' done';h+='<span class=\"'+c+'\" title=\"Step '+i+': '+NAMES[i]+'\"></span>'}document.getElementById('progress').innerHTML=h}
+function updateProg(i,cls){var d=document.querySelectorAll('#progress .prog-dot')[i-1];if(d){d.className='prog-dot '+cls}}
+
+// DeepSeek API
+async function callDS(prompt){
+  var r=await fetch('https://api.deepseek.com/v1/chat/completions',{
+    method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:'你是专业XAUUSD分析师。严格输出JSON，不要解释。'},{role:'user',content:prompt}],temperature:0.3,max_tokens:4096})
+  })
+  if(!r.ok)throw new Error('API '+r.status)
+  var d=await r.json()
+  return d.choices[0].message.content
+}
+
+function extractJSON(t){
+  try{return JSON.parse(t)}catch(e){}
+  var m=t.match(/```(?:json)?\s*([\s\S]*?)```/)||t.match(/\{[\s\S]*\}/)
+  if(m)try{return JSON.parse(m[1]||m[0])}catch(e){}
+  return {_raw:t.substring(0,500)}
+}
+
+// Run
+async function run(){
+  if(running)return
+  var text=document.getElementById('inputText').value.trim()
+  if(!text){setStatus('请先输入或加载分析文本');return}
+  if(!key){setStatus('请先输入 DeepSeek API Key');return}
+
+  running=true;stopped=false;results={}
+  ctx={raw_text:text,date:new Date().toLocaleDateString('zh-CN'),event_id:'XAU-'+Date.now(),current_price:'4263',timeframe:'4H',recent_high:'4303',recent_low:'4200',ma_short:'4240',ma_long:'4000',rsi:'52',volume_note:'正常',pattern_notes:'无',price_structure:'历史高位震荡',dxy:'104.5',real_yield:'2.15%',etf_holdings:'持仓稳定',cb_buying:'中国连续8月增持',cme_futures:'净多仓中等',india_china_demand:'淡季',atr:'35',account_balance:'10000',current_exposure:'0',max_drawdown_pct:'20',recent_trades:'无',previous_statement:'6月声明：12-0全票维持利率，措辞温和',trade_result:'待定',hindsight:'无'}
+  document.getElementById('results').innerHTML=''
+  document.getElementById('finalBox').style.display='none'
+  buildProgress()
+  document.getElementById('btnRun').disabled=true
+
+  for(var step=1;step<=16;step++){
+    if(stopped)break
+    updateProg(step,'running');setStatus('Step '+step+'/'+16+': '+NAMES[step])
+
+    if(step===9){
+      var preview=''
+      if(results[8]){try{var j=extractJSON(results[8]);var d=j.judgment||j;preview='AI方向: '+d.direction+'  置信度: '+d.confidence+'\n'+(d.rationale||'').substring(0,200)}catch(e){preview=results[8].substring(0,300)}}
+      document.getElementById('himPreview').textContent=preview
+      document.getElementById('himDir').value='';document.getElementById('himConf').value='';document.getElementById('himNotes').value=''
+      document.getElementById('himCover').style.display='flex'
+      await new Promise(function(r){window._hr=r})
+      if(!results[9])results[9]='{"source":"human","direction":"横盘","confidence":5}'
+      ctx['output_9']=results[9]
+      updateProg(9,'done');addCard(9,results[9],'info')
+      continue
+    }
+
+    var tpl=P[step]
+    for(var k in ctx){tpl=tpl.replace(new RegExp('\\{'+k+'\\}','g'),typeof ctx[k]==='object'?JSON.stringify(ctx[k]):String(ctx[k]||''))}
+
+    try{
+      var resp=await callDS(tpl)
+      results[step]=resp;ctx['output_'+step]=resp
+      updateProg(step,'done')
+      var parsed=extractJSON(resp)
+      var cls='info'
+      if(step===4){var s=parsed.scores||{};if(s.total>=10)cls='down';else if(s.total<=-10)cls='up'}
+      if(step===11){var v=parsed.decision||'';cls=v.includes('STRONG')?'up':v.includes('WEAK')?'warn':v.includes('MONITOR')?'info':'down'}
+      if(step===16){cls=parsed.final_approval==='APPROVED'?'up':parsed.final_approval==='CAUTION'?'warn':'down'}
+      addCard(step,resp,cls,parsed)
+    }catch(e){
+      results[step]='✗ '+e.message
+      updateProg(step,'error')
+      addCard(step,'✗ '+e.message,'down')
+      setStatus('错误: '+e.message)
+      break
+    }
+    await new Promise(function(r){setTimeout(r,300)})
+  }
+
+  running=false;document.getElementById('btnRun').disabled=false
+  setStatus('✓ 完成')
+
+  // Final summary
+  if(results[11]||results[8]){
+    var fj=results[11]?extractJSON(results[11]):{decision:'分析完成'}
+    var fd=results[11]?JSON.stringify(fj,null,2):(results[8]||'')
+    var fb=document.getElementById('finalBox')
+    var d=fj.decision||'完成',dir=fj.direction||'',ps=fj.position_size||''
+    var dc=d.includes('STRONG')?'var(--up)':d.includes('WEAK')?'var(--warn)':'var(--down)'
+    fb.innerHTML='<div class="f-decision" style="color:'+dc+'">'+d+'</div><div class="f-detail">'+dir+(ps?' · '+ps:'')+'</div>'
+    fb.style.display='block'
+  }
+}
+
+function addCard(step,text,cls,parsed){
+  var summary=''
+  if(step===4&&parsed&&parsed.scores){summary='总分 '+parsed.total+' · '+parsed.verdict}
+  if(step===8&&parsed){var d=parsed.judgment||parsed;summary=d.direction+' · 置信度 '+d.confidence}
+  if(step===10&&parsed){summary='分歧 '+parsed.divergence_score+' · '+parsed.divergence_level}
+  if(step===11&&parsed){summary=parsed.decision+' · '+parsed.direction+' · '+parsed.position_size}
+  if(step===15&&parsed){var e=parsed.entry||{};summary=e.direction+' @ '+e.price+' · SL '+(parsed.stop_loss||{}).price}
+  if(step===16&&parsed){summary=parsed.final_approval+' · '+(parsed.position||{}).final_lots+'手'}
+
+  var id='card'+Date.now()+Math.random()
+  document.getElementById('results').insertAdjacentHTML('beforeend',
+    '<div class="result-card"><div class="rc-head" onclick="document.getElementById(\''+id+'\').classList.toggle(\'open\')">'+
+    '<span>Step '+step+': '+NAMES[step]+'</span>'+
+    '<span style="display:flex;gap:8px;align-items:center">'+(summary?'<span style="font-weight:400;color:var(--text3);font-size:.68rem">'+summary+'</span>':'')+
+    '<span class="badge '+cls+'">'+NAMES[step]+'</span></span></div>'+
+    '<div class="rc-body open" id="'+id+'">'+escapeHTML(typeof text==='string'?text:JSON.stringify(text,null,2))+'</div></div>')
+}
+
+function submitHuman(){
+  var d=document.getElementById('himDir').value||'横盘'
+  var c=document.getElementById('himConf').value||'5'
+  var n=document.getElementById('himNotes').value||''
+  results[9]=JSON.stringify({source:'human',direction:d,confidence:parseInt(c),notes:n})
+  ctx['output_9']=results[9]
+  document.getElementById('himCover').style.display='none'
+  window._hr()
+}
+function skipHuman(){
+  results[9]='{"source":"human","direction":"同AI","confidence":5,"notes":"跳过"}'
+  ctx['output_9']=results[9]
+  document.getElementById('himCover').style.display='none'
+  window._hr()
+}
+
+function escapeHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+</script>
+</body>
+</html>
