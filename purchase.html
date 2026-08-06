@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="获取 AI 智能体工作流完整系统">
+<title>获取工作流 — 策略研究日志</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.pay-page{max-width:520px;margin:60px auto;text-align:center}
+.pay-page h1{font-size:1.5rem;font-weight:700;margin-bottom:8px}
+.pay-page .pp-sub{color:var(--text-sec);font-size:.875rem;margin-bottom:32px}
+.pay-card{background:var(--card);border:1px solid var(--border-soft);border-radius:16px;padding:28px;box-shadow:var(--shadow);margin-bottom:24px}
+.pay-card .pp-price{font-family:var(--mono);font-size:2.4rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0}
+.pay-card .pp-list{text-align:left;margin:20px 0}
+.pay-card .pp-list li{font-size:.8125rem;color:var(--text-sec);padding:6px 0;list-style:none}
+.pay-card .pp-list li::before{content:'✓ ';color:var(--up);font-weight:700}
+.pp-note{margin-top:12px;font-size:.75rem;color:var(--text-muted);line-height:1.7}
+.pp-success{display:none;background:linear-gradient(165deg,#FFFFFF,#EEF1FF 80%);border:2px solid rgba(5,150,105,.4);border-radius:20px;padding:36px 24px;box-shadow:var(--shadow)}
+.pp-success .pp-check{font-size:3rem;margin-bottom:12px}
+.pp-success h2{font-size:1.3rem;font-weight:700;color:var(--up);margin-bottom:8px}
+.pp-success p{font-size:.875rem;color:var(--text-sec);line-height:1.7;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div class="ticker-bar"><div class="ticker-track" id="ticker-track"><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span></div></div>
+
+<div class="container">
+<header class="site-header"><div class="header-inner">
+<a href="/" class="brand">
+<span class="brand-logo"><span class="ring"></span><svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg></span>
+<span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
+</a>
+<nav class="nav"><a href="/">日志</a><a href="product.html">工作流</a><a href="library.html">资料库</a><a href="about.html">关于</a><a href="subscribe.html" class="nav-cta">订阅</a></nav>
+</div></header>
+
+<div class="pay-page">
+<h1>获取 AI 智能体工作流</h1>
+<p class="pp-sub">支付后自动跳转到运行页面，即刻使用</p>
+
+<!-- Payment card -->
+<div class="pay-card" id="payCard">
+<div class="pp-price">¥199</div>
+<ul class="pp-list">
+<li>16 个串联 Prompt（可复制到任意 AI）</li>
+<li>置信度阈值规则表（含数学公式）</li>
+<li>3 个 Python 自动化脚本</li>
+<li>私有 GitHub 仓库永久访问 + 持续更新</li>
+<li>网页端一键运行器（无需安装任何东西）</li>
+</ul>
+<button class="btn-primary" onclick="completePurchase()" style="width:100%;font-size:.9375rem;padding:14px">确认支付 ¥199 →</button>
+<p class="pp-note">支付系统接入中。当前点击即视为已付款，直接进入工作流。</p>
+</div>
+
+<!-- Success -->
+<div class="pp-success" id="successBox">
+<div class="pp-check">✅</div>
+<h2>支付成功！</h2>
+<p>你已获得 AI 智能体工作流完整系统。<br>正在跳转到运行页面...</p>
+<a href="workflow.html" class="btn-primary" style="margin-top:12px">立即开始使用 →</a>
+<p class="pp-note">如未自动跳转，点击上方按钮</p>
+</div>
+</div>
+
+<footer class="footer">
+<div class="sig">舍予又见</div>
+<div class="sig-sub">STRATEGY · RESEARCH · AI</div>
+<p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
+</footer>
+</div>
+
+<script src="js/ticker.js"></script>
+<script>
+function completePurchase(){
+  document.getElementById('payCard').style.display='none';
+  var sb=document.getElementById('successBox');
+  sb.style.display='block';
+  // Auto-redirect to workflow runner after 2 seconds
+  setTimeout(function(){
+    window.location.href='workflow.html';
+  },2000);
+}
+</script>
+</body>
+</html>
