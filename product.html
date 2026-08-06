@@ -34,16 +34,14 @@
 <div class="wf-hero">
 <div class="wf-badge">PRODUCT · 智能体系统</div>
 <h1>AI 智能体工作流<br><span class="g">完整系统</span></h1>
-<p class="wf-sub">一套基于 AI 智能体的策略研究流水线。不是"AI替你决策"，而是用 16 个串联 Prompt 跑完从信息收集到决策验证的全过程——留一个可供审阅、可反复使用的思考外脑。</p>
-<div class="wf-price">¥199</div>
+<p class="wf-sub">一套基于 AI 智能体的策略研究流水线。16 个串联 Prompt 从信息收集跑到决策验证——留一个可供审阅、可反复使用的思考外脑。不是"AI替你决策"，是 AI 帮你看到你看不到的细节。</p>
 <div class="wf-actions">
-<a href="#preview" class="btn-primary" style="background:var(--card);color:var(--ai-1);border:1px solid rgba(99,102,241,.4);box-shadow:none">先看免费 Prompt ↓</a>
-<a href="purchase.html" class="btn-primary">购买完整版 ¥199 →</a>
+<a href="#preview" class="btn-primary">↓ 免费试用 Prompt #4（无需购买）</a>
 </div>
 </div>
 
-<!-- 流程图 -->
-<div class="wf-flow" id="flow">
+<!-- Prompt #4 免费预览（提前） -->
+<div class="prompt-preview fade-in" id="preview">
 <div class="wf-flow-title">工作流架构 · 5 阶段 16 节点</div>
 <div class="wf-phases">
 <div class="wf-phase">
@@ -171,6 +169,76 @@
 <div class="pp-copy"><button onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.querySelector('.pp-prompt').innerText);this.textContent='✓ 已复制';setTimeout(()=>this.textContent='复制 Prompt',2000)">复制 Prompt</button></div>
 </div>
 
+<!-- 流程图 + 价格（看完价值后再展示） -->
+<div class="wf-flow fade-in" id="flow">
+<div class="wf-flow-title">工作流架构 · 5 阶段 16 节点</div>
+<div class="wf-phases">
+<div class="wf-phase">
+<div class="ph-icon">🔍</div>
+<div class="ph-name">阶段一 · 采集</div>
+<div class="ph-nodes">
+<span class="wf-node locked">①筛选</span>
+<span class="wf-node locked">②提取</span>
+<span class="wf-node locked">③格式化</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">🧠</div>
+<div class="ph-name">阶段二 · AI分析</div>
+<div class="ph-nodes">
+<span class="wf-node free">④鹰鸽预览</span>
+<span class="wf-node locked">⑤多维</span>
+<span class="wf-node locked">⑥历史</span>
+<span class="wf-node locked">⑦异常</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">⚖️</div>
+<div class="ph-name">阶段三 · 人机对比</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑧初判</span>
+<span class="wf-node locked">⑨人判</span>
+<span class="wf-node locked">⑩分歧</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">✅</div>
+<div class="ph-name">阶段四 · 决策</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑪决策</span>
+<span class="wf-node locked">⑫复盘</span>
+</div>
+</div>
+<div class="wf-phase">
+<div class="ph-icon">🎯</div>
+<div class="ph-name">阶段五 · 技术执行</div>
+<div class="ph-nodes">
+<span class="wf-node locked">⑬技术</span>
+<span class="wf-node locked">⑭因子</span>
+<span class="wf-node locked">⑮入场</span>
+<span class="wf-node locked">⑯风控</span>
+</div>
+</div>
+</div>
+<div class="wf-arrows"><span>采集</span> → <span>AI分析</span> → <span>人机对比</span> → <span>决策</span> → <span>技术执行</span></div>
+<p style="text-align:center;font-size:.68rem;color:var(--text-muted);margin-top:6px">🔒 完整版含 15/16 个 Prompt · 仅 ④ 免费公开 · 购买后全部解锁</p>
+</div>
+
+<!-- 首发赠品 -->
+<div class="wf-flow fade-in" style="margin-top:0;border:1px solid rgba(34,211,238,.3);background:linear-gradient(165deg,rgba(34,211,238,.04),rgba(6,182,212,.02))">
+<div style="text-align:center;font-size:.78rem;color:var(--text-sec);line-height:1.7">
+🎁 <strong style="color:var(--ai-1)">首发赠品</strong>：前 50 名购买者赠送 <strong style="color:var(--text)">1v1 工作流配置咨询（15 分钟）</strong>— 帮你把 16 个 Prompt 在 Claude/DeepSeek 中配好，打开即用。
+</div>
+</div>
+
+<!-- 价格 + CTA -->
+<div class="wf-hero" style="padding:12px 0 4px">
+<div class="wf-price">¥199</div>
+<div class="wf-actions">
+<a href="purchase.html" class="btn-primary">获取完整版 →</a>
+</div>
+</div>
+
 <!-- 套餐 -->
 <div class="wf-includes fade-in">
 <h2>你将获得</h2>
@@ -188,7 +256,6 @@
 <div class="wf-buy fade-in">
 <h3>AI 智能体工作流 · 完整系统</h3>
 <p>16个Prompt + 置信度规则 + Python脚本 + 持续更新</p>
-<div style="font-family:var(--mono);font-size:1.6rem;font-weight:700;margin:8px 0 16px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">¥199</div>
 <a href="purchase.html" class="btn-primary">获取完整版 ¥199 →</a>
 <div class="wf-note">购买后通过邮箱收到 GitHub 仓库邀请 + PDF 下载链接</div>
 </div>
@@ -198,17 +265,23 @@
 <h2>常见问题</h2>
 <dl>
 <dt>需要什么技术水平？</dt>
-<dd>会用 Claude/GPT 的对话界面就够。Prompt 模板直接复制粘贴。Python 脚本有 README 说明，会装 Python 就能跑。完全零基础也提供了 Notion 版本（手动执行版）。</dd>
+<dd>会用 Claude/GPT/DeepSeek 的对话界面就够。Prompt 模板直接复制粘贴。Python 脚本有 README，会装 Python 就能跑。零基础也提供了手动执行版（打开网页直接跑）。</dd>
 <dt>支持哪些 AI 模型？</dt>
-<dd>所有 Prompt 均基于 Claude 构建并实测，同时适配 GPT-4/4o、Gemini、通义千问等主流模型。每个 Prompt 标注了如果使用不同模型的调整建议。</dd>
-<dt>和免费公开的 Prompt #4 有什么区别？</dt>
-<dd>Prompt #4 是整个流水线的一块"积木"。完整版给你 12 块积木的连接方式——哪个先跑、哪个后跑、输出怎么喂给下一个、分歧怎么处理——形成一条端到端的决策管线。</dd>
+<dd>所有 Prompt 基于 Claude 构建并实测，同时适配 GPT-4/4o、DeepSeek、Gemini、通义千问。每个 Prompt 标注了不同模型的调整建议。</dd>
+<dt>和直接写 Prompt 有什么区别？</dt>
+<dd>直接写 Prompt 是"问 AI 一个问题"。这个工作流是"12 个问题连成一条决策链"——前一个的输出喂给下一个，自动化完成从信息采集到仓位计算的完整流程。它不是更快，是更完整。</dd>
+<dt>和 Coze、Dify 这些 AI 工作流工具有什么区别？</dt>
+<dd>Coze/Dify 是通用工具，你要自己设计流程。工作流是基于 XAUUSD 策略研究的专用方案——16 个 Prompt 都是现成模板，不需要你从头设计。你可以把 Prompt 复制到任何平台使用。</dd>
 <dt>多久更新一次？</dt>
-<dd>每次本人使用中发现优化点即更新。月度小优化（Prompt调参），季度大版本（新增脚本或流程改进）。所有更新推送到买家 GitHub Repo。</dd>
-<dt>可以退款吗？</dt>
-<dd>购买后 7 天内，如果你觉得不值，邮件回复直接退款。</dd>
+<dd>月度小优化（Prompt 调参），季度大版本（新增脚本或流程改进）。所有更新推送到买家 GitHub Repo，永久同步。</dd>
+<dt>买了不适合能退吗？</dt>
+<dd>购买后 7 天内无理由退款。回复购买邮件或联系微信 twzd2519 即可。不是为了赚钱——如果工作流对你有帮助才值得付这 ¥199。</dd>
 <dt>适合哪些品种？</dt>
-<dd>目前基于 XAUUSD（现货黄金）设计。但所有 Prompt 模板均为参数化——将 `{{品种}}` 替换即可用于其他宏观驱动品种（外汇、原油、股指）。</dd>
+<dd>基于 XAUUSD 设计，但所有 Prompt 均为参数化——替换品种相关变量即可用于外汇、原油、股指等宏观驱动品种。</dd>
+<dt>付款后怎么拿到？</dt>
+<dd>扫码支付 → 联系卖家 → 收到 GitHub 仓库邀请 + 专属访问 Token → 打开运行器即可使用。全程 5 分钟内。</dd>
+<dt>这个工作流能帮我在交易中赚更多吗？</dt>
+<dd>不能保证。这个工作流做的是"帮你看到你可能忽略的信息"，最终判断永远是人做的。如果你期望一个点了就赚钱的按钮，这个产品不适合你。如果你想要一个帮你少犯错的系统——这是它存在的理由。</dd>
 </dl>
 </div>
 
