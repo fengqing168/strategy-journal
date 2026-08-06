@@ -309,14 +309,14 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .wf-arrows span{font-size:.6rem;letter-spacing:.1em;color:var(--text-muted);margin:0 6px}
 
 /* Prompt 预览 */
-.prompt-preview{max-width:780px;margin:35px auto;background:var(--card);border:1px solid var(--border-soft);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-.pp-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:linear-gradient(120deg,rgba(75,85,104,.08),rgba(168,85,247,.04));border-bottom:1px solid var(--border-soft)}
+.prompt-preview{max-width:780px;margin:35px auto;background:var(--card);border:1px solid var(--border-strong);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.pp-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:linear-gradient(120deg,rgba(75,85,104,.08),rgba(34,211,238,.04));border-bottom:1px solid var(--border-soft)}
 .pp-header .pp-title{font-size:.9375rem;font-weight:700;color:var(--text)}
 .pp-header .pp-badge{font-size:.625rem;background:rgba(5,150,105,.1);color:var(--up);border:1px solid rgba(5,150,105,.3);padding:3px 10px;border-radius:100px;font-family:var(--mono);font-weight:600}
 .pp-body{padding:22px}
 .pp-body .pp-label{font-size:.6875rem;color:var(--text-muted);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
 .pp-body .pp-desc{font-size:.8125rem;color:var(--text-sec);line-height:1.7;margin-bottom:18px}
-.pp-body .pp-prompt{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:18px;font-family:var(--mono);font-size:.75rem;line-height:1.8;color:var(--text);overflow-x:auto;white-space:pre-wrap;max-height:420px;overflow-y:auto}
+.pp-body .pp-prompt{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:18px;font-family:var(--mono);font-size:.75rem;line-height:1.8;color:var(--text);overflow-x:auto;white-space:pre-line;max-height:420px;overflow-y:auto}
 .pp-body .pp-prompt .hl{color:var(--ai-1)}
 .pp-body .pp-prompt .ph{color:var(--text-muted);font-style:italic}
 .pp-demo{margin-top:18px;padding:14px 18px;background:linear-gradient(120deg,rgba(5,150,105,.04),rgba(6,182,212,.04));border:1px solid rgba(5,150,105,.18);border-radius:10px}
