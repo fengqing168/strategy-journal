@@ -16,7 +16,7 @@
   var FALLBACK = "/data/xau_daily_recent.json";
 
   var C = {
-    up: "#34D399", down: "#F87171",
+    up: "#EF4444", down: "#10B981",
     text: "#949CB8", grid: "rgba(75,85,104,.12)",
     border: "rgba(75,85,104,.3)",
   };

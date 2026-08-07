@@ -21,6 +21,19 @@ const TOKEN_DAYS = 90;
 // 内存存储（Worker 重启时清空，适合低流量场景）
 let orders = new Map();  // id → { email, ref, status, token, createdAt }
 
+// ── K线缓存（新浪日K全量较重，缓存10分钟，避免每次回源） ──
+let klineCache = null;        // { candles, at }
+let klineCacheAt = 0;
+const KLINE_CACHE_MS = 10 * 60 * 1000;
+let klineInFlight = null;     // 并发去重：同一时刻只回源一次
+
+function clearExpiredCache() {
+  if (klineCache && Date.now() - klineCacheAt > KLINE_CACHE_MS) {
+    klineCache = null;
+    klineCacheAt = 0;
+  }
+}
+
 // 清理 24 小时前的订单
 function cleanup() {
   const cutoff = Date.now() - 86400000;
@@ -77,33 +90,37 @@ export default {
         const end = url.searchParams.get("end") || "";       // YYYY-MM-DD
         const limit = parseInt(url.searchParams.get("limit") || "400", 10);
 
-        const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
-        const resp = await fetch(sinaUrl);
-        const text = await resp.text();
-
-        const m = text.match(/\(\[(.*)\]\)/);
-        if (!m) {
-          return new Response(JSON.stringify({ error: "parse_failed" }), { status: 502, headers: { "Content-Type": "application/json", ...cors } });
+        // 10 分钟缓存 + 并发去重，避免每次回源新浪拉全量
+        clearExpiredCache();
+        if (!klineCache) {
+          if (!klineInFlight) {
+            klineInFlight = (async () => {
+              const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
+              const resp = await fetch(sinaUrl);
+              const text = await resp.text();
+              const m = text.match(/\(\[(.*)\]\)/);
+              if (!m) throw new Error("parse_failed");
+              let candles;
+              try { candles = JSON.parse("[" + m[1] + "]"); }
+              catch (e) { throw new Error("parse_failed"); }
+              return candles.map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }));
+            })();
+            klineInFlight.finally(() => { klineInFlight = null; });
+          }
+          klineCache = await klineInFlight;
+          klineCacheAt = Date.now();
         }
-        let candles;
-        try { candles = JSON.parse("[" + m[1] + "]"); }
-        catch (e) {
-          return new Response(JSON.stringify({ error: "parse_failed" }), { status: 502, headers: { "Content-Type": "application/json", ...cors } });
-        }
 
-        // 统一时间格式 YYYY-MM-DD，支持带或不带分隔符的入参
+        // 统一时间格式 YYYY-MM-DD
         const norm = (d) => d.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
         const startN = start ? norm(start) : "";
         const endN = end ? norm(end) : "";
 
-        let out = candles
-          .map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }))
-          .filter((c) => (!startN || c.time >= startN) && (!endN || c.time <= endN));
-
+        let out = klineCache.filter((c) => (!startN || c.time >= startN) && (!endN || c.time <= endN));
         if (limit > 0 && out.length > limit) out = out.slice(out.length - limit);
 
         return new Response(JSON.stringify(out), {
-          headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600", ...cors },
+          headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=600", ...cors },
         });
       } catch (e) {
         return new Response(JSON.stringify({ error: "unavailable" }), {
