@@ -349,11 +349,12 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .wf-card .wfc-t{font-size:.8125rem;font-weight:600;color:var(--text)}
 .wf-card .wfc-d{font-size:.6875rem;color:var(--text-muted);line-height:1.5;margin-top:2px}
 
-.wf-buy{max-width:780px;margin:28px auto;text-align:center;padding:32px;background:linear-gradient(165deg,#1D2030,#222638 80%);border:1px solid rgba(34,211,238,.18);border-radius:20px;box-shadow:var(--shadow)}
-.wf-buy h3{font-size:1.1rem;font-weight:700;color:var(--text)}
-.wf-buy p{font-size:.8125rem;color:var(--text-sec);margin:8px 0 16px;line-height:1.6}
-.wf-buy .btn-primary{font-size:.9375rem;padding:13px 32px}
-.wf-buy .wf-note{font-size:.68rem;color:var(--text-muted);margin-top:12px}
+.wf-log-banner{margin:30px auto;padding:34px 24px;background:linear-gradient(165deg,#1A1D2B,#202438 70%);border:1px solid rgba(34,211,238,.22);border-radius:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.wf-log-banner::before{content:"";position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(34,211,238,.10),transparent 70%)}
+.wf-log-banner .wlb-inner{max-width:780px;margin:0 auto;text-align:center;position:relative}
+.wf-log-banner .wlb-title{font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.4}
+.wf-log-banner .wlb-desc{font-size:.8125rem;color:var(--text-sec);line-height:1.8;margin:10px auto 20px;max-width:560px}
+.wf-log-banner .wlb-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
 
 /* FAQ */
 .wf-faq{max-width:780px;margin:30px auto 40px}
