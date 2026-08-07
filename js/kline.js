@@ -151,10 +151,34 @@
         else { addMark(g.series, m); }
       });
 
-      // 聚焦最近 zoomBars 根，保留纵深（代替全部压缩）
+      // 优先原则：先让观察/止损/目标线完整入画，再缩放K线适配，保证首阅清晰直观。
+      // 计算全部标注线价格 → 覆盖到价格轴可见区(上下各留 8% 呼吸)。
+      var plo = Infinity, phi = -Infinity;
+      marks.forEach(function (m) {
+        var p = +m.price;
+        if (p < plo) plo = p;
+        if (p > phi) phi = p;
+      });
+      if (isFinite(plo)) {
+        // 若数据价格范围比线范围更大，也让数据整体可见，避免线被挤出数据区域
+        var dlo = Infinity, dhi = -Infinity;
+        data.forEach(function (d) {
+          if (d.low < dlo) dlo = d.low;
+          if (d.high > dhi) dhi = d.high;
+        });
+        var lo = Math.min(plo, dlo), hi = Math.max(phi, dhi);
+        var pad = (hi - lo) * 0.08;
+        try {
+          g.chart.priceScale("right").setVisibleRange({ from: lo - pad, to: hi + pad });
+        } catch (e) {
+          try { g.chart.priceScale("right").setVisibleLogicalRange({ from: lo - pad, to: hi + pad }); } catch (e2) {}
+        }
+      }
+
+      // 时间轴：优先辅以完整纵深；线少时仍聚焦最近，保证首屏线最清晰
       try {
         g.chart.timeScale().setVisibleLogicalRange({
-          from: Math.max(0, data.length - zoomBars),
+          from: zoomBars < data.length ? Math.max(0, data.length - zoomBars) : 0,
           to: data.length - 1 + 8,
         });
       } catch (e) {
