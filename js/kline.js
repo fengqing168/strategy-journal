@@ -155,7 +155,7 @@
       lineWidth: 1,
       lineStyle: m.style === "solid" ? LightweightCharts.LineStyle.Solid : LightweightCharts.LineStyle.Dashed,
       crosshairMarkerVisible: false,
-      lastValueVisible: false,
+      lastValueVisible: true,
       priceLineVisible: false,
     });
     ray.setData(pts);
@@ -265,7 +265,7 @@
   }
 
   function finish(el, charts, marks, hint) {
-    var marks2 = (marks || []).filter(function (m) { return m.label; });
+    var marks2 = marks || [];
     if (marks2.length) {
       var legend = document.createElement("div");
       legend.className = "kline-legend";
