@@ -1,0 +1,14 @@
+{
+  "event_id": "XAU-20260806-125955",
+  "timestamp": "2026-08-06T12:59:56.859731",
+  "results": {
+    "1": "[DRY RUN] Prompt #1",
+    "2": "[DRY RUN] Prompt #2",
+    "3": "[DRY RUN] Prompt #3"
+  },
+  "context": {
+    "output_1": "{'dry_run': true, 'step': 1}",
+    "output_2": "{'dry_run': true, 'step': 2}",
+    "output_3": "{'dry_run': true, 'step': 3}"
+  }
+}

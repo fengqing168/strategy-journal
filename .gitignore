@@ -1,2 +1,2 @@
-workflow/output/
-data/xau_daily.jsonp
+__pycache__/
+*.pyc
