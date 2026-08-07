@@ -77,6 +77,9 @@
       rightPriceScale: { borderColor: C.border },
       timeScale: { borderColor: C.border, timeVisible: intraday, secondsVisible: false, rightOffset: 6 },
       crosshair: { mode: 0 },
+      // 交互：拖拽平移 + 滚轮/双指缩放（lightweight-charts 内建，显式开启）
+      handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+      handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: true },
       localization: { timeFormatter: intraday ? function (t) { return new Date(t * 1000).toISOString().slice(0, 16).replace("T", " "); } : undefined },
     });
     var series = chart.addCandlestickSeries({
@@ -125,6 +128,15 @@
       g.series.setData(data);
       marks.forEach(function (m) { addMark(g.series, m); });
       g.chart.timeScale().fitContent();
+
+      // 交互提示角标（非迷你图才显示，避免遮挡）
+      var w = body.clientWidth || 720;
+      if (w >= 360) {
+        var nav = document.createElement("div");
+        nav.className = "kline-nav";
+        nav.textContent = "拖拽平移 · 滚轮/双指缩放";
+        body.appendChild(nav);
+      }
 
       if (marks.length) {
         var legend = document.createElement("div");
