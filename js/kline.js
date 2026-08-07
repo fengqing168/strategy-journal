@@ -156,6 +156,16 @@
       priceLineVisible: false,
     });
     ray.setData(pts);
+    // 观察位文字标签：右侧价格轴显示"观察位·进场 4150"（createPriceLine 的 title 文字）
+    // 贯穿线与射线同色重叠，视觉上是一条完整的观察位线 + 轴标签文字
+    chart.series.createPriceLine({
+      price: +m.price,
+      color: m.color || C.text,
+      lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: m.label || "",
+    });
     return endTs;
   }
 
