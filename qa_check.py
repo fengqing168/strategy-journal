@@ -16,7 +16,7 @@ ROOT = Path(__file__).parent
 PAGES = [
     "index.html", "about.html", "library.html", "subscribe.html",
     "search.html", "product.html", "purchase.html", "admin.html",
-    "workflow.html", "logs/001.html"
+    "workflow.html", "logs/001.html", "logs/002.html"
 ]
 STYLES = "styles.css"
 
@@ -48,7 +48,7 @@ print("════════════════════════�
 
 # ── 1. 文件存在性 ──
 print("── 1. 文件存在性 ──")
-for p in PAGES + [STYLES, "js/main.js", "js/ticker.js", "images/pay-wechat.png.jpg", "images/pay-zhifubao.png.jpg"]:
+for p in PAGES + [STYLES, "js/main.js", "js/ticker.js", "js/kline.js", "js/vendor/lightweight-charts.standalone.production.js", "images/pay-wechat.png.jpg", "images/pay-zhifubao.png.jpg"]:
     if (ROOT / p).exists(): ok(p)
     else: fail(f"文件不存在: {p}")
 
@@ -88,7 +88,7 @@ for page in PAGES:
         pass  # admin.html and workflow.html don't have standard nav
         continue
     hrefs = re.findall(r'href="([^"]+)"', nav.group(1))
-    is_logs = page == "logs/001.html"
+    is_logs = page.startswith("logs/")
     expected = ['../index.html','../search.html','../about.html','../subscribe.html','../purchase.html'] if is_logs else ['/','search.html','about.html','subscribe.html','purchase.html']
     if hrefs == expected:
         ok(f"{page}: 导航正确 ✓")

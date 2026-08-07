@@ -3,6 +3,7 @@
  *
  * API:
  *   /api/sina              — 行情代理（5品种实时）
+ *   /api/kline             — 现货黄金日K代理（XAU，新浪源，可选 start/end/limit）
  *   /api/token/generate    — 生成 Token（需密码）
  *   /api/token/validate    — 验证 Token
  *   /api/order/create      — 创建待确认订单
@@ -60,6 +61,49 @@ export default {
         }
         return new Response(JSON.stringify(result), {
           headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=2", ...cors },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: "unavailable" }), {
+          status: 502, headers: { "Content-Type": "application/json", ...cors },
+        });
+      }
+    }
+
+    // ── /api/kline ──
+    if (path === "/api/kline") {
+      try {
+        const symbol = url.searchParams.get("symbol") || "XAU";
+        const start = url.searchParams.get("start") || "";   // YYYY-MM-DD
+        const end = url.searchParams.get("end") || "";       // YYYY-MM-DD
+        const limit = parseInt(url.searchParams.get("limit") || "400", 10);
+
+        const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
+        const resp = await fetch(sinaUrl);
+        const text = await resp.text();
+
+        const m = text.match(/\(\[(.*)\]\)/);
+        if (!m) {
+          return new Response(JSON.stringify({ error: "parse_failed" }), { status: 502, headers: { "Content-Type": "application/json", ...cors } });
+        }
+        let candles;
+        try { candles = JSON.parse("[" + m[1] + "]"); }
+        catch (e) {
+          return new Response(JSON.stringify({ error: "parse_failed" }), { status: 502, headers: { "Content-Type": "application/json", ...cors } });
+        }
+
+        // 统一时间格式 YYYY-MM-DD，支持带或不带分隔符的入参
+        const norm = (d) => d.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+        const startN = start ? norm(start) : "";
+        const endN = end ? norm(end) : "";
+
+        let out = candles
+          .map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }))
+          .filter((c) => (!startN || c.time >= startN) && (!endN || c.time <= endN));
+
+        if (limit > 0 && out.length > limit) out = out.slice(out.length - limit);
+
+        return new Response(JSON.stringify(out), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600", ...cors },
         });
       } catch (e) {
         return new Response(JSON.stringify({ error: "unavailable" }), {

@@ -375,6 +375,56 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 /* ── 文章评论 ── */
 .article-comments{margin-top:24px;padding-top:8px;border-top:1px solid var(--border-soft)}
 
+/* ── 运行日志 · K 线图 ── */
+.kline{position:relative;background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);margin:20px 0;overflow:hidden}
+.kline-title{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border-soft);font-size:.6875rem;font-weight:600;color:var(--text-sec);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.kline-title::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ai-1);flex-shrink:0}
+.kline-body{position:relative}
+.kline-body canvas{display:block}
+.kline-hint{padding:9px 14px;font-size:.6875rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border-soft);font-family:var(--mono)}
+.kline-src{position:absolute;left:14px;bottom:9px;font-size:.6rem;color:rgba(148,156,184,.55);font-family:var(--mono);letter-spacing:.04em;z-index:5;pointer-events:none}
+
+/* ── 运行日志 · 三段时区（实时/事实/复盘） ── */
+.tz-block{border-radius:var(--radius);padding:18px 20px;margin:20px 0;border:1px solid var(--border)}
+.tz-block .tz-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.tz-block .tz-tag{font-family:var(--mono);font-size:.625rem;font-weight:600;letter-spacing:.08em;padding:2px 9px;border-radius:5px;text-transform:uppercase}
+.tz-live .tz-tag{background:rgba(34,211,238,.12);color:var(--ai-1);border:1px solid rgba(34,211,238,.3)}
+.tz-fact .tz-tag{background:rgba(52,211,153,.12);color:var(--up);border:1px solid rgba(52,211,153,.3)}
+.tz-after .tz-tag{background:rgba(148,156,184,.12);color:var(--text-muted);border:1px solid var(--border-strong)}
+.tz-block .tz-time{font-family:var(--mono);font-size:.6875rem;color:var(--text-muted);letter-spacing:.05em}
+.tz-live{border-left:3px solid var(--ai-1)}
+.tz-fact{border-left:3px solid var(--up)}
+.tz-after{border-left:3px solid var(--border-strong)}
+.tz-block .tz-body{font-size:.875rem;color:var(--text-sec);line-height:1.8}
+.tz-block .tz-body p{margin-bottom:10px}
+.tz-block .tz-body p:last-child{margin-bottom:0}
+.tz-block .tz-body strong{color:var(--text)}
+.tz-divider{display:flex;align-items:center;gap:10px;margin:26px 0;color:var(--text-muted);font-family:var(--mono);font-size:.625rem;letter-spacing:.08em}
+.tz-divider::before,.tz-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── 运行日志 · 决策卡 ── */
+.decide{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.decide .dc{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.decide .dc-label{font-size:.625rem;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.decide .dc-value{font-size:.875rem;font-weight:600;color:var(--text);font-family:var(--mono)}
+.decide .dc-value.up{color:var(--up)}
+.decide .dc-value.down{color:var(--down)}
+.decide .dc-value.ai{color:var(--ai-1)}
+@media(max-width:620px){.decide{grid-template-columns:repeat(2,1fr)}}
+
+/* ── 运行日志 · 首页迷你记录条 ── */
+.jr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;gap:18px;align-items:stretch}
+.jr-card .jr-mini{width:240px;flex-shrink:0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.jr-card .jr-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.jr-card .jr-title{font-size:.75rem;font-weight:600;color:var(--text-muted);font-family:var(--mono);letter-spacing:.05em;margin-bottom:8px}
+.jr-card .jr-line{font-size:.9375rem;color:var(--text);line-height:1.7;margin-bottom:8px}
+.jr-card .jr-line strong{color:var(--text)}
+.jr-card .jr-result{font-size:.75rem;color:var(--text-sec);font-family:var(--mono)}
+.jr-card .jr-result .ok{color:var(--up)}.jr-card .jr-result .no{color:var(--down)}
+.jr-card .jr-link{margin-top:10px;font-size:.75rem;color:var(--ai-1);text-decoration:none;font-weight:500}
+.jr-card .jr-link:hover{color:var(--ai-2)}
+@media(max-width:760px){.jr-card{flex-direction:column}.jr-card .jr-mini{width:100%}}
+
 /* ── 可见性动画 ── */
 .fade-in{opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .fade-in.visible{opacity:1;transform:translateY(0)}

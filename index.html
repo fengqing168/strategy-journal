@@ -139,6 +139,23 @@
 </div>
 </div>
 
+<!-- 最新运行记录 -->
+<div class="wf-flow fade-in" style="border:1px solid rgba(34,211,238,.25)">
+<div class="wf-flow-title">最近一次运行 · 预判在先</div>
+<p style="text-align:center;font-size:.75rem;color:var(--text-sec);margin:-8px 0 18px;font-family:var(--mono)">判断发布于 2026.08.05 · 行情走到 2026.08.07 · 数据公开可核</p>
+<div class="jr-card">
+<div class="jr-mini"><div class="kline" data-end="2026-08-04" data-hint="预判时刻的盘面 · 标注=发布时写死的进出场位"
+data-mark='[{"price":4000,"label":"观察位 4000","color":"#22D3EE","style":"dashed"},{"price":3960,"label":"止损 3960","color":"#F87171","style":"dashed"},{"price":4250,"label":"目标 4250","color":"#34D399","style":"dashed"}]'></div></div>
+<div class="jr-body">
+<div class="jr-title">#002 · 2026.08.05 实时预判</div>
+<div class="jr-line"><strong>判断：</strong>金价 6 周在 3900–4100 磨底，4000 是多空分水岭。破位收回则追多，止损 3960，目标 4250。</div>
+<div class="jr-line"><strong>结果：</strong>08.05 长阳 4065→4246 突破箱体，08.07 目标位 4250 触及并越过。预判在前，行情在后。</div>
+<div class="jr-result">预判 ✓ 兑现 · AI 初判震荡待破位 · 人机分歧：入场时机（AI 4020 挂多 / 我破位确认）</div>
+<a href="logs/002.html" class="jr-link">看完整运行记录（含双 K 线图）→</a>
+</div>
+</div>
+</div>
+
 <!-- 首发赠品 -->
 <div class="wf-flow fade-in" style="border:1px solid rgba(34,211,238,.3);background:linear-gradient(165deg,rgba(34,211,238,.04),rgba(6,182,212,.02));padding:22px 22px">
 <div style="text-align:center;font-size:.78rem;color:var(--text-sec);line-height:1.7">
@@ -207,5 +224,7 @@
 
 <script src="js/main.js"></script>
 <script src="js/ticker.js"></script>
+<script src="js/vendor/lightweight-charts.standalone.production.js"></script>
+<script src="js/kline.js"></script>
 </body>
 </html>
