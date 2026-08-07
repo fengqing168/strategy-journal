@@ -33,6 +33,14 @@
     return Math.floor(new Date(s + "T00:00:00+08:00").getTime() / 1000);
   }
 
+  // UTC 精确到分钟的时间标签（例：11:35 UTC）
+  function utcLabel(t) {
+    var d = new Date(t * 1000);
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    var hh = p(d.getUTCHours()), mi = p(d.getUTCMinutes());
+    return hh + ":" + mi + " UTC";
+  }
+
   function loadData(start, end, interval) {
     var params = ["interval=" + (interval || "1d")];
     if (start) params.push("start=" + start);
@@ -80,7 +88,7 @@
       // 交互：拖拽平移 + 滚轮/双指缩放（lightweight-charts 内建，显式开启）
       handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
       handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: true },
-      localization: { timeFormatter: intraday ? function (t) { return new Date(t * 1000).toISOString().slice(0, 16).replace("T", " "); } : undefined },
+      localization: { timeFormatter: intraday ? function (t) { return utcLabel(t); } : undefined },
     });
     var series = chart.addCandlestickSeries({
       upColor: C.up, downColor: C.down,
@@ -127,7 +135,17 @@
       var g = makeChart(body, interval);
       g.series.setData(data);
       marks.forEach(function (m) { addMark(g.series, m); });
-      g.chart.timeScale().fitContent();
+
+      // 放大K线比例：聚焦最近 ~44 根，取代 fitContent（否则全部压缩塞满，点位太挤）
+      var zoomBarCount = 44;
+      try {
+        g.chart.timeScale().setVisibleLogicalRange({
+          from: Math.max(0, data.length - zoomBarCount),
+          to: data.length - 1 + 6,
+        });
+      } catch (e) {
+        g.chart.timeScale().fitContent();
+      }
 
       // 交互提示角标（非迷你图才显示，避免遮挡）
       var w = body.clientWidth || 720;
@@ -163,7 +181,7 @@
       // 右下角来源标注（证明数据公开可核）
       var src = document.createElement("div");
       src.className = "kline-src";
-      src.textContent = "数据源:SINA 日K · 可核验";
+      src.textContent = "数据源:TradingView · 可核验";
       el.appendChild(src);
 
       // resize
