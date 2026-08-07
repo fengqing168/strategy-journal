@@ -2,8 +2,8 @@
  * shujian.cc 后端 Worker
  *
  * API:
- *   /api/sina              — 行情代理（5品种实时）
- *   /api/kline             — 现货黄金日K代理（XAU，新浪源，可选 start/end/limit）
+ *   /api/sina              — 行情代理（5品种实时，新浪源）
+ *   /api/kline             — 现货黄金K线（XAUUSD，TradingView 源，统一 1d/4h/1h；可选 start/end/limit）
  *   /api/token/generate    — 生成 Token（需密码）
  *   /api/token/validate    — 验证 Token
  *   /api/order/create      — 创建待确认订单
@@ -42,6 +42,75 @@ function cleanup() {
   for (const [id, o] of orders) {
     if (o.createdAt < cutoff) orders.delete(id);
   }
+}
+
+// ── TradingView WebSocket 客户端（获取 XAUUSD K线） ──
+// 协议参考开源 tvdatafeed：data.tradingview.com/socket.io/websocket
+// 注意：Worker 通过 fetch(wss://..., {headers:{Upgrade:"websocket"}}) 发起出站 WS
+const TV_URL = "wss://data.tradingview.com/socket.io/websocket";
+const TV_INTERVALS = { "1d": "1D", "4h": "4H", "1h": "1H" };
+
+function tvPack(func, params) {
+  const payload = JSON.stringify({ m: func, p: params });
+  return `~m~${payload.length}~m~${payload}`;
+}
+
+async function tvFetchKline(interval, limit) {
+  // 打开出站 WebSocket
+  const resp = await fetch(TV_URL, {
+    headers: {
+      "Upgrade": "websocket",
+      "Origin": "https://data.tradingview.com",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+    },
+  });
+  if (!resp.webSocket) throw new Error("ws_handshake_failed");
+  const ws = resp.webSocket;
+  ws.accept();
+
+  const session = "cs_" + Math.random().toString(36).slice(2, 12);
+  const tvInterval = TV_INTERVALS[interval] || "1D";
+
+  // 发送序列：鉴权 → 建会话 → 解析标的 → 建序列 → 切时区
+  ws.send(tvPack("set_auth_token", ["unauthorized_user_token"]));
+  ws.send(tvPack("chart_create_session", [session, ""]));
+  ws.send(tvPack("resolve_symbol", [session, "symbol_1", '={"symbol":"FX_IDC:XAUUSD","adjustment":"splits","session":"regular"}']));
+  ws.send(tvPack("create_series", [session, "s1", "s1", "symbol_1", tvInterval, limit]));
+  ws.send(tvPack("switch_timezone", [session, "exchange"]));
+
+  // 收集消息直到 series_completed
+  let raw = "";
+  const result = await new Promise((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => { settled = true; reject(new Error("timeout")); }, 15000);
+    ws.addEventListener("message", (ev) => {
+      if (settled) return;
+      raw += ev.data + "\n";
+      if (raw.includes("series_completed")) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(raw);
+      }
+    });
+    ws.addEventListener("close", () => { if (!settled) { settled = true; clearTimeout(timer); reject(new Error("ws_closed")); } });
+    ws.addEventListener("error", () => { if (!settled) { settled = true; clearTimeout(timer); reject(new Error("ws_error")); } });
+  });
+
+  // 解析 bars：真实结构为 {"s":[{"i":0,"v":[ts,o,h,l,c,vol]},...],"ns":...}
+  const m = result.match(/"s":\[(.+?)\]\s*,"/);
+  if (!m) throw new Error("parse_failed");
+  const body = m[1];
+  const candles = [];
+  const re = /\{"i":\d+,"v":\[([^\]]+)\]\}/g;
+  let mm;
+  while ((mm = re.exec(body)) !== null) {
+    const v = mm[1].split(",").map(Number);
+    if (v.length >= 5 && !isNaN(v[0]) && !isNaN(v[1]) && !isNaN(v[2]) && !isNaN(v[3]) && !isNaN(v[4])) {
+      candles.push({ time: v[0], open: v[1], high: v[2], low: v[3], close: v[4] });
+    }
+  }
+  if (!candles.length) throw new Error("parse_failed");
+  return candles;
 }
 
 export default {
@@ -85,48 +154,25 @@ export default {
     }
 
     // ── /api/kline ──
-    // interval: 1d（默认，新浪日K）| 4h（东财240分）| 1h（东财60分）
+    // interval: 1d（默认）| 4h | 1h —— 全部走 TradingView 统一数据源
     if (path === "/api/kline") {
       try {
-        const symbol = url.searchParams.get("symbol") || "XAU";
+        const symbol = url.searchParams.get("symbol") || "XAUUSD";
         const interval = (url.searchParams.get("interval") || "1d").toLowerCase();
         const start = url.searchParams.get("start") || "";   // YYYY-MM-DD
         const end = url.searchParams.get("end") || "";       // YYYY-MM-DD
         const limit = parseInt(url.searchParams.get("limit") || "400", 10);
+        if (!TV_INTERVALS[interval]) {
+          return new Response(JSON.stringify({ error: "unsupported_interval" }), {
+            status: 400, headers: { "Content-Type": "application/json", ...cors },
+          });
+        }
 
         // 10 分钟缓存 + 并发去重（按 interval 分 key）
         let candles = getCached(interval);
         if (!candles) {
           if (!klineInFlight.has(interval)) {
-            const p = (async () => {
-              if (interval === "1d") {
-                // 新浪日K
-                const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
-                const resp = await fetch(sinaUrl);
-                const text = await resp.text();
-                const m = text.match(/\(\[(.*)\]\)/);
-                if (!m) throw new Error("parse_failed");
-                let list;
-                try { list = JSON.parse("[" + m[1] + "]"); }
-                catch (e) { throw new Error("parse_failed"); }
-                return list.map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }));
-              }
-              // 东财分钟/4H（klt: 240=4H, 60=1H）
-              const klt = interval === "4h" ? "240" : interval === "1h" ? "60" : "240";
-              const emUrl = `https://push2.eastmoney.com/api/qt/stock/kline/get?secid=122.XAU&klt=${klt}&fqt=1&end=20500101&lmt=800&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58`;
-              const resp = await fetch(emUrl, { headers: { Referer: "https://quote.eastmoney.com/" } });
-              const text = await resp.text();
-              let j;
-              try { j = JSON.parse(text); } catch (e) { throw new Error("parse_failed"); }
-              const list = j && j.data && j.data.klines;
-              if (!list || !list.length) throw new Error("parse_failed");
-              // 东财 klines 格式: "2026-08-07 21:00,open,close,high,low,vol,..."
-              return list.map((line) => {
-                const p = line.split(",");
-                const t = p[0].replace(" ", "T") + ":00+08:00";
-                return { time: Math.floor(new Date(t).getTime() / 1000), open: +p[1], close: +p[2], high: +p[3], low: +p[4] };
-              });
-            })();
+            const p = tvFetchKline(interval, limit);
             klineInFlight.set(interval, p);
             p.finally(() => { klineInFlight.delete(interval); });
           }
@@ -137,10 +183,9 @@ export default {
         // start/end 过滤（兼容 YYYY-MM-DD 与 unix 秒两种时间形态）
         const startTs = start ? Math.floor(new Date(start + "T00:00:00+08:00").getTime() / 1000) : 0;
         const endTs = end ? Math.floor(new Date(end + "T23:59:59+08:00").getTime() / 1000) : Infinity;
-        const norm = (d) => d.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 
         let out = candles.filter((c) => {
-          const ct = typeof c.time === "number" ? c.time : Math.floor(new Date(norm(c.time) + "T00:00:00+08:00").getTime() / 1000);
+          const ct = typeof c.time === "number" ? c.time : Math.floor(new Date(c.time.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") + "T00:00:00+08:00").getTime() / 1000);
           return ct >= startTs && ct <= endTs;
         });
         if (limit > 0 && out.length > limit) out = out.slice(out.length - limit);
