@@ -393,8 +393,8 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .kline-title::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ai-1);flex-shrink:0}
 .kline-body{position:relative}
 .kline-body canvas{display:block}
-.kline-panes{display:flex;flex-wrap:wrap;gap:16px}
-.kline-pane{position:relative;flex:1 1 46%;min-width:0}
+.kline-panes{display:flex;gap:16px}
+.kline-pane{position:relative;flex:1 1 0}
 .kline-pane-multi{border-radius:10px;border:1px solid var(--border);background:rgba(16,19,28,.6);padding:8px 8px 4px;overflow:hidden}
 .kline-pane-multi .kline-body{border-bottom:1px solid rgba(75,85,104,.25)}
 .kline-pane-multi .kline-body:last-child{border-bottom:0}
