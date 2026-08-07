@@ -75,9 +75,11 @@
       });
   }
 
-  function makeChart(el, interval) {
+  function makeChart(el, interval, heightRatio) {
     var w = el.clientWidth || 720;
-    var h = Math.round((w * 9) / 16);
+    // 高比可定制：并排小图用更高比例(接近大图高度)，单图默认 16:9
+    var ratio = heightRatio || (9 / 16);
+    var h = Math.round(w * ratio);
     var intraday = interval === "4h" || interval === "1h";
     var chart = LightweightCharts.createChart(el, {
       width: w, height: h,
@@ -110,14 +112,14 @@
     });
   }
 
-  // 渲染单个周期面板
-  function renderPane(host, interval, start, end, marks, zoomBars) {
+  // 渲染单个周期面板；heightRatio 用于并排小图默认对齐大图高度
+  function renderPane(host, interval, start, end, marks, zoomBars, heightRatio) {
     return loadData(start, end, interval).then(function (data) {
       var body = document.createElement("div");
       body.className = "kline-body";
       host.appendChild(body);
 
-      var g = makeChart(body, interval);
+      var g = makeChart(body, interval, heightRatio);
       g.series.setData(data);
       marks.forEach(function (m) { addMark(g.series, m); });
 
@@ -184,8 +186,8 @@
         pane.appendChild(lbl);
       }
 
-      renderPane(pane, interval, start, end, marks, multi ? 60 : 90).then(function (g) {
-        charts.push({ g: g, pane: pane, iv: interval });
+      renderPane(pane, interval, start, end, marks, multi ? 56 : 90, chartRatio(multi)).then(function (g) {
+        charts.push({ g: g, pane: pane, iv: interval, ratio: chartRatio(multi) });
         if (charts.length === pending) finish(el, charts, marks, hint);
       });
     });
@@ -193,6 +195,11 @@
 
   function ivLabel(iv) {
     return { "4h": "4H", "1h": "1H", "1d": "1D" }[iv] || iv.toUpperCase();
+  }
+
+  // 高度比：单图大框 16:9；并排小图用 11:10 略高，使两框整体视觉对等
+  function chartRatio(multi) {
+    return multi ? 11 / 10 : 9 / 16;
   }
 
   function finish(el, charts, marks, hint) {
@@ -229,7 +236,7 @@
     var onResize = function () {
       charts.forEach(function (c) {
         var nw = c.pane.clientWidth || 720;
-        c.g.chart.applyOptions({ width: nw, height: Math.round((nw * 9) / 16) });
+        c.g.chart.applyOptions({ width: nw, height: Math.round(nw * (c.ratio || 9 / 16)) });
       });
     };
     window.addEventListener("resize", onResize);
