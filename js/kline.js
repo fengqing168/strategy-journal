@@ -90,7 +90,7 @@
       layout: { background: { type: "solid", color: "transparent" }, textColor: C.text, fontSize: 11 },
       grid: { vertLines: { color: C.grid }, horzLines: { color: C.grid } },
       rightPriceScale: { borderColor: C.border },
-      timeScale: { borderColor: C.border, timeVisible: intraday, secondsVisible: false, rightOffset: 8 },
+      timeScale: { borderColor: C.border, timeVisible: intraday, secondsVisible: false, rightOffset: 0 },
       crosshair: { mode: 0 },
       // 交互：拖拽平移 + 滚轮/双指缩放（lightweight-charts 内建，显式开启）
       handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
@@ -129,10 +129,10 @@
       }
     }
     if (!pts.length) return null;
-    // 延伸到图最右：追加一个未来的时间点，让射线画出右缘（lightweight-charts 支持未来时间占位）
     var last = data[data.length - 1].time;
     var span = data.length > 1 ? (data[data.length - 1].time - data[0].time) / (data.length - 1) : 21600;
-    pts.push({ time: last + span * 6, value: +m.price });
+    var endTs = last + span * 30;
+    pts.push({ time: endTs, value: +m.price });
     var ray = chart.addLineSeries({
       color: m.color || C.text,
       lineWidth: 1,
@@ -142,7 +142,7 @@
       priceLineVisible: false,
     });
     ray.setData(pts);
-    return ray;
+    return endTs;
   }
 
   // 渲染单个周期面板；heightRatio 用于并排小图默认对齐大图高度
@@ -154,8 +154,9 @@
 
       var g = makeChart(body, interval, heightRatio);
       g.series.setData(data);
+      var rayEndTs = 0;
       marks.forEach(function (m) {
-        if (m.ray) { addRay(g.chart, data, m); }
+        if (m.ray) { var e = addRay(g.chart, data, m); if (e) rayEndTs = Math.max(rayEndTs, e); }
         else { addMark(g.series, m); }
       });
 
@@ -177,18 +178,26 @@
         var lo = Math.min(plo, dlo), hi = Math.max(phi, dhi);
         var pad = (hi - lo) * 0.08;
         try {
+          g.chart.priceScale("right").applyOptions({ autoScale: false });
           g.chart.priceScale("right").setVisibleRange({ from: lo - pad, to: hi + pad });
         } catch (e) {
           try { g.chart.priceScale("right").setVisibleLogicalRange({ from: lo - pad, to: hi + pad }); } catch (e2) {}
         }
       }
 
-      // 时间轴：优先辅以完整纵深；线少时仍聚焦最近，保证首屏线最清晰
+      // 时间轴：聚焦最近，且把射线末点纳入可视区，让射线贴到右缘
       try {
-        g.chart.timeScale().setVisibleLogicalRange({
-          from: zoomBars < data.length ? Math.max(0, data.length - zoomBars) : 0,
-          to: data.length - 1 + 8,
-        });
+        var lastIdx = data.length - 1;
+        var fromIdx = zoomBars < data.length ? Math.max(0, lastIdx - zoomBars) : 0;
+        var toIdx = lastIdx + 8;
+        if (rayEndTs) {
+          g.chart.timeScale().setVisibleRange({
+            from: data[fromIdx].time,
+            to: Math.max(data[lastIdx].time, rayEndTs),
+          });
+        } else {
+          g.chart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
+        }
       } catch (e) {
         g.chart.timeScale().fitContent();
       }
