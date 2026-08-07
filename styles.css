@@ -290,6 +290,19 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .wf-hero .wf-sub{font-size:.9375rem;color:var(--text-sec);margin-top:14px;line-height:1.7}
 .wf-price{font-family:var(--mono);font-size:2rem;font-weight:700;margin:22px 0 16px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .wf-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-ghost{display:inline-block;padding:11px 24px;color:var(--text-sec);border:1px solid var(--border-strong);border-radius:9px;text-decoration:none;font-weight:600;font-size:.875rem;transition:all .15s var(--ease)}
+.btn-ghost:hover{border-color:var(--ai-1);color:var(--ai-1)}
+
+/* 样本区两栏 */
+.sample-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:760px){.sample-grid{grid-template-columns:1fr}}
+.sample-left .sample-intro{font-size:.8125rem;color:var(--text-sec);margin-bottom:10px}
+.sample-steps{margin-bottom:14px}
+.sample-steps .ss{font-size:.78rem;color:var(--text-sec);line-height:1.7;padding:9px 0;border-bottom:1px solid var(--border-soft)}
+.sample-steps .ss:last-child{border-bottom:none}
+.sample-steps .ss b{color:var(--text);font-weight:600}
+.sample-note{font-size:.75rem;color:var(--text-muted);line-height:1.75}
+.sample-note b{color:var(--text)}
 
 /* 流程图 */
 .wf-flow{max-width:780px;margin:42px auto;padding:28px 22px;background:var(--card);border:1px solid var(--border-soft);border-radius:16px;box-shadow:var(--shadow)}

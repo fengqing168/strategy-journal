@@ -95,6 +95,17 @@ for page in PAGES:
     else:
         fail(f"{page}: 导航错 → 实际 {hrefs}")
 
+# ── 4.5 订阅表单 ↔ main.js ──
+print("\n── 4.5 订阅表单 ↔ main.js ──")
+for page in PAGES:
+    html = load(page)
+    if not html: continue
+    if 'sub-form' not in html: continue
+    if 'js/main.js' in html:
+        ok(f"{page}: 订阅表单 + main.js ✓")
+    else:
+        fail(f"{page}: 订阅表单缺 main.js（subscribeForm 未定义 → 点击无反应）")
+
 # ── 5. CSS 色值残留 ──
 print("\n── 5. CSS 色值残留 ──")
 css = load(STYLES)
@@ -134,9 +145,10 @@ for page in PAGES:
     html = load(page)
     if not html: continue
     # Count non-void open tags
-    tags = re.findall(r'<(\w+)', html)
-    non_void = [t for t in tags if t not in VOID]
-    closes = len(re.findall(r'</(\w+)>', html))
+    tags = re.findall(r'<(\w+)([^>]*?)(/?)>', html)
+    non_void = [t for t, attrs, slash in tags if t not in VOID]
+    self_closed = sum(1 for _, _, s in tags if s == '/')
+    closes = len(re.findall(r'</(\w+)>', html)) + self_closed
     diff = abs(len(non_void) - closes)
     if diff <= 3:
         ok(f"{page}: 标签平衡 ✓")
