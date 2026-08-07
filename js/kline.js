@@ -107,8 +107,10 @@
     return { chart: chart, series: series };
   }
 
-  function addMark(series, m) {
-    series.createPriceLine({
+  // 标记线（止损/目标等贯穿线）：createPriceLine 负责右侧轴上的"标签文字+价格"，
+  // 另加一条全透明 line series 占位，参与价格轴 autoscale，确保线默认可见。
+  function addMark(chart, data, m) {
+    chart.series.createPriceLine({
       price: +m.price,
       color: m.color || C.text,
       lineWidth: 1,
@@ -116,6 +118,18 @@
       axisLabelVisible: true,
       title: m.label || "",
     });
+    // 透明占位：把该价格纳入 autoscale，避免线低于数据低点被挤出画面
+    var ghost = chart.chart.addLineSeries({
+      color: "transparent",
+      lineWidth: 1,
+      crosshairMarkerVisible: false,
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
+    ghost.setData([
+      { time: data[0].time, value: +m.price },
+      { time: data[data.length - 1].time, value: +m.price },
+    ]);
   }
 
   // 水平射线：从进场时刻(由 m.from 指定)起，向右画一条线到图最右，
@@ -133,12 +147,12 @@
     var span = data.length > 1 ? (data[data.length - 1].time - data[0].time) / (data.length - 1) : 21600;
     var endTs = last + span * 30;
     pts.push({ time: endTs, value: +m.price });
-    var ray = chart.addLineSeries({
+    var ray = chart.chart.addLineSeries({
       color: m.color || C.text,
       lineWidth: 1,
       lineStyle: m.style === "solid" ? LightweightCharts.LineStyle.Solid : LightweightCharts.LineStyle.Dashed,
       crosshairMarkerVisible: false,
-      lastValueVisible: false,
+      lastValueVisible: true,
       priceLineVisible: false,
     });
     ray.setData(pts);
@@ -156,34 +170,9 @@
       g.series.setData(data);
       var rayEndTs = 0;
       marks.forEach(function (m) {
-        if (m.ray) { var e = addRay(g.chart, data, m); if (e) rayEndTs = Math.max(rayEndTs, e); }
-        else { addMark(g.series, m); }
+        if (m.ray) { var e = addRay(g, data, m); if (e) rayEndTs = Math.max(rayEndTs, e); }
+        else { addMark(g, data, m); }
       });
-
-      // 优先原则：先让观察/止损/目标线完整入画，再缩放K线适配，保证首阅清晰直观。
-      // 计算全部标注线价格 → 覆盖到价格轴可见区(上下各留 8% 呼吸)。
-      var plo = Infinity, phi = -Infinity;
-      marks.forEach(function (m) {
-        var p = +m.price;
-        if (p < plo) plo = p;
-        if (p > phi) phi = p;
-      });
-      if (isFinite(plo)) {
-        // 若数据价格范围比线范围更大，也让数据整体可见，避免线被挤出数据区域
-        var dlo = Infinity, dhi = -Infinity;
-        data.forEach(function (d) {
-          if (d.low < dlo) dlo = d.low;
-          if (d.high > dhi) dhi = d.high;
-        });
-        var lo = Math.min(plo, dlo), hi = Math.max(phi, dhi);
-        var pad = (hi - lo) * 0.08;
-        try {
-          g.chart.priceScale("right").applyOptions({ autoScale: false });
-          g.chart.priceScale("right").setVisibleRange({ from: lo - pad, to: hi + pad });
-        } catch (e) {
-          try { g.chart.priceScale("right").setVisibleLogicalRange({ from: lo - pad, to: hi + pad }); } catch (e2) {}
-        }
-      }
 
       // 时间轴：聚焦最近，且把射线末点纳入可视区，让射线贴到右缘
       try {
