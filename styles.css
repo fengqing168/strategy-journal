@@ -438,12 +438,12 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .jr-card .jr-mini{width:100%;flex-shrink:0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .jr-card .jr-mini .kline{margin:0}
 .jr-card .jr-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
-.jr-card .jr-title{font-size:.75rem;font-weight:600;color:var(--text-muted);font-family:var(--mono);letter-spacing:.05em;margin-bottom:8px}
+.jr-card .jr-title{font-size:.8125rem;font-weight:700;color:var(--text);font-family:var(--mono);letter-spacing:.05em;margin-bottom:8px}
 .jr-card .jr-line{font-size:.9375rem;color:var(--text);line-height:1.7;margin-bottom:8px}
 .jr-card .jr-line strong{color:var(--text)}
 .jr-card .jr-result{font-size:.75rem;color:var(--text-sec);font-family:var(--mono)}
 .jr-card .jr-result .ok{color:var(--up)}.jr-card .jr-result .no{color:var(--down)}
-.jr-card .jr-link{margin-top:10px;font-size:.75rem;color:var(--ai-1);text-decoration:none;font-weight:500}
+.jr-card .jr-link{margin-bottom:4px;font-size:1.05rem;color:var(--ai-1);text-decoration:none;font-weight:700}
 .jr-card .jr-link:hover{color:var(--ai-2)}
 
 /* ── 运行日志 · K 线点位图例 ── */
