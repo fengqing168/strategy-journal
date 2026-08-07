@@ -382,7 +382,7 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .kline-body{position:relative}
 .kline-body canvas{display:block}
 .kline-hint{padding:9px 14px;font-size:.6875rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border-soft);font-family:var(--mono)}
-.kline-src{position:absolute;left:14px;bottom:9px;font-size:.6rem;color:rgba(148,156,184,.55);font-family:var(--mono);letter-spacing:.04em;z-index:5;pointer-events:none}
+.kline-src{display:block;text-align:right;padding:2px 14px 8px;font-size:.6rem;color:rgba(148,156,184,.55);font-family:var(--mono);letter-spacing:.04em}
 
 /* ── 运行日志 · 三段时区（实时/事实/复盘） ── */
 .tz-block{border-radius:var(--radius);padding:18px 20px;margin:20px 0;border:1px solid var(--border)}
@@ -413,8 +413,9 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 @media(max-width:620px){.decide{grid-template-columns:repeat(2,1fr)}}
 
 /* ── 运行日志 · 首页迷你记录条 ── */
-.jr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;gap:18px;align-items:stretch}
-.jr-card .jr-mini{width:240px;flex-shrink:0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.jr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.jr-card .jr-mini{width:100%;flex-shrink:0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.jr-card .jr-mini .kline{margin:0}
 .jr-card .jr-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .jr-card .jr-title{font-size:.75rem;font-weight:600;color:var(--text-muted);font-family:var(--mono);letter-spacing:.05em;margin-bottom:8px}
 .jr-card .jr-line{font-size:.9375rem;color:var(--text);line-height:1.7;margin-bottom:8px}
@@ -423,7 +424,13 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .jr-card .jr-result .ok{color:var(--up)}.jr-card .jr-result .no{color:var(--down)}
 .jr-card .jr-link{margin-top:10px;font-size:.75rem;color:var(--ai-1);text-decoration:none;font-weight:500}
 .jr-card .jr-link:hover{color:var(--ai-2)}
-@media(max-width:760px){.jr-card{flex-direction:column}.jr-card .jr-mini{width:100%}}
+
+/* ── 运行日志 · K 线点位图例 ── */
+.kline-legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:9px 14px;border-top:1px solid var(--border-soft);background:var(--code-bg)}
+.kline-legend .kl-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.6875rem;color:var(--text-sec)}
+.kline-legend .kl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kline-legend .kl-label{color:var(--text-muted)}
+.kline-legend .kl-price{font-weight:600;color:var(--text)}
 
 /* ── 可见性动画 ── */
 .fade-in{opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease),transform .5s var(--ease)}

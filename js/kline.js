@@ -96,14 +96,16 @@
     var title = el.getAttribute("data-title") || "";
     var hint = el.getAttribute("data-hint") || "";
 
-    var hintEl = document.createElement("div");
-    hintEl.className = "kline-hint";
-    hintEl.textContent = hint;
-    el.appendChild(hintEl);
-
     var body = document.createElement("div");
     body.className = "kline-body";
     el.appendChild(body);
+
+    if (title) {
+      var t = document.createElement("div");
+      t.className = "kline-title";
+      t.textContent = title;
+      el.insertBefore(t, body);
+    }
 
     loadData(start, end).then(function (data) {
       var g = makeChart(body);
@@ -111,18 +113,33 @@
       marks.forEach(function (m) { addMark(g.series, m); });
       g.chart.timeScale().fitContent();
 
+      if (marks.length) {
+        var legend = document.createElement("div");
+        legend.className = "kline-legend";
+        marks.forEach(function (m) {
+          var item = document.createElement("span");
+          item.className = "kl-item";
+          item.innerHTML =
+            '<span class="kl-dot" style="background:' + m.color + '"></span>' +
+            '<span class="kl-label">' + m.label + '</span>' +
+            '<span class="kl-price">' + m.price + '</span>';
+          legend.appendChild(item);
+        });
+        el.appendChild(legend);
+      }
+
+      if (hint) {
+        var hintEl = document.createElement("div");
+        hintEl.className = "kline-hint";
+        hintEl.textContent = hint;
+        el.appendChild(hintEl);
+      }
+
       // 右下角来源标注（证明数据公开可核）
       var src = document.createElement("div");
       src.className = "kline-src";
       src.textContent = "数据源:SINA 日K · 可核验";
       el.appendChild(src);
-
-      if (title) {
-        var t = document.createElement("div");
-        t.className = "kline-title";
-        t.textContent = title;
-        el.insertBefore(t, body);
-      }
 
       // resize
       var onResize = function () {
