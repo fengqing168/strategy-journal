@@ -42,7 +42,7 @@
       " " + p(d.getUTCHours()) + ":" + p(d.getUTCMinutes()) + " UTC");
   }
 
-  function loadData(start, end, interval) {
+  function loadData(start, end, interval, cut) {
     var params = ["interval=" + (interval || "1d")];
     if (start) params.push("start=" + start);
     if (end) params.push("end=" + end);
@@ -68,10 +68,14 @@
           });
       })
       .then(function (data) {
-        return data.map(function (c) {
-          var t = typeof c.time === "number" ? c.time : normTime(c.time);
-          return { time: t, open: +c.open, high: +c.high, low: +c.low, close: +c.close };
-        });
+        return data
+          .filter(function (c) {
+            return (!cut || toTs(c.time) <= cut);
+          })
+          .map(function (c) {
+            var t = typeof c.time === "number" ? c.time : normTime(c.time);
+            return { time: t, open: +c.open, high: +c.high, low: +c.low, close: +c.close };
+          });
       });
   }
 
@@ -97,6 +101,8 @@
       upColor: C.up, downColor: C.down,
       borderUpColor: C.up, borderDownColor: C.down,
       wickUpColor: C.up, wickDownColor: C.down,
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
     return { chart: chart, series: series };
   }
@@ -123,8 +129,10 @@
       }
     }
     if (!pts.length) return null;
+    // 延伸到图最右：追加一个未来的时间点，让射线画出右缘（lightweight-charts 支持未来时间占位）
     var last = data[data.length - 1].time;
-    pts.push({ time: last, value: +m.price });
+    var span = data.length > 1 ? (data[data.length - 1].time - data[0].time) / (data.length - 1) : 21600;
+    pts.push({ time: last + span * 6, value: +m.price });
     var ray = chart.addLineSeries({
       color: m.color || C.text,
       lineWidth: 1,
@@ -138,8 +146,8 @@
   }
 
   // 渲染单个周期面板；heightRatio 用于并排小图默认对齐大图高度
-  function renderPane(host, interval, start, end, marks, zoomBars, heightRatio) {
-    return loadData(start, end, interval).then(function (data) {
+  function renderPane(host, interval, start, end, marks, zoomBars, heightRatio, cut) {
+    return loadData(start, end, interval, cut).then(function (data) {
       var body = document.createElement("div");
       body.className = "kline-body";
       host.appendChild(body);
@@ -200,6 +208,7 @@
   function init(el) {
     var start = el.getAttribute("data-start") || "";
     var end = el.getAttribute("data-end") || "";
+    var cut = el.getAttribute("data-cut") ? toTs(el.getAttribute("data-cut")) : null;
     var markAttr = el.getAttribute("data-mark") || "[]";
     var marks = [];
     try { marks = JSON.parse(markAttr); } catch (e) {}
@@ -238,7 +247,7 @@
         pane.appendChild(lbl);
       }
 
-      renderPane(pane, interval, start, end, marks, multi ? 56 : 90, chartRatio(multi)).then(function (g) {
+      renderPane(pane, interval, start, end, marks, multi ? 56 : 90, chartRatio(multi), cut).then(function (g) {
         charts.push({ g: g, pane: pane, iv: interval, ratio: chartRatio(multi) });
         if (charts.length === pending) finish(el, charts, marks, hint);
       });
