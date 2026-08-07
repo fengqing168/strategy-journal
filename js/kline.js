@@ -1,19 +1,20 @@
-/* ── 运行日志 · 双 K 线组件（预判图 + 验证图） ──
+/* ── 运行日志 · K 线组件 ──
  * 依赖:../js/vendor/lightweight-charts.standalone.production.js
  *
- * 用法:在页面中放置 <div class="kline" data-end="2026-08-04">…
- *  - data-end      截止日期(判断段图):只画到这一天,证明"当时看到的是这个"
- *  - data-start    起始日期(验证段图):从这一天画起,显示行情后续如何走到目标
- *  - data-interval 周期:1d(默认,新浪日K) / 4h(东财4小时) / 1h(东财1小时)
- *  - data-title    图标题
- *  - data-mark     标注: 用 JSON 数组 [{price,label,color,style}]
- *  - data-hint     图底部一句话提示
- * 数据源:优先 /api/kline(worker 代理),失败回退本地 data/xau_daily_recent.json
+ * 用法:在页面中放置 <div class="kline">…
+ *  - data-end        截止日期(判断段图):只画到这一天
+ *  - data-start      起始日期(验证段图):从这一天画起
+ *  - data-interval   单周期:1d/4h/1h
+ *  - data-intervals  多周期堆叠(图里上下合并):如 "4h,1h"，中间隔开区分周期
+ *  - data-title      图标题
+ *  - data-mark       标注 JSON [{price,label,color,style}]
+ *  - data-hint       图底部一句话提示
+ * 数据源:/api/kline(worker→TradingView),失败回退本地 data/xau_daily_recent.json
  */
 (function () {
   if (typeof LightweightCharts === "undefined") return;
 
-  var API = "/api/kline?symbol=XAU&limit=400";
+  var API = "/api/kline?symbol=XAU&limit=500";
   var FALLBACK = "/data/xau_daily_recent.json";
 
   var C = {
@@ -33,12 +34,12 @@
     return Math.floor(new Date(s + "T00:00:00+08:00").getTime() / 1000);
   }
 
-  // UTC 精确到分钟的时间标签（例：11:35 UTC）
+  // UTC 24 小时制 + 详细日期，例：2026/8/5 21:30
   function utcLabel(t) {
     var d = new Date(t * 1000);
     var p = function (n) { return (n < 10 ? "0" : "") + n; };
-    var hh = p(d.getUTCHours()), mi = p(d.getUTCMinutes());
-    return hh + ":" + mi + " UTC";
+    return (d.getUTCFullYear() + "/" + (d.getUTCMonth() + 1) + "/" + d.getUTCDate() +
+      " " + p(d.getUTCHours()) + ":" + p(d.getUTCMinutes()) + " UTC");
   }
 
   function loadData(start, end, interval) {
@@ -83,7 +84,7 @@
       layout: { background: { type: "solid", color: "transparent" }, textColor: C.text, fontSize: 11 },
       grid: { vertLines: { color: C.grid }, horzLines: { color: C.grid } },
       rightPriceScale: { borderColor: C.border },
-      timeScale: { borderColor: C.border, timeVisible: intraday, secondsVisible: false, rightOffset: 6 },
+      timeScale: { borderColor: C.border, timeVisible: intraday, secondsVisible: false, rightOffset: 8 },
       crosshair: { mode: 0 },
       // 交互：拖拽平移 + 滚轮/双指缩放（lightweight-charts 内建，显式开启）
       handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
@@ -109,6 +110,39 @@
     });
   }
 
+  // 渲染单个周期面板
+  function renderPane(host, interval, start, end, marks, zoomBars) {
+    return loadData(start, end, interval).then(function (data) {
+      var body = document.createElement("div");
+      body.className = "kline-body";
+      host.appendChild(body);
+
+      var g = makeChart(body, interval);
+      g.series.setData(data);
+      marks.forEach(function (m) { addMark(g.series, m); });
+
+      // 聚焦最近 zoomBars 根，保留纵深（代替全部压缩）
+      try {
+        g.chart.timeScale().setVisibleLogicalRange({
+          from: Math.max(0, data.length - zoomBars),
+          to: data.length - 1 + 8,
+        });
+      } catch (e) {
+        g.chart.timeScale().fitContent();
+      }
+
+      // 交互提示角标（居中，放大）
+      var w = body.clientWidth || 720;
+      if (w >= 360) {
+        var nav = document.createElement("div");
+        nav.className = "kline-nav";
+        nav.textContent = "K线可拖拽平移 · 滚轮/双指缩放";
+        body.appendChild(nav);
+      }
+      return g;
+    });
+  }
+
   function init(el) {
     var start = el.getAttribute("data-start") || "";
     var end = el.getAttribute("data-end") || "";
@@ -118,79 +152,87 @@
 
     var title = el.getAttribute("data-title") || "";
     var hint = el.getAttribute("data-hint") || "";
-    var interval = el.getAttribute("data-interval") || "1d";
-
-    var body = document.createElement("div");
-    body.className = "kline-body";
-    el.appendChild(body);
+    // 支持多周期堆叠:data-intervals="4h,1h"；否则单周期 data-interval
+    var intervals = (el.getAttribute("data-intervals") || el.getAttribute("data-interval") || "1d")
+      .split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    var multi = intervals.length > 1;
 
     if (title) {
       var t = document.createElement("div");
       t.className = "kline-title";
       t.textContent = title;
-      el.insertBefore(t, body);
+      el.appendChild(t);
     }
 
-    loadData(start, end, interval).then(function (data) {
-      var g = makeChart(body, interval);
-      g.series.setData(data);
-      marks.forEach(function (m) { addMark(g.series, m); });
+    // 多周期：垂直堆叠，周期间用间隔区分
+    var wrapper = document.createElement("div");
+    wrapper.className = multi ? "kline-panes" : "";
+    el.appendChild(wrapper);
 
-      // 放大K线比例：聚焦最近 ~44 根，取代 fitContent（否则全部压缩塞满，点位太挤）
-      var zoomBarCount = 44;
-      try {
-        g.chart.timeScale().setVisibleLogicalRange({
-          from: Math.max(0, data.length - zoomBarCount),
-          to: data.length - 1 + 6,
-        });
-      } catch (e) {
-        g.chart.timeScale().fitContent();
+    var charts = [];
+    var pending = intervals.length;
+
+    intervals.forEach(function (interval, idx) {
+      var pane = document.createElement("div");
+      pane.className = "kline-pane" + (multi ? " kline-pane-multi" : "");
+      wrapper.appendChild(pane);
+
+      if (multi) {
+        var lbl = document.createElement("div");
+        lbl.className = "kline-plabel";
+        lbl.textContent = ivLabel(interval);
+        pane.appendChild(lbl);
       }
 
-      // 交互提示角标（非迷你图才显示，避免遮挡）
-      var w = body.clientWidth || 720;
-      if (w >= 360) {
-        var nav = document.createElement("div");
-        nav.className = "kline-nav";
-        nav.textContent = "拖拽平移 · 滚轮/双指缩放";
-        body.appendChild(nav);
-      }
-
-      if (marks.length) {
-        var legend = document.createElement("div");
-        legend.className = "kline-legend";
-        marks.forEach(function (m) {
-          var item = document.createElement("span");
-          item.className = "kl-item";
-          item.innerHTML =
-            '<span class="kl-dot" style="background:' + m.color + '"></span>' +
-            '<span class="kl-label">' + m.label + '</span>' +
-            '<span class="kl-price">' + m.price + '</span>';
-          legend.appendChild(item);
-        });
-        el.appendChild(legend);
-      }
-
-      if (hint) {
-        var hintEl = document.createElement("div");
-        hintEl.className = "kline-hint";
-        hintEl.textContent = hint;
-        el.appendChild(hintEl);
-      }
-
-      // 右下角来源标注（证明数据公开可核）
-      var src = document.createElement("div");
-      src.className = "kline-src";
-      src.textContent = "数据源:TradingView · 可核验";
-      el.appendChild(src);
-
-      // resize
-      var onResize = function () {
-        var nw = body.clientWidth || 720;
-        g.chart.applyOptions({ width: nw, height: Math.round((nw * 9) / 16) });
-      };
-      window.addEventListener("resize", onResize);
+      renderPane(pane, interval, start, end, marks, multi ? 60 : 90).then(function (g) {
+        charts.push({ g: g, pane: pane, iv: interval });
+        if (charts.length === pending) finish(el, charts, marks, hint);
+      });
     });
+  }
+
+  function ivLabel(iv) {
+    return { "4h": "4H", "1h": "1H", "1d": "1D" }[iv] || iv.toUpperCase();
+  }
+
+  function finish(el, charts, marks, hint) {
+    var marks2 = marks || [];
+    if (marks2.length) {
+      var legend = document.createElement("div");
+      legend.className = "kline-legend";
+      marks2.forEach(function (m) {
+        var item = document.createElement("span");
+        item.className = "kl-item";
+        item.innerHTML =
+          '<span class="kl-dot" style="background:' + m.color + '"></span>' +
+          '<span class="kl-label">' + m.label + '</span>' +
+          '<span class="kl-price">' + m.price + '</span>';
+        legend.appendChild(item);
+      });
+      el.appendChild(legend);
+    }
+
+    if (hint) {
+      var hintEl = document.createElement("div");
+      hintEl.className = "kline-hint";
+      hintEl.textContent = hint;
+      el.appendChild(hintEl);
+    }
+
+    // 右下角来源标注
+    var src = document.createElement("div");
+    src.className = "kline-src";
+    src.textContent = "数据源:TradingView · 可核验";
+    el.appendChild(src);
+
+    // resize
+    var onResize = function () {
+      charts.forEach(function (c) {
+        var nw = c.pane.clientWidth || 720;
+        c.g.chart.applyOptions({ width: nw, height: Math.round((nw * 9) / 16) });
+      });
+    };
+    window.addEventListener("resize", onResize);
   }
 
   var els = document.querySelectorAll(".kline");
