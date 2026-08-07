@@ -58,6 +58,9 @@
         return data;
       })
       .catch(function () {
+        // 日内(4h/1h)不落到日线兜底：日线高/低会吞掉"观察位触及时"的定格语义。
+        // 例如08/05日线 high=4267 已越过目标4250，错误地出现"到达目标的K线"。
+        if (interval === "4h" || interval === "1h") throw new Error("intraday unavailable");
         return fetch(FALLBACK)
           .then(function (r) { return r.json(); })
           .then(function (data) {

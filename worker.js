@@ -46,8 +46,10 @@ function cleanup() {
 
 // ── TradingView WebSocket 客户端（获取 XAUUSD K线） ──
 // 协议参考开源 tvdatafeed：data.tradingview.com/socket.io/websocket
-// 注意：Worker 通过 fetch(wss://..., {headers:{Upgrade:"websocket"}}) 发起出站 WS
-const TV_URL = "wss://data.tradingview.com/socket.io/websocket";
+// 关键：Worker 出站 WS 用 fetch("https://...", {headers:{Upgrade:"websocket"}})：
+//   - URL 必须用 https://（非 wss://），Cloudflare 自动升级为 WS
+//   - fetch 方式可携带自定义 headers（TradingView 需要 Origin/UA）
+const TV_URL = "https://data.tradingview.com/socket.io/websocket";
 const TV_INTERVALS = { "1d": "1D", "4h": "4H", "1h": "1H" };
 
 function tvPack(func, params) {
@@ -56,44 +58,61 @@ function tvPack(func, params) {
 }
 
 async function tvFetchKline(interval, limit) {
-  // 打开出站 WebSocket
+  // 连接不稳定/被限流偶发握手失败 → 自动重试最多 3 次
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await tvFetchOnce(interval, limit);
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
+}
+
+async function tvFetchOnce(interval, limit) {
+  // 打开出站 WebSocket（https:// + Upgrade 头，可带自定义 headers）
   const resp = await fetch(TV_URL, {
     headers: {
       "Upgrade": "websocket",
       "Origin": "https://data.tradingview.com",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
     },
   });
-  if (!resp.webSocket) throw new Error("ws_handshake_failed");
+  if (!resp.webSocket) {
+    const err = new Error("ws_handshake_failed:status_" + resp.status);
+    err.debugInfo = { status: resp.status };
+    throw err;
+  }
   const ws = resp.webSocket;
   ws.accept();
 
   const session = "cs_" + Math.random().toString(36).slice(2, 12);
   const tvInterval = TV_INTERVALS[interval] || "1D";
 
-  // 发送序列：鉴权 → 建会话 → 解析标的 → 建序列 → 切时区
-  ws.send(tvPack("set_auth_token", ["unauthorized_user_token"]));
-  ws.send(tvPack("chart_create_session", [session, ""]));
-  ws.send(tvPack("resolve_symbol", [session, "symbol_1", '={"symbol":"FX_IDC:XAUUSD","adjustment":"splits","session":"regular"}']));
-  ws.send(tvPack("create_series", [session, "s1", "s1", "symbol_1", tvInterval, limit]));
-  ws.send(tvPack("switch_timezone", [session, "exchange"]));
-
-  // 收集消息直到 series_completed
-  let raw = "";
   const result = await new Promise((resolve, reject) => {
+    let raw = "";
     let settled = false;
-    const timer = setTimeout(() => { settled = true; reject(new Error("timeout")); }, 15000);
+    const finish = (fn, val) => { if (!settled) { settled = true; fn(val); } };
+    const timer = setTimeout(() => finish(reject, new Error("timeout")), 15000);
     ws.addEventListener("message", (ev) => {
       if (settled) return;
       raw += ev.data + "\n";
       if (raw.includes("series_completed")) {
-        settled = true;
         clearTimeout(timer);
-        resolve(raw);
+        finish(resolve, raw);
       }
     });
-    ws.addEventListener("close", () => { if (!settled) { settled = true; clearTimeout(timer); reject(new Error("ws_closed")); } });
-    ws.addEventListener("error", () => { if (!settled) { settled = true; clearTimeout(timer); reject(new Error("ws_error")); } });
+    ws.addEventListener("close", (ev) => { clearTimeout(timer); finish(reject, new Error("ws_closed:" + ev.code)); });
+    ws.addEventListener("error", () => { clearTimeout(timer); finish(reject, new Error("ws_error")); });
+
+    // 发送序列：鉴权 → 建会话 → 解析标的 → 建序列 → 切时区
+    ws.send(tvPack("set_auth_token", ["unauthorized_user_token"]));
+    ws.send(tvPack("chart_create_session", [session, ""]));
+    ws.send(tvPack("resolve_symbol", [session, "symbol_1", '={"symbol":"FX_IDC:XAUUSD","adjustment":"splits","session":"regular"}']));
+    ws.send(tvPack("create_series", [session, "s1", "s1", "symbol_1", tvInterval, limit]));
+    ws.send(tvPack("switch_timezone", [session, "exchange"]));
   });
 
   // 解析 bars：真实结构为 {"s":[{"i":0,"v":[ts,o,h,l,c,vol]},...],"ns":...}
@@ -194,7 +213,11 @@ export default {
           headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=600", ...cors },
         });
       } catch (e) {
-        return new Response(JSON.stringify({ error: "unavailable" }), {
+        const debug = url.searchParams.get("debug") === "1";
+        const body = debug
+          ? JSON.stringify({ error: "unavailable", reason: String(e && e.message || e), detail: (e && e.debugInfo) || undefined })
+          : JSON.stringify({ error: "unavailable" });
+        return new Response(body, {
           status: 502, headers: { "Content-Type": "application/json", ...cors },
         });
       }
@@ -362,7 +385,7 @@ export default {
 
     // ── /api/ping ──
     if (path === "/api/ping") {
-      return new Response(JSON.stringify({ ok: true, orders: orders.size, time: new Date().toISOString() }), {
+      return new Response(JSON.stringify({ ok: true, orders: orders.size, version: "tv-5-retry", time: new Date().toISOString() }), {
         headers: { "Content-Type": "application/json", ...cors },
       });
     }
