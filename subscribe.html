@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-.sub-value{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:780px;margin:24px auto}
-@media(max-width:500px){.sub-value{grid-template-columns:1fr}}
+.sub-value{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:780px;margin:24px auto}
+@media(max-width:760px){.sub-value{grid-template-columns:1fr}}
 .sub-vc{background:var(--card);border:1px solid var(--border-soft);border-radius:12px;padding:16px;text-align:center}
 .sub-vc .sv-icon{font-size:1.5rem;margin-bottom:6px}
 .sub-vc .sv-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:4px}
@@ -16,7 +16,7 @@
 </style>
 
 <meta property="og:title" content="订阅 · 每周运行实况 | 策略研究日志">
-<meta property="og:description" content="每周一封，看这套系统真实跑出的分析结果、人机分歧与更新。免费，随时退订。">
+<meta property="og:description" content="每周一封，看这套系统真实跑出的分析结果、人机分歧与更新。先看几周，再决定要不要拥有它。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shujian.cc/subscribe.html">
 <meta property="og:image" content="https://shujian.cc/images/og-default.png">
@@ -35,7 +35,7 @@
 </div></header>
 
 
-<div class="page-header"><div class="page-lvl">04 · 订阅</div><h1 class="page-title">每周，看这套系统真实在跑</h1><p class="page-sub">这里不送东西。这里让你看一套系统，每周真实跑出来的结果。免费，随时退订。</p></div>
+<div class="page-header"><div class="page-lvl">04 · 订阅</div><h1 class="page-title">每周，看这套系统真实在跑</h1><p class="page-sub">这里不送东西。这里让你看一套系统，每周真实跑出来的结果。这里没有确定性，只有过程。免费，随时退订。</p></div>
 
 <div class="sub-value">
 <div class="sub-vc"><div class="sv-icon">📊</div><div class="sv-title">每周实证</div><div class="sv-desc">这套系统真实跑出的分析结果——一次判断，连同它的推理过程</div></div>
@@ -49,12 +49,10 @@
 <form class="sub-form" onsubmit="subscribeForm(this);return false"><input type="email" placeholder="你的邮箱地址" required><button type="submit">订阅</button></form>
 </div>
 
-<ul class="sub-benefits">
-<li>每周一封系统运行实况——它这次分析了一件什么事</li>
-<li>AI 的判断与我的判断，以及分歧是如何被裁决的</li>
-<li>新节点、规则修订与优化，先于所有人收到</li>
-<li>首发优惠与限量名额，只在订阅内通知</li></ul>
-<p style="font-size:.75rem;color:var(--text-muted);margin-top:16px">每周一封。不会发垃圾。随时取消。</p>
+<div style="max-width:640px;margin:22px auto 0;text-align:center">
+<p style="font-size:.8125rem;color:var(--text-sec);line-height:1.8">订阅，是看它跑。购买，是拥有整条系统。两者不冲突——你可以先看几周，再决定。</p>
+<p style="font-size:.7rem;color:var(--text-muted);margin-top:8px">每周一封 · 可随时退订 · 不发垃圾</p>
+</div>
 
 <p style="text-align:center;margin-top:28px;font-size:.8125rem;color:var(--text-sec)">不想等，想直接拥有整套系统？
 <a href="purchase.html" style="color:var(--ai-1);font-weight:600;text-decoration:none">查看完整工作流 →</a></p>

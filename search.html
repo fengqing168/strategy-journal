@@ -74,7 +74,7 @@
 <nav class="nav"><a href="/">工作流</a><a href="search.html" class="active">运行日志</a><a href="about.html">关于</a><a href="subscribe.html">订阅</a><a href="purchase.html" class="nav-cta">获取完整版</a></nav>
 </div></header>
 
-<div class="page-header"><div class="page-lvl">02 · 运行日志</div><h1 class="page-title">系统运行实况</h1><p class="page-sub">这套工作流真实跑出的分析过程与复盘。每一篇，都是一次完整决策的切片。</p></div>
+<div class="page-header"><div class="page-lvl">02 · 运行日志</div><h1 class="page-title">运行日志</h1><p class="page-sub">这套工作流真实跑出的分析过程与复盘。每一篇，都是一次完整决策的切片。</p></div>
 
 <div class="log-page">
 
@@ -94,7 +94,7 @@
 <!-- Grid -->
 <div class="log-grid" id="logGrid">
 <div class="log-card coming"><div class="lc-num">#002</div><span class="lc-date">即将发布</span><div class="lc-title">AI 辅助分析趋势跟踪策略</div><div class="lc-excerpt">用量化方法回测趋势策略的历史表现，测试不同参数组合的胜率与回撤。</div></div>
-<div class="log-card coming"><div class="lc-num">#003</div><span class="lc-date">选题中</span><div class="lc-title">一次失败判断的完整复盘</div><div class="lc-excerpt">当时判断的依据是什么，这套工作流在哪个环节出了问题，如何修正。</div></div>
+<div class="log-card coming"><div class="lc-num">#003</div><span class="lc-date">选题中</span><div class="lc-title">一次失败判断的完整复盘</div><div class="lc-excerpt">当时判断的依据是什么，这套工作流在哪一环出了差错，如何修正。</div></div>
 <div class="log-card coming"><div class="lc-num">#004</div><span class="lc-date">选题中</span><div class="lc-title">中东冲突如何改变金价逻辑</div><div class="lc-excerpt">从 FOMC 声明首次提及地缘冲突，看避险情绪如何影响价格。</div></div>
 <div class="log-card coming"><div class="lc-num">#005</div><span class="lc-date">选题中</span><div class="lc-title">这套工作流：从 0 到 1</div><div class="lc-excerpt">16 步 Prompt 链的设计思路与踩过的坑。</div></div>
 </div>
@@ -104,10 +104,10 @@
 <!-- Sidebar -->
 <div class="log-side">
 <div class="ls-card">
-<h4>日志统计</h4>
+<h4>运行统计</h4>
 <div class="ls-stats">
 <div class="ls-stat"><b>1</b><span>已发布</span></div>
-<div class="ls-stat"><b>4</b><span>选题中</span></div>
+<div class="ls-stat"><b>持续</b><span>更新中</span></div>
 </div>
 </div>
 <div class="ls-card">
@@ -118,7 +118,8 @@
 <span onclick="filterLogs('Prompt')">Prompt</span>
 <span onclick="filterLogs('回测')">回测</span>
 <span onclick="filterLogs('复盘')">复盘</span>
-<span onclick="filterLogs('趋势')">趋势</span>
+<span onclick="filterLogs('避险')">避险</span>
+<span onclick="filterLogs('地缘')">地缘</span>
 </div>
 </div>
 <div class="ls-card">
@@ -129,12 +130,21 @@
 
 </div>
 
+<div class="log-cta fade-in" style="max-width:780px;margin:0 auto 8px">
+<div>
+<div class="lc-t">这套系统，来自一条完整的工作流</div>
+<div class="lc-d">16 个节点 + 置信度规则 + Python 脚本 + 持续更新，把这里看到的每一次运行，变成你自己可以跑的系统。</div>
+</div>
+<a href="index.html" class="btn-primary">查看工作流 →</a>
+</div>
+
 <footer class="footer">
 <div class="sig">舍予又见</div>
 <div class="sig-sub">STRATEGY · RESEARCH · AI</div>
 <p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="about.html">关于</a> &nbsp;·&nbsp; <a href="about.html#privacy">隐私</a> &nbsp;·&nbsp; <a href="subscribe.html">订阅</a></p>
 </footer>
 </div>
+<script src="js/main.js"></script>
 <script src="js/ticker.js"></script>
 <script>
 var data=[{n:"002",t:"AI 辅助分析趋势跟踪策略",d:"即将发布",e:"用量化方法回测趋势策略的历史表现，测试不同参数组合的胜率与回撤。",k:"回测 趋势"},{n:"003",t:"一次失败判断的完整复盘",d:"选题中",e:"当时判断的依据是什么差错，这套工作流在哪个环节出了问题。",k:"复盘 教训"},{n:"004",t:"中东冲突如何改变金价逻辑",d:"选题中",e:"从 FOMC 声明首次提及地缘冲突，看避险情绪如何影响价格。",k:"地缘 避险 央行分析"},{n:"005",t:"这套工作流：从 0 到 1",d:"选题中",e:"16 步 Prompt 链的设计思路与踩过的坑。",k:"Prompt AI 工作流"}];
