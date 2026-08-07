@@ -21,17 +21,19 @@ const TOKEN_DAYS = 90;
 // 内存存储（Worker 重启时清空，适合低流量场景）
 let orders = new Map();  // id → { email, ref, status, token, createdAt }
 
-// ── K线缓存（新浪日K全量较重，缓存10分钟，避免每次回源） ──
-let klineCache = null;        // { candles, at }
-let klineCacheAt = 0;
+// ── K线缓存（按周期分 key，1d=新浪日K，4h=东财240分） ──
+// 东财接口较重，缓存10分钟避免每次回源
 const KLINE_CACHE_MS = 10 * 60 * 1000;
-let klineInFlight = null;     // 并发去重：同一时刻只回源一次
+const klineCache = new Map();   // interval → { candles, at }
+const klineInFlight = new Map();// interval → Promise（并发去重）
 
-function clearExpiredCache() {
-  if (klineCache && Date.now() - klineCacheAt > KLINE_CACHE_MS) {
-    klineCache = null;
-    klineCacheAt = 0;
-  }
+function getCached(interval) {
+  const c = klineCache.get(interval);
+  if (c && Date.now() - c.at < KLINE_CACHE_MS) return c.candles;
+  return null;
+}
+function setCached(interval, candles) {
+  klineCache.set(interval, { candles, at: Date.now() });
 }
 
 // 清理 24 小时前的订单
@@ -83,40 +85,64 @@ export default {
     }
 
     // ── /api/kline ──
+    // interval: 1d（默认，新浪日K）| 4h（东财240分）| 1h（东财60分）
     if (path === "/api/kline") {
       try {
         const symbol = url.searchParams.get("symbol") || "XAU";
+        const interval = (url.searchParams.get("interval") || "1d").toLowerCase();
         const start = url.searchParams.get("start") || "";   // YYYY-MM-DD
         const end = url.searchParams.get("end") || "";       // YYYY-MM-DD
         const limit = parseInt(url.searchParams.get("limit") || "400", 10);
 
-        // 10 分钟缓存 + 并发去重，避免每次回源新浪拉全量
-        clearExpiredCache();
-        if (!klineCache) {
-          if (!klineInFlight) {
-            klineInFlight = (async () => {
-              const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
-              const resp = await fetch(sinaUrl);
+        // 10 分钟缓存 + 并发去重（按 interval 分 key）
+        let candles = getCached(interval);
+        if (!candles) {
+          if (!klineInFlight.has(interval)) {
+            const p = (async () => {
+              if (interval === "1d") {
+                // 新浪日K
+                const sinaUrl = `https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20t=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=${symbol}`;
+                const resp = await fetch(sinaUrl);
+                const text = await resp.text();
+                const m = text.match(/\(\[(.*)\]\)/);
+                if (!m) throw new Error("parse_failed");
+                let list;
+                try { list = JSON.parse("[" + m[1] + "]"); }
+                catch (e) { throw new Error("parse_failed"); }
+                return list.map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }));
+              }
+              // 东财分钟/4H（klt: 240=4H, 60=1H）
+              const klt = interval === "4h" ? "240" : interval === "1h" ? "60" : "240";
+              const emUrl = `https://push2.eastmoney.com/api/qt/stock/kline/get?secid=122.XAU&klt=${klt}&fqt=1&end=20500101&lmt=800&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58`;
+              const resp = await fetch(emUrl, { headers: { Referer: "https://quote.eastmoney.com/" } });
               const text = await resp.text();
-              const m = text.match(/\(\[(.*)\]\)/);
-              if (!m) throw new Error("parse_failed");
-              let candles;
-              try { candles = JSON.parse("[" + m[1] + "]"); }
-              catch (e) { throw new Error("parse_failed"); }
-              return candles.map((c) => ({ time: c.date, open: +c.open, high: +c.high, low: +c.low, close: +c.close }));
+              let j;
+              try { j = JSON.parse(text); } catch (e) { throw new Error("parse_failed"); }
+              const list = j && j.data && j.data.klines;
+              if (!list || !list.length) throw new Error("parse_failed");
+              // 东财 klines 格式: "2026-08-07 21:00,open,close,high,low,vol,..."
+              return list.map((line) => {
+                const p = line.split(",");
+                const t = p[0].replace(" ", "T") + ":00+08:00";
+                return { time: Math.floor(new Date(t).getTime() / 1000), open: +p[1], close: +p[2], high: +p[3], low: +p[4] };
+              });
             })();
-            klineInFlight.finally(() => { klineInFlight = null; });
+            klineInFlight.set(interval, p);
+            p.finally(() => { klineInFlight.delete(interval); });
           }
-          klineCache = await klineInFlight;
-          klineCacheAt = Date.now();
+          candles = await klineInFlight.get(interval);
+          setCached(interval, candles);
         }
 
-        // 统一时间格式 YYYY-MM-DD
+        // start/end 过滤（兼容 YYYY-MM-DD 与 unix 秒两种时间形态）
+        const startTs = start ? Math.floor(new Date(start + "T00:00:00+08:00").getTime() / 1000) : 0;
+        const endTs = end ? Math.floor(new Date(end + "T23:59:59+08:00").getTime() / 1000) : Infinity;
         const norm = (d) => d.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-        const startN = start ? norm(start) : "";
-        const endN = end ? norm(end) : "";
 
-        let out = klineCache.filter((c) => (!startN || c.time >= startN) && (!endN || c.time <= endN));
+        let out = candles.filter((c) => {
+          const ct = typeof c.time === "number" ? c.time : Math.floor(new Date(norm(c.time) + "T00:00:00+08:00").getTime() / 1000);
+          return ct >= startTs && ct <= endTs;
+        });
         if (limit > 0 && out.length > limit) out = out.slice(out.length - limit);
 
         return new Response(JSON.stringify(out), {
