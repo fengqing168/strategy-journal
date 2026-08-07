@@ -112,8 +112,9 @@
     });
   }
 
+  // 时间点标注：在指定 K 线上打竖线+标签（如预判时点/触发时点/止损时点）
   // 渲染单个周期面板；heightRatio 用于并排小图默认对齐大图高度
-  function renderPane(host, interval, start, end, marks, zoomBars, heightRatio) {
+  function renderPane(host, interval, start, end, marks, zoomBars, heightRatio, timeMarks) {
     return loadData(start, end, interval).then(function (data) {
       var body = document.createElement("div");
       body.className = "kline-body";
@@ -122,6 +123,26 @@
       var g = makeChart(body, interval, heightRatio);
       g.series.setData(data);
       marks.forEach(function (m) { addMark(g.series, m); });
+      if (timeMarks && timeMarks.length) {
+        var markers = [];
+        timeMarks.forEach(function (tm) {
+          var target = toTs(tm.time);
+          var idx = -1;
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].time >= target) { idx = i; break; }
+          }
+          if (idx === -1) idx = data.length - 1;
+          markers.push({
+            time: data[idx].time,
+            position: tm.pos === "below" ? "belowBar" : "aboveBar",
+            color: tm.color || "#22D3EE",
+            shape: tm.shape || "arrowUp",
+            text: tm.label || "",
+            size: 1.5,
+          });
+        });
+        g.series.setMarkers(markers);
+      }
 
       // 聚焦最近 zoomBars 根，保留纵深（代替全部压缩）
       try {
@@ -151,6 +172,9 @@
     var markAttr = el.getAttribute("data-mark") || "[]";
     var marks = [];
     try { marks = JSON.parse(markAttr); } catch (e) {}
+    var tmAttr = el.getAttribute("data-time-mark") || "[]";
+    var timeMarks = [];
+    try { timeMarks = JSON.parse(tmAttr); } catch (e) {}
 
     var title = el.getAttribute("data-title") || "";
     var hint = el.getAttribute("data-hint") || "";
@@ -186,7 +210,7 @@
         pane.appendChild(lbl);
       }
 
-      renderPane(pane, interval, start, end, marks, multi ? 56 : 90, chartRatio(multi)).then(function (g) {
+      renderPane(pane, interval, start, end, marks, multi ? 56 : 90, chartRatio(multi), timeMarks).then(function (g) {
         charts.push({ g: g, pane: pane, iv: interval, ratio: chartRatio(multi) });
         if (charts.length === pending) finish(el, charts, marks, hint);
       });
