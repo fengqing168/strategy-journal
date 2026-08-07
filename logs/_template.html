@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="{{META_DESC}}">
+<title>{{TITLE}} | 策略研究日志</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<meta property="og:title" content="{{TITLE}} | 策略研究日志">
+<meta property="og:description" content="{{META_DESC}}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shujian.cc/logs/{{NUM}}.html">
+<meta property="og:image" content="https://shujian.cc/images/og-default.png">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<div class="ticker-bar"><div class="ticker-track" id="ticker-track"><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span><span class="tkr"><span class="tkr-label">XAUUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">EURUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">GBPUSD</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDJPY</span><span class="tkr-price">--</span></span><span class="tkr-sep">·</span><span class="tkr"><span class="tkr-label">USDCAD</span><span class="tkr-price">--</span></span></div></div>
+
+<div class="container">
+<header class="site-header"><div class="header-inner">
+<a href="../index.html" class="brand">
+<span class="brand-logo"><span class="ring"></span><svg viewBox="0 0 24 24"><path d="M6 17V11m3 6V8m3 9v-7m3 7V9l3 3 2-2"/></svg></span>
+<span class="brand-text"><span class="bt-name">策略研究日志</span><span class="bt-en">Strategy Research Journal</span></span>
+</a>
+<nav class="nav"><a href="../index.html">工作流</a><a href="../search.html">运行日志</a><a href="../about.html">关于</a><a href="../subscribe.html">订阅</a><a href="../purchase.html" class="nav-cta">获取完整版</a></nav>
+</div></header>
+
+<a href="../search.html" class="back">← 返回列表</a>
+
+<article class="article fade-in">
+<div class="article-header">
+<div class="article-meta"><span class="article-num">#{{NUM}}</span><span class="article-date">{{DATE_LINE}}</span></div>
+<h1>{{H1}}</h1>
+<div style="font-size:.68rem;color:var(--text-muted);margin-top:10px">对应工作流节点：#{{NODE}} · 阶段四（决策）</div>
+</div>
+
+<div class="tz-block tz-live">
+<div class="tz-head"><span class="tz-tag">判断段 · 实时</span><span class="tz-time">{{JUDGE_TIME}}</span></div>
+<div class="tz-body">
+{{JUDGE_HTML}}
+</div>
+</div>
+
+<div class="kline" data-interval="4h" data-end="{{END_DAY}}" data-cut="{{CUT_TS}}" data-title="{{LIVE_TITLE}}" data-hint="{{LIVE_HINT}}"
+data-mark='{{MARKS}}'></div>
+
+<div class="decide">
+{{DECIDE_HTML}}
+</div>
+
+<div class="tz-divider">▼ 行情随后如何走 · 事实，不评点</div>
+
+<div class="tz-block tz-fact">
+<div class="tz-head"><span class="tz-tag">结果段 · 事实</span><span class="tz-time">{{FACT_TIME}}</span></div>
+<div class="tz-body">
+{{FACT_HTML}}
+</div>
+</div>
+
+<div class="kline" data-intervals="4h,1h" data-start="{{START_DAY}}" data-end="{{END_DAY}}" data-cut="{{CUT_TS}}" data-title="{{REAL_TITLE}}" data-hint="{{REAL_HINT}}"
+data-mark='{{MARKS}}'></div>
+
+<div class="tz-divider">▼ 事后才看得见的东西</div>
+
+<div class="tz-block tz-after">
+<div class="tz-head"><span class="tz-tag">复盘段 · 事后</span><span class="tz-time">{{REVIEW_TIME}}</span></div>
+<div class="tz-body">
+{{REVIEW_HTML}}
+</div>
+</div>
+
+<div class="takeaway"><b>{{TAKEAWAY_H1}}</b><br>{{TAKEAWAY_BODY}}</div>
+
+<div class="tags">{{TAGS_HTML}}</div>
+
+<div class="article-nav"><a href="{{PREV}}">← {{PREV_LABEL}}</a><a href="{{NEXT}}">{{NEXT_LABEL}} →</a></div>
+
+<div class="log-cta" style="margin-top:24px">
+<div>
+<div class="lc-t">这篇日志里，预判来自 AI 智能体工作流的 {{NODE}} 节点</div>
+<div class="lc-d">16 节点完整系统，从采集到技术执行。你看到的分歧标注、破位确认，就是它的日常运行。<br>判断不是我拍脑袋，是人机核对后的结论。</div>
+</div>
+<a href="../index.html" class="btn-primary">查看完整工作流 →</a>
+</div>
+
+<div style="text-align:center;margin:18px 0 4px"><a href="../subscribe.html" style="color:var(--text-sec);font-size:.8125rem">想持续看它怎么跑？订阅 →</a></div>
+
+<div class="article-comments" style="max-width:780px;margin:32px auto">
+<div class="sec-h"><h2>讨论</h2><span class="sec-sub">COMMENTS</span></div>
+<script src="https://giscus.app/client.js"
+  data-repo="fengqing168/strategy-journal"
+  data-repo-id="R_kgDOTvFWfw"
+  data-category="Announcements"
+  data-category-id="DIC_kwDOTvFWf84DC0ed"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="dark"
+  data-lang="zh-CN"
+  crossorigin="anonymous"
+  async>
+</script>
+<p style="font-size:.68rem;color:var(--text-muted);margin-top:8px">评论由 <a href="https://giscus.app" target="_blank" style="color:var(--ai-1)">Giscus</a> 驱动 · 需 GitHub 账号登录</p>
+</div>
+</article>
+
+<footer class="footer">
+<div class="sig">舍予又见</div>
+<div class="sig-sub">STRATEGY · RESEARCH · AI</div>
+<p class="meta">© 2026 策略研究日志 &nbsp;·&nbsp; <a href="../about.html">关于</a> &nbsp;·&nbsp; <a href="../subscribe.html">订阅</a></p>
+</footer>
+</div>
+
+<script src="../js/main.js"></script>
+<script src="../js/ticker.js"></script>
+<script src="../js/vendor/lightweight-charts.standalone.production.js"></script>
+<script src="../js/kline.js"></script>
+</body>
+</html>

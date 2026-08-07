@@ -55,3 +55,32 @@
 - 第 2 项「运行日志」指向 search.html
 - 「获取完整版」统一指向 purchase.html
 - 任何页面都有 ≥1 条「向前一步」的购买路径
+
+## 六、日志发布工作流（自动发布 SOP）
+
+发一篇日志 = 三步，缺一不可：
+
+### 1. 触发
+交易日志不发固定格式稿，由**行情触发**：
+- 用户报当前价位，问「黄金目前有没有进场的机会」→ 先取实时行情：
+  - `curl https://shujian.cc/api/sina` → 实时价（hf_XAU.price）
+  - `curl "https://shujian.cc/api/kline?symbol=XAU&interval=4h&limit=N"` → 实时 K 线
+- 基于实时价 + 判断框三线（观察/止损/目标）给出进场判断并写进「判断段·实时」。
+
+### 第 2 步. 发布由工具执行
+用 `workflow/publish.py` 一键完成，禁止手改多个文件：
+
+```bash
+python3 workflow/publish.py drafts/xxx.json
+# 预览: python3 workflow/publish.py drafts/xxx.json --dry-run
+# 仅生成不推送: python3 workflow/publish.py drafts/xxx.json --no-push
+```
+
+草稿 JSON 字段见文件头注释。脚本会自动：
+- 生成 `logs/NNN.html`（基于 `logs/_template.html`）
+- 同步 `search.html`（featured + grid 卡片 + JS data 数组 + 统计+1）
+- 同步 `index.html`（最新发布预览卡链接与判断/结果行）
+- git add/commit/push → Cloudflare Pages 自动部署
+
+### 第 3 步. 一条铁律：logs 与 search 必须同批同步
+发日志页只改了 `logs/NNN.html` 而漏了 `search.html` = 发布未完成。发布时用脚本同批更新，`search.html` data 数组永远与 `logs/` 一一对应。
