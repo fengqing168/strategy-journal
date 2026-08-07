@@ -127,10 +127,10 @@ svg{display:inline-block;vertical-align:middle;flex-shrink:0}
 .s-lock.free{color:var(--up);border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.06)}
 
 /* ── 信任条 ── */
-.home-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:30px 0 0}
+.home-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0 0}
 @media(max-width:760px){.home-trust{grid-template-columns:1fr}}
-.ht{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border-soft);border-radius:12px;padding:13px 16px;box-shadow:0 1px 3px rgba(75,85,104,.06);transition:all .2s var(--ease)}
-.ht:hover{border-color:rgba(75,85,104,.4)}
+.ht{display:flex;gap:12px;align-items:center;background:transparent;border:1px dashed var(--border-soft);border-radius:12px;padding:13px 16px;box-shadow:none;transition:all .2s var(--ease)}
+.ht:hover{border-color:rgba(75,85,104,.4);border-style:solid}
 .ht .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(75,85,104,.1);flex-shrink:0}
 .ht .t{font-size:.8125rem;font-weight:600;color:var(--text)}
 .ht .d{font-size:.7rem;color:var(--text-sec);line-height:1.45}
