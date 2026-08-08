@@ -108,8 +108,12 @@ python3 workflow/publish.py drafts/xxx.json
 5. **回滚方式**：`npx wrangler rollback` 或重新执行标准部署命令（带 assets）。
 6. **涉及域名/DNS/zone 的操作 = 红线中的红线**：任何修改前先记录现状，改完立刻全面验证；不改则不碰。
 7. **worker.js 兜底逻辑不得删**：worker.js 末尾 `if (env && env.ASSETS) return env.ASSETS.fetch(request)` 是最后防线，非 /api 请求必须交给 assets，禁止移除。
+8. **域名归属铁律（本架构核心）**：`shujian.cc` 由 **custom domain 绑定到 `strategy-journal`** 承接全站（静态 + /api 均由此 Worker 服务）。**禁止删除 `strategy-journal` Worker**；禁止新建/重复 custom domain 绑定到其它 Worker。`shujian-api` 是历史残留 Worker（旧 `tv-5-retry` 代码），不得触碰，不要对它做任何 deploy/delete。
+9. **worker 命名血泪账**：曾有"两个 worker/两个名字"混乱（部署推到 A、域名绑 B）。**全站架构唯一**：wrangler.toml name = strategy-journal + custom domain。除标准部署命令外，任何指向其它 worker 名（shujian-api 等）的 deploy/delete 都必须先停下来核对。
+10. **删除任何 Worker 前必查**：先确认该 worker 没有挂 Custom Domain / Zone Route（查 `GET /accounts/{ACCT}/workers/domains` 与 `GET /zones/{ZID}/workers/routes`）。删挂域名的 worker = 整站 530/1016 事故（曾发生）。
 
 ### 事故记录（2026-08-08）
 - 事故一：本地 deploy 未带 assets → 整站 `{"error":"not_found"}`（application/json）。
 - 事故二：修复 ticker（补回 doFetch 后）部署成功后 2 分钟内，又有一次不带 assets 的部署覆盖 → 再次整站 404。
-- 结论：任何不带 assets 的部署都会杀死整站。此红线不可触碰。
+- 事故三：误删 `strategy-journal` Worker → 其 custom domain `shujian.cc` 绑定随删除被移除 → 整站 `530`（error code 1016）。恢复方法：重新 `wrangler deploy worker.js --name strategy-journal --assets .` 后，用 API `PUT /accounts/{acct}/workers/domains` 重新绑定 `{"hostname":"shujian.cc","service":"strategy-journal","environment":"production"}`，再删除历史残留 route `shujian.cc/api/* → shujian-api`。
+- 结论：任何不带 assets 的部署都会杀死整站；任何删挂域名的 worker 都会杀死整站。两条红线都不可触碰。
