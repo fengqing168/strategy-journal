@@ -2,9 +2,9 @@
  * shujian.cc 后端 Worker
  *
  * API:
- *   /api/quote             — 实时报价（5品种，TradingView 同源，3秒缓存，新浪兜底）
+ *   /api/quote             — 实时报价（5品种，TradingView 同源，共享缓存 10s，新浪兜底）
  *   /api/sina              — 行情代理兜底（5品种实时，新浪源）
- *   /api/kline             — 现货黄金K线（XAUUSD，TradingView 源，统一 1d/4h/1h；可选 start/end/limit）
+ *   /api/kline             — 现货黄金K线（XAUUSD，TradingView 源，统一 1d/4h/1h/1w；可选 start/end/limit）
  *   /api/token/generate    — 生成 Token（需密码）
  *   /api/token/validate    — 验证 Token
  *   /api/order/create      — 创建待确认订单
@@ -34,6 +34,35 @@ function getCached(interval) {
 }
 function setCached(interval, candles) {
   klineCache.set(interval, { candles, at: Date.now() });
+}
+
+// ── Cloudflare Cache API（跨实例/跨边缘共享缓存） ─────────────────────
+// 用处：内存缓存只在本 Worker 实例内有效；Cache API 让全球实例共享同一份拉取结果，
+//       大幅降低"每个冷请求都重新连 TradingView WebSocket"的 8~10s 慢启动。
+const SHARE_PREFIX = "https://shujian.cc/_cache/";
+function shareReq(key) { return new Request(SHARE_PREFIX + key); }
+
+// 读共享缓存：命中返回克隆的 Response，未命中返回 null
+async function cacheRead(key) {
+  try {
+    const resp = await caches.default.match(shareReq(key));
+    return resp ? resp.clone() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 写共享缓存 body 为纯 JSON 字符串，TTL 毫秒
+async function cacheWrite(key, jsonBody, ttlMs) {
+  try {
+    const resp = new Response(jsonBody, {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": `public, max-age=${Math.max(1, Math.floor(ttlMs / 1000))}`,
+      },
+    });
+    await caches.default.put(shareReq(key), resp);
+  } catch (e) { /* 写失败不阻塞主流程 */ }
 }
 
 // ── 实时报价缓存（/api/quote，同源 TradingView） ──
@@ -72,7 +101,7 @@ function cleanup() {
 //   - URL 必须用 https://（非 wss://），Cloudflare 自动升级为 WS
 //   - fetch 方式可携带自定义 headers（TradingView 需要 Origin/UA）
 const TV_URL = "https://data.tradingview.com/socket.io/websocket";
-const TV_INTERVALS = { "1d": "1D", "4h": "4H", "1h": "1H" };
+const TV_INTERVALS = { "1d": "1D", "4h": "4H", "1h": "1H", "1w": "1W" };
 
 function tvPack(func, params) {
   const payload = JSON.stringify({ m: func, p: params });
@@ -244,11 +273,15 @@ export default {
     }
 
     // ── /api/quote ──
-    // 实时报价：TradingView 同源（最新 1h 未收线 bar），3 秒缓存，新浪兜底
+    // 实时报价：TradingView 同源（最新 1h 未收线 bar），共享缓存优先 + 新浪兜底
     if (path === "/api/quote") {
       try {
+        const shared = await cacheRead("quote-v1");
+        if (shared) return shared;
         const q = await fetchQuotes();
-        return new Response(JSON.stringify(q), {
+        const body = JSON.stringify(q);
+        await cacheWrite("quote-v1", body, 10000); // 共享缓存 10s(行情粒度足够,减少跨实例重复拉取)
+        return new Response(body, {
           headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3", ...cors },
         });
       } catch (e) {
@@ -280,7 +313,7 @@ export default {
     }
 
     // ── /api/kline ──
-    // interval: 1d（默认）| 4h | 1h —— 全部走 TradingView 统一数据源
+    // interval: 1d（默认）| 4h | 1h | 1w —— 全部走 TradingView 统一数据源
     if (path === "/api/kline") {
       try {
         const symbol = url.searchParams.get("symbol") || "XAUUSD";
@@ -294,8 +327,17 @@ export default {
           });
         }
 
-        // 10 分钟缓存 + 并发去重（按 interval 分 key）
+        // 共享缓存（跨实例,10 分钟）→ 内存缓存 → 并发去重 → 拉取
         let candles = getCached(interval);
+        if (!candles) {
+          const sharedResp = await cacheRead("kline-" + interval);
+          if (sharedResp) {
+            try {
+              const sharedArr = await sharedResp.json();
+              if (Array.isArray(sharedArr) && sharedArr.length) candles = sharedArr;
+            } catch (e) { /* 解析失败走拉取 */ }
+          }
+        }
         if (!candles) {
           if (!klineInFlight.has(interval)) {
             const p = tvFetchKline(interval, limit);
@@ -304,6 +346,7 @@ export default {
           }
           candles = await klineInFlight.get(interval);
           setCached(interval, candles);
+          await cacheWrite("kline-" + interval, JSON.stringify(candles), KLINE_CACHE_MS);
         }
 
         // start/end 过滤（兼容 YYYY-MM-DD 与 unix 秒两种时间形态）
@@ -492,11 +535,17 @@ export default {
 
     // ── /api/ping ──
     if (path === "/api/ping") {
-      return new Response(JSON.stringify({ ok: true, orders: orders.size, version: "tv-5-retry", time: new Date().toISOString() }), {
+      return new Response(JSON.stringify({ ok: true, orders: orders.size, version: "v1w-opt", time: new Date().toISOString() }), {
         headers: { "Content-Type": "application/json", ...cors },
       });
     }
 
+    // ── 静态资源（首页/日志/样式等） ──
+    // 仓库静态文件通过 Workers Static Assets 挂载（env.ASSETS）。
+    // 非 /api/* 的页面请求全部交给 assets 返回，实现"一个 Worker 同时服务整站 + API"。
+    if (env && env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
     return new Response(JSON.stringify({ error: "not_found" }), { status: 404, headers: { "Content-Type": "application/json", ...cors } });
   },
 };

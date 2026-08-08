@@ -4,7 +4,7 @@
   "model": "deepseek-chat",
   "temperature": 0.3,
   "stock": "XAUUSD",
-  "count": 16,
+  "count": 17,
   "prompts": [
     {
       "id": 1,
@@ -321,6 +321,28 @@
       "strict": true,
       "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
       "template": "你是风险管理师。执行仓位和风险计算。\n\n账户余额：{account_balance}\n当前已有风险暴露：{current_exposure}\n允许最大回撤：{max_drawdown_pct}%\n入场计划：{output_15}\n最近交易：{recent_trades}\n\n1. 仓位计算\n   - Kelly 公式（保守版 Kelly/4）：f* = (胜率×(盈亏比+1)-1)/盈亏比\n   - 2% 单笔风险规则\n   - 取较小者\n\n2. 压力测试 — 连亏 3 笔回撤？连亏 5 笔？是否超最大回撤？\n\n3. 风控清单\n[ ] 单笔风险 ≤2%\n[ ] 总暴露 ≤6%\n[ ] 盈亏比 ≥1.5\n[ ] 止损有技术意义\n[ ] 周度亏损未超限\n\n```json\n{{\n  \"position\": {{\"kelly_pct\": X, \"two_percent_lots\": X, \"final_lots\": X, \"risk_pct\": X}},\n  \"stress_test\": {{\"dd_3_losses_pct\": X, \"dd_5_losses_pct\": X, \"exceeds_limit\": true/false}},\n  \"checklist\": {{\"all_clear\": true/false, \"failed_items\": []}},\n  \"final_approval\": \"APPROVED/CAUTION/REJECTED\"\n}}\n```"
+    },
+    {
+      "id": 17,
+      "name": "活线机制判定",
+      "stage": "structure",
+      "stage_name": "结构判定",
+      "desc": "多空防守阶梯判定:G6158多空防守线 / 0.786终极防守线,活线由交易者指定,AI联动跟踪,周K收盘判破位",
+      "vars": [
+        "active_line",
+        "recent_high",
+        "recent_low",
+        "current_price",
+        "week_close",
+        "support_618",
+        "support_786",
+        "structure_note"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD技术结构分析师。严格按输出格式输出JSON,不要额外解释。未明确证据不得给结论。",
+      "template": "你是 XAUUSD 技术结构判定引擎。基于交易者的活线机制,判定黄金当前所处结构。\n\n## 黄金分割锚定\n- 更大周期显著高点(锚): {recent_high}\n- 更大周期显著低点(锚): {recent_low}\n- 由锚计算黄金分割档位:\n  0    = 低点\n  0.236\n  0.382\n  0.618 = 多空防守线\n  0.786 = 终极防守线\n  1    = 高点\n- 当前价格:{current_price}\n- 最近周K线收盘价:{week_close}\n- 已知0.618位:{support_618}\n- 已知0.786位:{support_786}\n- 结构备注:{structure_note}\n\n## 活线机制(铁律)\n交易者当前指定活线为: {active_line} (取值: 0.618 或 0.786)\n\n自动配对联动:\n- 活线 = 0.618 时: 0.786 降级为【终极警戒线】,只被动监视,不主动判定多空\n- 活线 = 0.786 时: 0.618 升级为【前置预警线】,提前预报,仍不是立场线\n\n联动跟踪规则:\n1. 活线守(周K收盘未有效跌破) → 维持当前结构,不切换立场\n2. 活线破(周K线收盘价有效定格于该线之下):\n   - 破活线 0.618: 多头退守观察,转中性偏弱,同时检查 0.786(=终极警戒线)是否将承压\n   - 破活线 0.786: 大周期结构翻转为空头,以逢高做空为基调\n3. 结构佐证(两线共用,与活线选择无关):\n   - 多头结构: 低点不断抬高 + 高创新高\n   - 空头结构: 高点不断压降 + 低创新低\n\n判定顺序:\n Step 1: 确认当前为多头或空头结构(先看结构佐证)\n Step 2: 用活线下一次收盘判意: 守/破\n Step 3: 收破则联动升级, 给出主观结构与立场结论\n\n输出 JSON:\n```json\n{{\n  \"active_line\": \"0.618 或 0.786\",\n  \"paired_line\": {{\n    \"line\": 0.618 或 0.786,\n    \"role\": \"前置预警线/终极警戒线\"\n  }},\n  \"structure\": {{\n    \"type\": \"多头/空头/中性\",\n    \"highs_and_lows\": {{\n      \"high_making_new_high\": true/false,\n      \"low_making_new_low\": true/false,\n      \"observation\": \"\"\n    }}\n  }},\n  \"line_status\": {{\n    \"close_price\": X,\n    \"close_line\": \"位于0.618上/下, 0.786上/下\",\n    \"violated\": true/false,\n    \"violation_basis\": \"收盘价定格低于活线 等具体依据\"\n  }},\n  \"held_period_judgment\": {{\n    \"holding_period\": \"长/中/短\",\n    \"direction\": \"多/空/中性\",\n    \"strategy\": \"逢高做空 或 逢低做多 或 观望等待破位\"\n  }},\n  \"entry_plan\": {{\n    \"observe\": [],\n    \"stop_loss\": X,\n    \"target\": X\n  }},\n  \"confidence\": 0-1,\n  \"warnings\": []\n}}\n```\n\n铁律:\n1. 破位只看周K收盘价, 盘中影线一律不视为有效破/守\n2. 没有证据时 clearance 必须为中性, 用 confidence 表达不确定\n3. 两道线不同时下结论, 只以高优权(活线)为准"
     }
   ]
 }
