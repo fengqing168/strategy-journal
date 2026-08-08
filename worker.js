@@ -2,7 +2,8 @@
  * shujian.cc 后端 Worker
  *
  * API:
- *   /api/sina              — 行情代理（5品种实时，新浪源）
+ *   /api/quote             — 实时报价（5品种，TradingView 同源，3秒缓存，新浪兜底）
+ *   /api/sina              — 行情代理兜底（5品种实时，新浪源）
  *   /api/kline             — 现货黄金K线（XAUUSD，TradingView 源，统一 1d/4h/1h；可选 start/end/limit）
  *   /api/token/generate    — 生成 Token（需密码）
  *   /api/token/validate    — 验证 Token
@@ -21,8 +22,7 @@ const TOKEN_DAYS = 90;
 // 内存存储（Worker 重启时清空，适合低流量场景）
 let orders = new Map();  // id → { email, ref, status, token, createdAt }
 
-// ── K线缓存（按周期分 key，1d=新浪日K，4h=东财240分） ──
-// 东财接口较重，缓存10分钟避免每次回源
+// ── K线缓存（按周期分 key，统一 TradingView 源） ──
 const KLINE_CACHE_MS = 10 * 60 * 1000;
 const klineCache = new Map();   // interval → { candles, at }
 const klineInFlight = new Map();// interval → Promise（并发去重）
@@ -34,6 +34,27 @@ function getCached(interval) {
 }
 function setCached(interval, candles) {
   klineCache.set(interval, { candles, at: Date.now() });
+}
+
+// ── 实时报价缓存（/api/quote，同源 TradingView） ──
+const QUOTE_CACHE_MS = 3000;    // 3 秒缓存，避免每个访客都开 WS、也够"实时"
+const quoteCache = new Map();   // symbolKey → { quotes, at }
+const quoteInFlight = new Map();// symbolKey → Promise（并发去重）
+
+// 品种映射：前端 ticker 的 key → TradingView symbol
+const QUOTE_SYMBOLS = {
+  hf_XAU:     "FX_IDC:XAUUSD",
+  fx_seurusd: "FX_IDC:EURUSD",
+  fx_sgbpusd: "FX_IDC:GBPUSD",
+  fx_susdjpy: "FX_IDC:USDJPY",
+  fx_susdcad: "FX_IDC:USDCAD",
+};
+
+function getQuoteCached() {
+  for (const [, c] of quoteCache) {
+    if (Date.now() - c.at < QUOTE_CACHE_MS) return c.quotes;
+  }
+  return null;
 }
 
 // 清理 24 小时前的订单
@@ -57,12 +78,12 @@ function tvPack(func, params) {
   return `~m~${payload.length}~m~${payload}`;
 }
 
-async function tvFetchKline(interval, limit) {
+async function tvFetchKline(interval, limit, symbol) {
   // 连接不稳定/被限流偶发握手失败 → 自动重试最多 3 次
   let lastErr;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      return await tvFetchOnce(interval, limit);
+      return await tvFetchOnce(interval, limit, symbol);
     } catch (e) {
       lastErr = e;
       await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
@@ -71,7 +92,82 @@ async function tvFetchKline(interval, limit) {
   throw lastErr;
 }
 
-async function tvFetchOnce(interval, limit) {
+// 取单品种实时价 = 最新一根 1h bar 的 close（未收线 bar 的 close 即当前实时价）
+async function tvFetchQuote(symbol) {
+  const candles = await tvFetchKline("1h", 2, symbol);
+  const last = candles[candles.length - 1];
+  if (!last) throw new Error("no_data:" + symbol);
+  return { price: last.close, time: last.time };
+}
+
+// /api/quote 主逻辑：5 品种并发抓取，3 秒缓存 + 并发去重，新浪兜底
+async function fetchQuotes() {
+  let q = getQuoteCached();
+  if (q) return q;
+
+  const k = "all";
+  if (!quoteInFlight.has(k)) {
+    const p = (async () => {
+      const entries = Object.entries(QUOTE_SYMBOLS);
+      const results = await Promise.all(
+        entries.map(async ([key, sym]) => {
+          try {
+            const out = await tvFetchQuoteWithRetry(sym);
+            return [key, { price: out.price, time: out.time, src: "tv" }];
+          } catch (e) {
+            return null;
+          }
+        })
+      );
+      // 新浪兜底：补上 TV 失败的品种
+      const sina = await fetchSinaRaw();
+      const qMap = {};
+      for (const r of results) if (r) qMap[r[0]] = r[1];
+      for (const [key, r] of Object.entries(sina)) {
+        if (!qMap[key]) qMap[key] = { price: r.price, src: "sina" };
+      }
+      return qMap;
+    })();
+    quoteInFlight.set(k, p);
+    p.finally(() => quoteInFlight.delete(k));
+    p.then((qMap) => { quoteCache.set(k, { quotes: qMap, at: Date.now() }); });
+  }
+  return quoteInFlight.get(k);
+}
+
+async function tvFetchQuoteWithRetry(symbol) {
+  let lastErr;
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await tvFetchQuote(symbol);
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, 300 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
+// 新浪原始报文（兜底用，结构与 /api/sina 相同解析）
+async function fetchSinaRaw() {
+  const sinaUrl = "https://hq.sinajs.cn/list=hf_XAU,fx_seurusd,fx_sgbpusd,fx_susdjpy,fx_susdcad";
+  const resp = await fetch(sinaUrl, { headers: { Referer: "https://finance.sina.com.cn/" } });
+  const text = await resp.text();
+  const cfg = { hf_XAU: { idx: 0 }, fx_seurusd: { idx: 1 }, fx_sgbpusd: { idx: 1 }, fx_susdjpy: { idx: 1 }, fx_susdcad: { idx: 1 } };
+  const result = {};
+  for (const line of text.split(";")) {
+    const m = line.match(/hq_str_(\w+)="(.+)"/);
+    if (!m) continue;
+    const key = m[1], fields = m[2].split(","), c = cfg[key];
+    if (!c) continue;
+    const price = parseFloat(fields[c.idx]);
+    if (!isNaN(price)) result[key] = { price };
+  }
+  return result;
+}
+
+async function tvFetchOnce(interval, limit, symbolRaw) {
+  const symbol = symbolRaw || "FX_IDC:XAUUSD";
   // 打开出站 WebSocket（https:// + Upgrade 头，可带自定义 headers）
   const resp = await fetch(TV_URL, {
     headers: {
@@ -110,7 +206,7 @@ async function tvFetchOnce(interval, limit) {
     // 发送序列：鉴权 → 建会话 → 解析标的 → 建序列 → 切时区
     ws.send(tvPack("set_auth_token", ["unauthorized_user_token"]));
     ws.send(tvPack("chart_create_session", [session, ""]));
-    ws.send(tvPack("resolve_symbol", [session, "symbol_1", '={"symbol":"FX_IDC:XAUUSD","adjustment":"splits","session":"regular"}']));
+    ws.send(tvPack("resolve_symbol", [session, "symbol_1", '={"symbol":"' + symbol + '","adjustment":"splits","session":"regular"}']));
     ws.send(tvPack("create_series", [session, "s1", "s1", "symbol_1", tvInterval, limit]));
     ws.send(tvPack("switch_timezone", [session, "exchange"]));
   });
@@ -146,22 +242,32 @@ export default {
       return new Response(null, { status: 204, headers: cors });
     }
 
-    // ── /api/sina ──
+    // ── /api/quote ──
+    // 实时报价：TradingView 同源（最新 1h 未收线 bar），3 秒缓存，新浪兜底
+    if (path === "/api/quote") {
+      try {
+        const q = await fetchQuotes();
+        return new Response(JSON.stringify(q), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3", ...cors },
+        });
+      } catch (e) {
+        // 兜底失败才 502
+        const sina = await fetchSinaRaw().catch(() => ({}));
+        if (Object.keys(sina).length) {
+          return new Response(JSON.stringify(sina), {
+            headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=2", ...cors },
+          });
+        }
+        return new Response(JSON.stringify({ error: "unavailable" }), {
+          status: 502, headers: { "Content-Type": "application/json", ...cors },
+        });
+      }
+    }
+
+    // ── /api/sina ──（新浪兜底源，仍保留供 ticker 回退）
     if (path === "/api/sina") {
       try {
-        const sinaUrl = "https://hq.sinajs.cn/list=hf_XAU,fx_seurusd,fx_sgbpusd,fx_susdjpy,fx_susdcad";
-        const resp = await fetch(sinaUrl, { headers: { Referer: "https://finance.sina.com.cn/" } });
-        const text = await resp.text();
-        const cfg = { hf_XAU: { idx: 0 }, fx_seurusd: { idx: 1 }, fx_sgbpusd: { idx: 1 }, fx_susdjpy: { idx: 1 }, fx_susdcad: { idx: 1 } };
-        const result = {};
-        for (const line of text.split(";")) {
-          const m = line.match(/hq_str_(\w+)="(.+)"/);
-          if (!m) continue;
-          const key = m[1], fields = m[2].split(","), c = cfg[key];
-          if (!c) continue;
-          const price = parseFloat(fields[c.idx]);
-          if (!isNaN(price)) result[key] = { price };
-        }
+        const result = await fetchSinaRaw();
         return new Response(JSON.stringify(result), {
           headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=2", ...cors },
         });
