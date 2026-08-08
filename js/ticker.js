@@ -78,6 +78,38 @@
     return items;
   }
 
+  async function doFetch() {
+    if (busy) return;
+    busy = true;
+    var items = null;
+
+    try {
+      var q = await fetch('/api/quote');
+      if (q.ok) {
+        var dq = await q.json();
+        items = toNormal(dq, 'quote');
+        if (!KEYS.some(function (k) { return items[k]; })) items = null;
+      }
+    } catch (e) { items = null; }
+
+    if (!items) {
+      try {
+        var s = await fetch('/api/sina');
+        if (s.ok) {
+          var ds = await s.json();
+          items = toNormal(ds, 'sina');
+        }
+      } catch (e2) { items = null; }
+    }
+
+    if (items && KEYS.some(function (k) { return items[k]; })) {
+      firstLoad = !Object.keys(cache).length;
+      render(items);
+      if (firstLoad) firstLoad = false;
+    }
+    busy = false;
+  }
+
   doFetch();
   setInterval(doFetch, 3000);
 })();
