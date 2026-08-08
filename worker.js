@@ -42,12 +42,13 @@ const quoteCache = new Map();   // symbolKey → { quotes, at }
 const quoteInFlight = new Map();// symbolKey → Promise（并发去重）
 
 // 品种映射：前端 ticker 的 key → TradingView symbol
+// 用户要求：黄金 + 美元指数 + 货币对 + 比特币
 const QUOTE_SYMBOLS = {
-  hf_XAU:     "FX_IDC:XAUUSD",
-  fx_seurusd: "FX_IDC:EURUSD",
-  fx_sgbpusd: "FX_IDC:GBPUSD",
-  fx_susdjpy: "FX_IDC:USDJPY",
-  fx_susdcad: "FX_IDC:USDCAD",
+  gold:    "FX_IDC:XAUUSD",  // 黄金
+  dxy:     "TVC:DXY",        // 美元指数
+  eurusd:  "FX_IDC:EURUSD",  // 货币对：欧元/美元
+  usdjpy:  "FX_IDC:USDJPY",  // 货币对：美元/日元
+  btcusd:  "BINANCE:BTCUSDT",// 比特币
 };
 
 function getQuoteCached() {

@@ -1,18 +1,25 @@
-/* ── 实时行情（Worker 代理） ── */
+/* ── 实时行情（Worker 代理） ──
+ * 数据源：/api/quote（TradingView 同源，实时，3s 缓存）
+ * 失败时回退 /api/sina（新浪兜底）
+ */
 (function () {
   var track = document.getElementById('ticker-track');
   if (!track) return;
 
   var CFG = {
-    hf_XAU:      { label: 'XAUUSD', dec: 2 },
-    fx_seurusd:  { label: 'EURUSD', dec: 4 },
-    fx_sgbpusd:  { label: 'GBPUSD', dec: 4 },
-    fx_susdjpy:  { label: 'USDJPY', dec: 3 },
-    fx_susdcad:  { label: 'USDCAD', dec: 4 },
+    gold:   { label: 'XAUUSD', dec: 2 },
+    dxy:    { label: 'DXY',    dec: 2 },
+    eurusd: { label: 'EURUSD', dec: 4 },
+    usdjpy: { label: 'USDJPY', dec: 3 },
+    btcusd: { label: 'BTCUSD', dec: 0 },
+  };
+  // 新浪兜底字段名（/api/sina 返回的 key）→ 上表 key
+  var SINA_MAP = {
+    hf_XAU: 'gold', fx_seurusd: 'eurusd', fx_susdjpy: 'usdjpy',
   };
 
   var KEYS = Object.keys(CFG);
-  var CACHE_KEY = 'tkr_v7';
+  var CACHE_KEY = 'tkr_v8';
   var busy = false;
   var cache = {};
   try { cache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch (e) {}
@@ -25,10 +32,11 @@
       if (!d) return;
       var cfg = CFG[k];
       var p = d.price, pre = d.prev, ch = d.change;
-      var dir = (firstLoad || ch >= 0) ? 'up' : 'down';
-      var arrow = firstLoad ? '' : (ch >= 0 ? '▲' : '▼');
-      var chStr = firstLoad ? '' : ((ch >= 0 ? '+' : '') + ch.toFixed(cfg.dec));
-      var flash = (!firstLoad && pre !== null && pre !== p) ? (p > pre ? 'flash-up' : 'flash-down') : '';
+      var hasCh = (pre !== null && pre !== undefined && typeof ch === 'number');
+      var dir = (!hasCh || ch >= 0) ? 'up' : 'down';
+      var arrow = hasCh ? (ch >= 0 ? '▲' : '▼') : '';
+      var chStr = hasCh ? ((ch >= 0 ? '+' : '') + ch.toFixed(cfg.dec)) : '';
+      var flash = (hasCh && pre !== p) ? (p > pre ? 'flash-up' : 'flash-down') : '';
 
       h += '<span class="tkr">' +
         '<span class="tkr-label">' + cfg.label + '</span>' +
@@ -42,7 +50,6 @@
   function render(items) {
     var inner = buildHTML(items);
     if (!inner) return;
-    // Just replace content — don't touch animation
     track.innerHTML = inner + inner;
     var toSave = {};
     KEYS.forEach(function (k) { if (items[k]) toSave[k] = { price: items[k].price }; });
@@ -50,31 +57,25 @@
     cache = items;
   }
 
-  async function doFetch() {
-    if (busy) return;
-    busy = true;
-    try {
-      var resp = await fetch('/api/sina');
-      if (!resp.ok) return;
-      var data = await resp.json();
-
-      var items = {};
-      KEYS.forEach(function (k) {
-        var p = data[k];
-        if (!p || !p.price) return;
-        var price = p.price;
-        var old = cache[k] ? cache[k].price : null;
-        var change = (old !== null) ? (price - old) : 0;
-        items[k] = { price: price, prev: old, change: change };
-      });
-
-      if (KEYS.some(function (k) { return items[k]; })) {
-        firstLoad = !Object.keys(cache).length;
-        render(items);
-        if (firstLoad) firstLoad = false;
+  // 归一化为 CFG keys 的 items 结构
+  function toNormal(data, mode) {
+    var items = {};
+    KEYS.forEach(function (k) {
+      var srcKey = k;
+      if (mode === 'sina') {
+        var found = null;
+        for (var s in SINA_MAP) { if (SINA_MAP[s] === k) { found = s; break; } }
+        srcKey = found;
+        if (!found) return;
       }
-    } catch (e) { /* keep static fallback */ }
-    busy = false;
+      var p = data[srcKey];
+      if (!p || !p.price) return;
+      var price = p.price;
+      var old = cache[k] ? cache[k].price : null;
+      var change = (old !== null && old !== undefined) ? (price - old) : null;
+      items[k] = { price: price, prev: old, change: change };
+    });
+    return items;
   }
 
   doFetch();

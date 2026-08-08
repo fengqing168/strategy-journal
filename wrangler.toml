@@ -1,0 +1,6 @@
+name = "strategy-journal"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# 静态站点托管在 Cloudflare Pages，本 Worker 只负责 /api/* 接口
+# 路由需在 Cloudflare 侧设置，或通过 Pages 的绑定 /functions 实现
