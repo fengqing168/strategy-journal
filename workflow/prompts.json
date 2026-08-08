@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "updated": "2026-08-08",
+  "model": "deepseek-chat",
+  "temperature": 0.3,
+  "stock": "XAUUSD",
+  "count": 16,
+  "prompts": [
+    {
+      "id": 1,
+      "name": "信息源筛选",
+      "stage": "collect",
+      "stage_name": "采集",
+      "desc": "",
+      "vars": [
+        "date",
+        "raw_text"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是一位宏观信息过滤器，专门识别与黄金（XAUUSD）价格相关的新闻和事件。\n\n当前日期：{date}\n当前环境：联邦基金利率 3.50%-3.75%，最新 FOMC（7月29日）9-3 维持不变，通胀仍高于 2% 目标。\n\n输入 — 一批新闻/信息：\n{raw_text}\n\n请对每条内容进行两步筛选：\nStep 1 — 相关性判断：相关（直接影响利率/美元/避险/通胀）或 无关\nStep 2 — 对相关条目标注影响类型：货币政策信号 / 经济数据 / 地缘政治 / 市场结构 / 其他\n\n输出 JSON：\n```json\n{{\n  \"relevant\": [\n    {{\"title\": \"…\", \"type\": [\"货币政策信号\"], \"impact\": \"正面/负面/中性\", \"urgency\": \"高/中/低\", \"reason\": \"一句话\"}}\n  ],\n  \"irrelevant_count\": N,\n  \"summary\": \"本批共 X 条，Y 条相关，重点关注 Z\"\n}}\n```"
+    },
+    {
+      "id": 2,
+      "name": "关键点提取",
+      "stage": "collect",
+      "stage_name": "采集",
+      "desc": "",
+      "vars": [
+        "event_type",
+        "raw_text"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是金融信息分析师，从央行讲话/经济报告中提取影响黄金价格的 5 个维度关键点。\n\n输入 — 全文：\n{raw_text}\n事件类型：{event_type}\n\n从以下 5 个维度提取有\"信息增量\"的内容：\n\n1. **利率立场** — 加息/降息/观望的信号词\n2. **通胀描述** — 用词强度（elevated/persistent/sticky/transitory）\n3. **就业市场** — tight/balanced/softening\n4. **风险平衡** — 上行风险 vs 下行风险，是否新增风险\n5. **异常措辞** — 与历史惯例不同的表述\n\n输出 JSON：\n```json\n{{\n  \"利率立场\": {{\"extracted\": [\"关键句\"], \"direction\": \"偏鹰/偏鸽/中性\", \"signals\": \"…\", \"new_info\": true/false, \"change_description\": \"…\"}},\n  \"通胀描述\": {{ … }},\n  \"就业市场\": {{ … }},\n  \"风险平衡\": {{ … }},\n  \"异常措辞\": [{{\"passage\": \"原文\", \"annotation\": \"为什么异常\"}}]\n}}\n```\n\n每个维度至少 2 条。异常措辞必须逐字引用原文。"
+    },
+    {
+      "id": 3,
+      "name": "结构化",
+      "stage": "collect",
+      "stage_name": "采集",
+      "desc": "",
+      "vars": [
+        "output_2"
+      ],
+      "deps": [
+        2
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是数据结构化专家。将前面的 5 维度 JSON 结果压平为标准表格。\n\n输入：\n{output_2}\n\n输出一张 Markdown 表格，每个维度一行：\n\n| 维度 | 关键摘录 | 方向(+1/-1/0) | 信号强度(1-5) | 新增信息？ | 变化描述 |\n\n信号强度标准：\n- 1 = 微弱（\"will monitor\"）\n- 3 = 中等（\"inflation remains elevated\"）\n- 5 = 强烈（\"will deliver price stability\"）\n\n如有异常措辞，表格下方单独列出 ⚠ 异常项。"
+    },
+    {
+      "id": 4,
+      "name": "鹰鸽打分",
+      "stage": "analysis",
+      "stage_name": "AI分析",
+      "desc": "",
+      "vars": [
+        "raw_text"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是央行政策分析师。对官员讲话进行 5 维度鹰鸽打分。\n\n背景：当前联邦基金利率 3.50%-3.75%，最新 FOMC 7月29日 9-3 投票维持不变，Hammack/Kashkari/Logan 投加息反对票。通胀仍高于 2% 目标。\n\n讲话关键语句：\n{raw_text}\n\n从以下 5 个维度打分，每个 -5 到 +5（正=鹰派，负=鸽派）：\n1. 利率指引 — 暗示加息/降息/观望\n2. 通胀措辞 — 用词强度\n3. 就业评估 — 劳动力市场判断\n4. 风险提及 — 新增或强调的风险偏向\n5. 语气方向 — 整体措辞的立场偏移\n\n输出 JSON：\n```json\n{{\n  \"scores\": {{\"利率指引\":X,\"通胀措辞\":X,\"就业评估\":X,\"风险提及\":X,\"语气方向\":X}},\n  \"total\": X,\n  \"verdict\": \"鹰派(15~25)/偏鹰(5~14)/中性(-4~4)/偏鸽(-14~-5)/鸽派(-25~-15)\",\n  \"certainty\": \"高/中/低\",\n  \"key_evidence\": [\"引用原文词句\"],\n  \"risk_flag\": \"是否触发预警（任意维度≥±2偏移时触发）\"\n}}\n```\n\n如果打分 ≥+3，必须至少一条原文引用。"
+    },
+    {
+      "id": 5,
+      "name": "多维影响评估",
+      "stage": "analysis",
+      "stage_name": "AI分析",
+      "desc": "",
+      "vars": [
+        "current_price",
+        "output_4"
+      ],
+      "deps": [
+        4
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是宏观策略分析师。将鹰鸽打分映射为对 XAUUSD 的 4 条传导路径。\n\n当前 XAUUSD：{current_price}\n\n鹰鸽评分：\n{output_4}\n\n请分析 4 条传导路径（每条打分 -3 到 +3，正 = 对金价利好）：\n\n1. **利率预期路径** — 实际利率 ↑ → 金价 ↓ | 实际利率 ↓ → 金价 ↑\n2. **美元强弱路径** — 利差扩大 → 美元 ↑ → 金价 ↓ | 利差收窄 → 金价 ↑\n3. **风险情绪路径** — 不确定性/地缘 ↑ → 避险 ↑ → 金价 ↑\n4. **通胀预期路径** — 通胀粘性超预期 → 抗通胀需求 ↑ → 金价 ↑\n\n输出 JSON：\n```json\n{{\n  \"pathways\": {{\n    \"利率预期\": {{\"score\":X, \"rationale\":\"\", \"confidence\":\"高/中/低\"}},\n    \"美元强弱\": {{\"score\":X, \"rationale\":\"\", \"confidence\":\"高/中/低\"}},\n    \"风险情绪\": {{\"score\":X, \"rationale\":\"\", \"confidence\":\"高/中/低\"}},\n    \"通胀预期\": {{\"score\":X, \"rationale\":\"\", \"confidence\":\"高/中/低\"}}\n  }},\n  \"composite\": X,\n  \"composite_direction\": \"看涨/中性偏涨/中性/中性偏跌/看跌\",\n  \"dominant_pathway\": \"\",\n  \"note\": \"\"\n}}\n```\n\ncomposite = 四条路径得分之和（-12 ~ +12）。"
+    },
+    {
+      "id": 6,
+      "name": "历史语境对比",
+      "stage": "analysis",
+      "stage_name": "AI分析",
+      "desc": "",
+      "vars": [
+        "previous_statement",
+        "previous_statement_2",
+        "raw_text"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是央行政策历史分析师。将当前讲话与前两次同机构/同官员的表态做多维对比。\n\n本次：\n{raw_text}\n\n上次：\n{previous_statement}\n\n上上次（如有）：\n{previous_statement_2}\n\n逐维度对比（利率立场/通胀措辞/就业评估/风险提及/语气方向 × 3 次），输出：\n\n```json\n{{\n  \"comparisons\": [\n    {{\n      \"dimension\": \"利率立场\",\n      \"本次\": \"摘要\",\n      \"上次\": \"摘要\",\n      \"trend\": \"持续偏鹰/持续偏鸽/由鹰转鸽/由鸽转鹰/不变\",\n      \"magnitude\": 1-3,\n      \"is_reversal\": true/false,\n      \"note\": \"\"\n    }}\n  ],\n  \"overall_trend\": \"\",\n  \"significance\": \"常规变动/值得注意/重大信号\"\n}}\n```\n\n如果只有一次历史数据，标记\"数据不足\"。如果 3 次显示一致趋势，significance=重大信号。"
+    },
+    {
+      "id": 7,
+      "name": "矛盾与异常检测",
+      "stage": "analysis",
+      "stage_name": "AI分析",
+      "desc": "",
+      "vars": [
+        "output_4",
+        "output_5",
+        "output_6",
+        "raw_text"
+      ],
+      "deps": [
+        4,
+        5,
+        6
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是分析质检员。检查前面的分析是否存在内部矛盾、逻辑不一致或可疑结论。\n\n事件原文：\n{raw_text}\n\n鹰鸽打分（Prompt #4）：\n{output_4}\n\n传导路径（Prompt #5）：\n{output_5}\n\n历史对比（Prompt #6）：\n{output_6}\n\n检查 5 类问题：\n1. **内部矛盾** — 5 维度打分之间是否有逻辑矛盾？\n2. **路径矛盾** — 4 条传导路径是否有自相矛盾？\n3. **引用漂移** — key_evidence 中的引用是否真的来自原文？（对照原文核对）\n4. **历史偏差** — 本次偏移幅度是否为此官员历史上从未出现过的？\n5. **置信度虚高** — 是否有绝对化措辞但数据薄弱？\n\n输出 JSON：\n```json\n{{\n  \"issues_found\": [\n    {{\"type\": \"内部矛盾/路径矛盾/引用漂移/历史偏差/过度自信\", \"severity\": \"严重/中等/轻微\", \"description\": \"\", \"suggested_fix\": \"\"}}\n  ],\n  \"clean\": true/false,\n  \"summary\": \"\"\n}}\n```\n\n宁错杀不放过。每一个 issue 必须给出具体数据点和修正建议。"
+    },
+    {
+      "id": 8,
+      "name": "AI初判输出",
+      "stage": "human_ai",
+      "stage_name": "人机对比",
+      "desc": "",
+      "vars": [
+        "current_price",
+        "output_4",
+        "output_5",
+        "output_6",
+        "output_7"
+      ],
+      "deps": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是黄金策略分析师。基于前面所有分析，给出你对 XAUUSD 方向的 AI 初步判断。\n\n当前 XAUUSD：{current_price}\n\n鹰鸽评分：{output_4}\n传导路径：{output_5}\n历史对比：{output_6}\n质量审核：{output_7}\n\n输出你的判断：\n\n```json\n{{\n  \"event_id\": \"{event_id}\",\n  \"timestamp\": \"\",\n  \"current_price\": {current_price},\n  \"judgment\": {{\n    \"direction\": \"看涨/看跌/横盘\",\n    \"confidence\": 1-10,\n    \"time_horizon\": \"描述（如：到下次FOMC前）\",\n    \"target_zone\": {{\"upside\": X, \"downside\": X}},\n    \"rationale\": \"3-5句核心逻辑\",\n    \"uncertainties\": [\"因素1\"],\n    \"invalidation_condition\": \"什么情况会证明你错了\"\n  }}\n}}\n```\n\n如果 confidence < 4，direction 必须是\"横盘\"并建议观望。target_zone 基于 current_price 的合理百分比（日内 ±1-3%）。"
+    },
+    {
+      "id": 9,
+      "name": "人工判断输入",
+      "stage": "human_ai",
+      "stage_name": "人机对比",
+      "desc": "",
+      "vars": [
+        "current_price",
+        "output_8"
+      ],
+      "deps": [
+        8
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "这是人工判断输入模板。请交易者回答：\n\n当前 XAUUSD：{current_price}\nAI 的初判（仅供参考）：{output_8}\n\n请回答：\n1. 你对 XAUUSD 方向的判断？[看涨/看跌/横盘]\n2. 确信程度？(1-10)\n3. 判断基于什么？\n   [ ] 技术面（图表、支撑阻力） — 具体：\n   [ ] 基本面（宏观、政策） — 具体：\n   [ ] 直觉/经验 — 具体：\n4. 与 AI 判断最一致的点？\n5. 与 AI 判断最不一致的点？\n6. 当前最大风险判断？\n7. 备注\n\n输出 JSON：\n```json\n{{\n  \"source\": \"human\",\n  \"direction\": \"\",\n  \"confidence\": 1-10,\n  \"basis\": {{\n    \"technical\": {{\"used\": true/false, \"details\": \"\"}},\n    \"fundamental\": {{\"used\": true/false, \"details\": \"\"}},\n    \"intuition\": {{\"used\": true/false, \"details\": \"\"}}\n  }},\n  \"agree_with_ai\": \"\",\n  \"disagree_with_ai\": \"\",\n  \"risk_assessment\": \"\",\n  \"notes\": \"\"\n}}\n```"
+    },
+    {
+      "id": 10,
+      "name": "人机分歧对比",
+      "stage": "human_ai",
+      "stage_name": "人机对比",
+      "desc": "",
+      "vars": [
+        "output_8",
+        "output_9"
+      ],
+      "deps": [
+        8,
+        9
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是决策审计师。客观对比 AI 和人工判断。\n\nAI 判断：{output_8}\n人工判断：{output_9}\n\n逐项对比：\n1. 方向一致度\n2. 置信度差距\n3. 逻辑差异 — AI 侧重什么？人侧重什么？\n4. 风险感知差异\n5. 分歧严重度\n\n```json\n{{\n  \"direction_match\": true/false,\n  \"confidence_gap\": X,\n  \"logic_divergence\": {{\n    \"ai_focus\": [\"…\"], \"human_focus\": [\"…\"],\n    \"overlap\": [\"共同点\"], \"ai_only\": [\"…\"], \"human_only\": [\"…\"]\n  }},\n  \"risk_divergence\": {{\"ai_risk\": \"\", \"human_risk\": \"\", \"match\": true/false}},\n  \"divergence_score\": 1-10,\n  \"divergence_level\": \"高度一致(1-3)/部分分歧(4-6)/严重分歧(7-10)\",\n  \"recommendation\": \"以AI为准/以人为主/各半加权/建议观望（分歧过大）\"\n}}\n```\n\n分歧评分逻辑：方向不一致 +5，置信度差≥3 +2，逻辑无重叠 +2，风险不一致 +1。"
+    },
+    {
+      "id": 11,
+      "name": "加权决策矩阵",
+      "stage": "decision",
+      "stage_name": "决策",
+      "desc": "",
+      "vars": [
+        "output_10",
+        "output_8",
+        "output_9"
+      ],
+      "deps": [
+        8,
+        9,
+        10
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是量化决策引擎。基于预设规则计算最终交易信号。\n\nAI 判断：{output_8}\n人工判断：{output_9}\n分歧分析：{output_10}\n历史准确率：AI=0.5, 人=0.5（暂无足够数据），权重各 50%\n\n决策规则（内置，不可改）：\n\n规则 1 — 方向不一致 → NO TRADE\n规则 2 — 加权得分 = (AI置信度×AI准确率×0.5 + 人置信度×人准确率×0.5) / 1.0\n规则 3 — 分歧惩罚：\n  - 分歧 ≥7 → 得分 ×0.5\n  - 分歧 4-6 → 得分 ×0.8\n  - 分歧 ≤3 → 不惩罚\n规则 4 — 信号阈值：\n  - ≥7.0 → STRONG_SIGNAL（标准仓位）\n  - 5.0-6.9 → WEAK_SIGNAL（半仓）\n  - 3.0-4.9 → MONITOR（观望）\n  - <3.0 → NO_TRADE\n\n输出 JSON：\n```json\n{{\n  \"decision\": \"STRONG_SIGNAL/WEAK_SIGNAL/MONITOR/NO_TRADE\",\n  \"direction\": \"LONG/SHORT/NONE\",\n  \"position_size\": \"标准(100%)/半仓(50%)/零\",\n  \"weighted_score\": X.X,\n  \"score_breakdown\": {{\n    \"ai_contribution\": X, \"human_contribution\": X,\n    \"divergence_penalty\": X, \"anti_rule_check\": \"通过/触发\"\n  }},\n  \"caution\": \"\"\n}}\n```"
+    },
+    {
+      "id": 12,
+      "name": "事后复盘",
+      "stage": "review",
+      "stage_name": "复盘",
+      "desc": "",
+      "vars": [
+        "hindsight",
+        "output_11",
+        "output_8",
+        "output_9",
+        "trade_result"
+      ],
+      "deps": [
+        8,
+        9,
+        11
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是交易复盘分析师。对本次完整工作流进行事后审计。\n\n工作流输出（#8）：{output_8}\n人工判断（#9）：{output_9}\n决策结果（#11）：{output_11}\n\n实际交易结果：{trade_result}\n复盘时已知的信息：{hindsight}\n\n按以下框架复盘：\n\n1. **信号质量** — 鹰鸽打分事后看准吗？传导路径判断合理吗？\n2. **决策质量** — 决策矩阵的得分合理吗？有没有规则说不行但执意做了？\n3. **信息缺口** — 决策时少了什么信息？如果有会不同吗？\n4. **流程改进** — 哪个 Prompt 要调整？有没有新的信号要加入？\n5. **知识更新** — 学到了什么规律？\n\n```json\n{{\n  \"outcome\": {{\"result\": \"盈利/亏损/未触发\", \"pnl\": X}},\n  \"signal_audit\": {{\"prompt4_accuracy\": \"准确/不准确/无法判断\"}},\n  \"decision_audit\": {{\"rule_followed\": true/false, \"overrides\": []}},\n  \"information_gaps\": [],\n  \"process_improvements\": [],\n  \"lessons\": [],\n  \"archive_tag\": []\n}}\n```\n\n不要写\"我觉得\"。lessons 必须是可行动的——\"以后 XX 条件出现时应更谨慎\"，不是\"以后要更小心\"。"
+    },
+    {
+      "id": 13,
+      "name": "技术面分析",
+      "stage": "technical",
+      "stage_name": "技术面",
+      "desc": "",
+      "vars": [
+        "current_price",
+        "ma_long",
+        "ma_short",
+        "output_8",
+        "pattern_notes",
+        "price_structure",
+        "recent_high",
+        "recent_low",
+        "rsi",
+        "timeframe",
+        "volume_note"
+      ],
+      "deps": [
+        8
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是 XAUUSD 技术分析师。基于以下数值判断当前技术结构。\n\n当前价格：{current_price}\n分析周期：{timeframe}\n基本面偏向：{output_8}\n\n技术水平数据：\n| 指标 | 数值 |\n|------|------|\n| 近期高点 | {recent_high} |\n| 近期低点 | {recent_low} |\n| 短期均线 | {ma_short} |\n| 长期均线 | {ma_long} |\n| RSI(14) | {rsi} |\n| 成交量 | {volume_note} |\n| 形态 | {pattern_notes} |\n| 价格结构 | {price_structure} |\n\n请分析：\n1. 趋势判断（多头/空头/震荡，强度 1-5）\n2. 关键阻力位（2个）和支撑位（2个）\n3. RSI 信号（超买/超卖/中性，是否有背离）\n4. 均线信号（金叉/死叉，发散/收敛）\n5. 技术面结论：偏多/偏空/中性，置信度 1-10\n6. 与基本面的一致/矛盾 — 如果不一致，哪个可能主导？\n\n```json\n{{\n  \"trend\": {{\"direction\": \"多头/空头/震荡\", \"strength\": 1-5}},\n  \"key_levels\": {{\"resistances\": [{{\"price\":X, \"reason\":\"\"}}], \"supports\": [{{\"price\":X, \"reason\":\"\"}}]}},\n  \"rsi\": {{\"value\":X, \"zone\": \"超买/超卖/中性\", \"divergence\": true/false, \"direction\": \"上升/下降\"}},\n  \"ma\": {{\"golden_cross\": true/false, \"price_vs_ma\": \"之上/之下\", \"ma_trend\": \"发散/收敛\"}},\n  \"tech_conclusion\": {{\"direction\": \"偏多/偏空/中性\", \"confidence\": 1-10}},\n  \"vs_fundamental\": {{\"consistent\": true/false, \"comment\": \"\"}}\n}}\n```"
+    },
+    {
+      "id": 14,
+      "name": "黄金特有因子",
+      "stage": "technical",
+      "stage_name": "技术面",
+      "desc": "",
+      "vars": [
+        "cb_buying",
+        "cme_futures",
+        "current_price",
+        "dxy",
+        "etf_holdings",
+        "india_china_demand",
+        "real_yield"
+      ],
+      "deps": [],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是黄金市场分析师。分析 XAUUSD 的 6 个特有驱动因子。\n\n当前 XAUUSD：{current_price}\nDXY：{dxy}\n美国 10Y TIPS 实际收益率：{real_yield}\n\n黄金特有因子数据：\n| 因子 | 数据 |\n|------|------|\n| GLD ETF 持仓 | {etf_holdings} |\n| 央行购金动态 | {cb_buying} |\n| CME 期货持仓 | {cme_futures} |\n| 印中实物需求 | {india_china_demand} |\n\n逐一打分（+3 到 -3，正=利好金价）：\n\n1. 实际利率 — TIPS 收益率 vs 金价反向关系\n2. 美元 (DXY) — DXY 位置和趋势\n3. ETF 资金流 — 机构资金流入/流出\n4. 央行购金 — 全球央行购金趋势\n5. 实物需求 — 印度/中国季节性需求\n6. 投机仓位 — CME 净多头持仓极端程度\n\n```json\n{{\n  \"factors\": {{\n    \"实际利率\": {{\"score\":X, \"assessment\":\"\"}},\n    \"美元\":     {{\"score\":X, \"assessment\":\"\"}},\n    \"ETF资金流\":{{\"score\":X, \"assessment\":\"\"}},\n    \"央行购金\":  {{\"score\":X, \"assessment\":\"\"}},\n    \"实物需求\":  {{\"score\":X, \"assessment\":\"\"}},\n    \"投机仓位\":  {{\"score\":X, \"assessment\":\"\"}}\n  }},\n  \"composite_gold_score\": X,\n  \"dominant_factor\": \"\",\n  \"warning\": \"\"\n}}\n```\n\ncomposite_gold_score = 6 个因子之和（-18 ~ +18）。"
+    },
+    {
+      "id": 15,
+      "name": "入场信号确认",
+      "stage": "execution",
+      "stage_name": "执行",
+      "desc": "",
+      "vars": [
+        "atr",
+        "current_price",
+        "output_11",
+        "output_13"
+      ],
+      "deps": [
+        11,
+        13
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是 XAUUSD 交易策略师。确认入场计划。\n\n当前价格：{current_price}\nATR(14)：{atr}\n决策信号：{output_11}\n技术面分析：{output_13}\n\nStep 1：入场条件审核\n[ ] 条件1：决策信号 STRONG 或 WEAK\n[ ] 条件2：基本面和技术面方向一致\n[ ] 条件3：当前价格离最近关键位 ≥ 0.5 ATR\n[ ] 条件4：12h 内无重大数据（NFP/CPI/FOMC）\n[ ] 条件5：日内波幅 < 2 ATR\n\nStep 2：入场价位\n- 激进（市价）vs 保守（回撤入场），建议哪个？\n\nStep 3：止损 = 1.5×ATR，放在关键价位之下/之上\n\nStep 4：止盈 — TP1(第一关键位) 和 TP2(第二关键位)，计算盈亏比\n\n```json\n{{\n  \"entry_check\": {{\"all_clear\": true/false, \"missing\": []}},\n  \"entry\": {{\"direction\": \"LONG/SHORT\", \"price\": X, \"type\": \"市价/回撤\"}},\n  \"stop_loss\": {{\"price\": X, \"distance_atr\": X, \"based_on\": \"\"}},\n  \"take_profit\": {{\"tp1\": {{\"price\": X, \"rr\": X}}, \"tp2\": {{\"price\": X, \"rr\": X}}}},\n  \"warnings\": []\n}}\n```\n\n盈亏比 < 1.5 时标注警告但不阻止。"
+    },
+    {
+      "id": 16,
+      "name": "仓位与风险管理",
+      "stage": "execution",
+      "stage_name": "执行",
+      "desc": "",
+      "vars": [
+        "account_balance",
+        "current_exposure",
+        "max_drawdown_pct",
+        "output_15",
+        "recent_trades"
+      ],
+      "deps": [
+        15
+      ],
+      "output_schema": "JSON",
+      "strict": true,
+      "system_hint": "你是专业XAUUSD分析师。严格按输出格式输出JSON，不要额外解释。",
+      "template": "你是风险管理师。执行仓位和风险计算。\n\n账户余额：{account_balance}\n当前已有风险暴露：{current_exposure}\n允许最大回撤：{max_drawdown_pct}%\n入场计划：{output_15}\n最近交易：{recent_trades}\n\n1. 仓位计算\n   - Kelly 公式（保守版 Kelly/4）：f* = (胜率×(盈亏比+1)-1)/盈亏比\n   - 2% 单笔风险规则\n   - 取较小者\n\n2. 压力测试 — 连亏 3 笔回撤？连亏 5 笔？是否超最大回撤？\n\n3. 风控清单\n[ ] 单笔风险 ≤2%\n[ ] 总暴露 ≤6%\n[ ] 盈亏比 ≥1.5\n[ ] 止损有技术意义\n[ ] 周度亏损未超限\n\n```json\n{{\n  \"position\": {{\"kelly_pct\": X, \"two_percent_lots\": X, \"final_lots\": X, \"risk_pct\": X}},\n  \"stress_test\": {{\"dd_3_losses_pct\": X, \"dd_5_losses_pct\": X, \"exceeds_limit\": true/false}},\n  \"checklist\": {{\"all_clear\": true/false, \"failed_items\": []}},\n  \"final_approval\": \"APPROVED/CAUTION/REJECTED\"\n}}\n```"
+    }
+  ]
+}
