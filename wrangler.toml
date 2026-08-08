@@ -2,5 +2,10 @@ name = "strategy-journal"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# 静态站点托管在 Cloudflare Pages，本 Worker 只负责 /api/* 接口
-# 路由需在 Cloudflare 侧设置，或通过 Pages 的绑定 /functions 实现
+# ── 防崩红线：整站由本 Worker + Static Assets 共同服务 ──
+# 仓库静态文件（首页/日志/样式/脚本）通过 Workers Static Assets 挂载为 env.ASSETS。
+# 此配置使"wrangler deploy"默认必带静态站，禁止任何不带 assets 的部署（否则整站 404 JSON）。
+[assets]
+directory = "."
+binding = "ASSETS"
+not_found_handling = "none"

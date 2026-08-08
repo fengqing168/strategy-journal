@@ -84,3 +84,32 @@ python3 workflow/publish.py drafts/xxx.json
 
 ### 第 3 步. 一条铁律：logs 与 search 必须同批同步
 发日志页只改了 `logs/NNN.html` 而漏了 `search.html` = 发布未完成。发布时用脚本同批更新，`search.html` data 数组永远与 `logs/` 一一对应。
+
+## 七、防崩红线（最高优先级，谁都不许碰）
+
+> 本站整站由 `strategy-journal` Worker + Workers Static Assets 共同服务。
+> **任何部署若不带 assets，整站立即变成 JSON 404（曾两次发生）。**
+
+### 红线规则（每次部署必须遵守）
+1. **部署命令固定为**：
+   ```bash
+   npx wrangler deploy worker.js --name strategy-journal --assets .
+   ```
+   严禁不带 `--assets .` 的 deploy；严禁只 deploy worker 而不带静态站。
+2. **`wrangler.toml` 已固化 `[assets]` 配置**（directory = ".", binding = "ASSETS"），理论上即使命令漏写 `--assets` 也会默认带上。但为保险，部署时必须核对输出里有 `env.ASSETS Assets` 绑定。
+3. **git push ≠ 部署**。push 只是备份；线上内容完全由 `wrangler deploy` 决定。改完前端/worker 不 deploy = 线上没变。
+4. **部署后必须立即验证**（用 curl 逐项确认，不能只靠感觉）：
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}\n" https://shujian.cc/          # 期望 200
+   curl -s -o /dev/null -w "%{http_code}\n" https://shujian.cc/js/ticker.js # 期望 200
+   curl -s https://shujian.cc/api/ping                                     # 期望 {"ok":true,...}
+   ```
+   任一非 200 → 立即回滚/重部署，绝不放行。
+5. **回滚方式**：`npx wrangler rollback` 或重新执行标准部署命令（带 assets）。
+6. **涉及域名/DNS/zone 的操作 = 红线中的红线**：任何修改前先记录现状，改完立刻全面验证；不改则不碰。
+7. **worker.js 兜底逻辑不得删**：worker.js 末尾 `if (env && env.ASSETS) return env.ASSETS.fetch(request)` 是最后防线，非 /api 请求必须交给 assets，禁止移除。
+
+### 事故记录（2026-08-08）
+- 事故一：本地 deploy 未带 assets → 整站 `{"error":"not_found"}`（application/json）。
+- 事故二：修复 ticker（补回 doFetch 后）部署成功后 2 分钟内，又有一次不带 assets 的部署覆盖 → 再次整站 404。
+- 结论：任何不带 assets 的部署都会杀死整站。此红线不可触碰。
